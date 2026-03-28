@@ -1,0 +1,46 @@
+# Dependencies
+app/node_modules/
+node_modules/
+
+# Next.js
+app/.next/
+.next/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build
+app/out/
+dist/
+
+# Temp
+*.tmp
+test_write.tmp
+
+# Large binaries / PDFs (docs live in Notion)
+*.pdf
+*.PDF
+*.zip
+*.docx
+
+# Legacy code (V2.6 reference only)
+Skypro360_CodigoCompleto/
+Sky_anotherVerions/
+
+# Docker volumes
+app/docker-data/
+
+# Claude Code local settings
+.claude/settings.local.json

@@ -1,0 +1,58 @@
+## OpsManager — Docker Compose (dev)
+## Port offset +100: app=3100, postgres=6100, redis=6101
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: opsmanager-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: opsmanager
+      POSTGRES_PASSWORD: opsmanager
+      POSTGRES_DB: opsmanager
+    ports:
+      - "127.0.0.1:6100:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opsmanager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: opsmanager-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    ports:
+      - "127.0.0.1:6101:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: opsmanager-caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3180:80"
+      - "127.0.0.1:3143:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  pgdata:
+  redisdata:
+  caddydata:
+  caddyconfig:

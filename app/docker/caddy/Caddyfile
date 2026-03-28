@@ -1,0 +1,21 @@
+# OpsManager — Caddy reverse proxy (dev/staging)
+# En produccion: cambiar localhost por dominio real
+
+:80 {
+	# Reverse proxy al Next.js dev server
+	reverse_proxy localhost:3100
+
+	# Headers de seguridad
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Logs
+	log {
+		output stdout
+		format console
+	}
+}
