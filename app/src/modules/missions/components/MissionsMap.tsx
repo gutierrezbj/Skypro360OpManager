@@ -28,7 +28,6 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
 
-  // Stable resize handler — preserve center when container changes size
   const handleResize = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -87,16 +86,10 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
       const color = MARKER_COLORS[mission.status] ?? "#9ca3af";
       const isActive = mission.status === "in_flight";
       const isSelected = mission.id === selectedId;
-      const statusLabel = STATUS_LABELS[mission.status] ?? mission.status;
       const size = isSelected ? 22 : isActive ? 18 : 14;
 
-      // Wrapper with CSS tooltip — no MapLibre popup
-      const wrapper = document.createElement("div");
-      wrapper.className = "marker-wrapper";
-      wrapper.style.cssText = `position: relative; width: ${size}px; height: ${size}px; overflow: visible;`;
-
-      // Marker dot
       const el = document.createElement("div");
+      el.title = `${mission.code} — ${mission.name} (${STATUS_LABELS[mission.status] ?? mission.status})`;
       el.style.cssText = `
         width: ${size}px;
         height: ${size}px;
@@ -109,37 +102,20 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
         ${isActive ? "animation: pulse 2s infinite;" : ""}
       `;
 
-      // Tooltip (pure CSS/DOM, not MapLibre)
-      const tooltip = document.createElement("div");
-      tooltip.className = "marker-tooltip";
-      tooltip.innerHTML = `
-        <div style="font-size:10px;color:#6b7280;font-family:monospace">${mission.code}</div>
-        <div style="font-size:13px;font-weight:600;color:#111827;margin:2px 0">${mission.name}</div>
-        <span style="display:inline-block;font-size:10px;padding:1px 8px;border-radius:9999px;background:${color}20;color:${color};font-weight:600">${statusLabel}</span>
-      `;
-
-      wrapper.appendChild(el);
-      wrapper.appendChild(tooltip);
-
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.4)";
-        tooltip.style.opacity = "1";
-        tooltip.style.pointerEvents = "auto";
+        el.style.transform = "scale(1.5)";
       });
       el.addEventListener("mouseleave", () => {
         el.style.transform = "scale(1)";
-        tooltip.style.opacity = "0";
-        tooltip.style.pointerEvents = "none";
       });
-
-      const marker = new maplibregl.Marker({ element: wrapper, anchor: "center" })
-        .setLngLat([lng, lat])
-        .addTo(map);
-
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onSelectMission?.(mission);
       });
+
+      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
+        .setLngLat([lng, lat])
+        .addTo(map);
 
       markersRef.current.push(marker);
     }
@@ -153,31 +129,6 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
           0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
           70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
           100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        .marker-tooltip {
-          position: absolute;
-          bottom: calc(100% + 8px);
-          left: 50%;
-          transform: translateX(-50%);
-          background: white;
-          border-radius: 8px;
-          padding: 8px 10px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          white-space: nowrap;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s;
-          font-family: system-ui, sans-serif;
-          z-index: 10;
-        }
-        .marker-tooltip::after {
-          content: '';
-          position: absolute;
-          top: 100%;
-          left: 50%;
-          transform: translateX(-50%);
-          border: 5px solid transparent;
-          border-top-color: white;
         }
       `}</style>
       {/* Legend */}
