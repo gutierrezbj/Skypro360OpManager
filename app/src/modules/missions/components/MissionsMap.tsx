@@ -46,7 +46,7 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-      center: [-6.37, 39.15], // Extremadura center
+      center: [-6.37, 39.15],
       zoom: 7.5,
       attributionControl: false,
     });
@@ -59,10 +59,7 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
 
     mapRef.current = map;
 
-    // ResizeObserver to handle panel open/close without jumping
-    const observer = new ResizeObserver(() => {
-      handleResize();
-    });
+    const observer = new ResizeObserver(() => handleResize());
     observer.observe(containerRef.current);
 
     return () => {
@@ -77,13 +74,10 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
     const map = mapRef.current;
     if (!map) return;
 
-    // Clear existing markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    const geoMissions = missions.filter(
-      (m) => m.latitude && m.longitude,
-    );
+    const geoMissions = missions.filter((m) => m.latitude && m.longitude);
 
     for (const mission of geoMissions) {
       const lng = parseFloat(mission.longitude!);
@@ -93,10 +87,15 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
       const color = MARKER_COLORS[mission.status] ?? "#9ca3af";
       const isActive = mission.status === "in_flight";
       const isSelected = mission.id === selectedId;
+      const statusLabel = STATUS_LABELS[mission.status] ?? mission.status;
 
-      // Create marker element
+      // Wrapper with CSS tooltip — no MapLibre popup
+      const wrapper = document.createElement("div");
+      wrapper.className = "marker-wrapper";
+      wrapper.style.cssText = "position: relative;";
+
+      // Marker dot
       const el = document.createElement("div");
-      el.className = "mission-marker";
       const size = isSelected ? 22 : isActive ? 18 : 14;
       el.style.cssText = `
         width: ${size}px;
@@ -110,55 +109,35 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
         ${isActive ? "animation: pulse 2s infinite;" : ""}
       `;
 
+      // Tooltip (pure CSS/DOM, not MapLibre)
+      const tooltip = document.createElement("div");
+      tooltip.className = "marker-tooltip";
+      tooltip.innerHTML = `
+        <div style="font-size:10px;color:#6b7280;font-family:monospace">${mission.code}</div>
+        <div style="font-size:13px;font-weight:600;color:#111827;margin:2px 0">${mission.name}</div>
+        <span style="display:inline-block;font-size:10px;padding:1px 8px;border-radius:9999px;background:${color}20;color:${color};font-weight:600">${statusLabel}</span>
+      `;
+
+      wrapper.appendChild(el);
+      wrapper.appendChild(tooltip);
+
       el.addEventListener("mouseenter", () => {
         el.style.transform = "scale(1.4)";
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
       });
       el.addEventListener("mouseleave", () => {
         el.style.transform = "scale(1)";
+        tooltip.style.opacity = "0";
+        tooltip.style.pointerEvents = "none";
       });
 
-      // Tooltip popup on hover
-      const popup = new maplibregl.Popup({
-        offset: 12,
-        closeButton: false,
-        closeOnClick: false,
-        maxWidth: "260px",
-      }).setHTML(`
-        <div style="font-family: system-ui, sans-serif; padding: 4px 2px;">
-          <div style="font-size: 10px; color: #6b7280; font-family: monospace;">${mission.code}</div>
-          <div style="font-size: 13px; font-weight: 600; color: #111827; margin: 2px 0;">${mission.name}</div>
-          <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-            <span style="
-              display: inline-block;
-              font-size: 10px;
-              padding: 1px 8px;
-              border-radius: 9999px;
-              background: ${color}20;
-              color: ${color};
-              font-weight: 600;
-            ">${STATUS_LABELS[mission.status] ?? mission.status}</span>
-            ${mission.soraClass ? `<span style="font-size: 10px; color: #6b7280;">SORA ${mission.soraClass}</span>` : ""}
-          </div>
-          ${mission.scheduledStart ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">${new Date(mission.scheduledStart).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</div>` : ""}
-          <div style="font-size: 9px; color: #d1d5db; margin-top: 4px;">Click para ver detalle</div>
-        </div>
-      `);
-
-      // Show popup on hover, not click
-      el.addEventListener("mouseenter", () => {
-        popup.setLngLat([lng, lat]).addTo(map);
-      });
-      el.addEventListener("mouseleave", () => {
-        popup.remove();
-      });
-
-      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
+      const marker = new maplibregl.Marker({ element: wrapper, anchor: "center" })
         .setLngLat([lng, lat])
         .addTo(map);
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
-        popup.remove();
         onSelectMission?.(mission);
       });
 
@@ -169,20 +148,36 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
-      {/* Pulse animation for active flights */}
       <style>{`
         @keyframes pulse {
           0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
           70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
           100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        .maplibregl-popup-content {
-          border-radius: 8px !important;
-          padding: 8px 10px !important;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        .marker-tooltip {
+          position: absolute;
+          bottom: calc(100% + 8px);
+          left: 50%;
+          transform: translateX(-50%);
+          background: white;
+          border-radius: 8px;
+          padding: 8px 10px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.15s;
+          font-family: system-ui, sans-serif;
+          z-index: 10;
         }
-        .maplibregl-popup-tip {
-          border-top-color: white !important;
+        .marker-tooltip::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 5px solid transparent;
+          border-top-color: white;
         }
       `}</style>
       {/* Legend */}
