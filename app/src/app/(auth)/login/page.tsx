@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -11,10 +11,16 @@ const DEMO_ACCOUNTS = [
   { label: "Piloto 2", email: "ferenz@skypro360.es", password: "pilot12345", role: "pilot" },
 ] as const;
 
-const ROLE_COLORS: Record<string, string> = {
+const ROLE_COLORS_LIGHT: Record<string, string> = {
   admin: "border-blue-300 text-blue-700 hover:bg-blue-50",
   coordinator: "border-indigo-300 text-indigo-700 hover:bg-indigo-50",
   pilot: "border-emerald-300 text-emerald-700 hover:bg-emerald-50",
+};
+
+const ROLE_COLORS_DARK: Record<string, string> = {
+  admin: "border-blue-500/40 text-blue-300 hover:bg-blue-900/30",
+  coordinator: "border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/30",
+  pilot: "border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/30",
 };
 
 export default function LoginPage() {
@@ -23,6 +29,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("opsmanager-theme");
+    if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      setDark(true);
+    }
+  }, []);
+
+  function toggleTheme() {
+    const next = !dark;
+    setDark(next);
+    localStorage.setItem("opsmanager-theme", next ? "dark" : "light");
+  }
 
   async function doLogin(loginEmail: string, loginPassword: string) {
     setError("");
@@ -55,30 +75,45 @@ export default function LoginPage() {
     doLogin(account.email, account.password);
   }
 
+  const roleColors = dark ? ROLE_COLORS_DARK : ROLE_COLORS_LIGHT;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md">
+    <div className={`flex min-h-screen items-center justify-center transition-colors duration-300 ${dark ? "bg-gray-950" : "bg-gray-50"}`}>
+      <div className={`relative w-full max-w-sm rounded-2xl p-8 shadow-lg transition-colors duration-300 ${dark ? "bg-gray-900 shadow-black/40" : "bg-white shadow-gray-200/60"}`}>
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleTheme}
+          className={`absolute right-4 top-4 rounded-lg border p-2 transition-colors ${dark ? "border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-gray-200" : "border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600"}`}
+          title={dark ? "Modo claro" : "Modo oscuro"}
+        >
+          {dark ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          )}
+        </button>
+
         {/* Header */}
         <div className="flex flex-col items-center gap-2 text-center">
           <img src="/logo-skypro360.png" alt="Skypro360" className="h-36 w-auto" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">OpsManager</h1>
-            <p className="mt-0.5 text-xs font-medium uppercase tracking-widest text-gray-400">
-              Operations Console
-            </p>
-          </div>
+          <p className={`text-xs font-medium uppercase tracking-widest transition-colors ${dark ? "text-gray-500" : "text-gray-400"}`}>
+            Operations Console
+          </p>
         </div>
 
+        {/* Separator */}
+        <hr className={`my-6 ${dark ? "border-gray-800" : "border-gray-100"}`} />
+
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+            <div className={`rounded-md p-3 text-sm ${dark ? "bg-red-900/30 text-red-400" : "bg-red-50 text-red-700"}`}>
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label htmlFor="email" className={`block text-xs font-semibold uppercase tracking-wide ${dark ? "text-gray-400" : "text-gray-500"}`}>
               Email
             </label>
             <input
@@ -87,13 +122,13 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500 ${dark ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:bg-gray-800" : "border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white"}`}
               placeholder="piloto@skypro360.es"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <label htmlFor="password" className={`block text-xs font-semibold uppercase tracking-wide ${dark ? "text-gray-400" : "text-gray-500"}`}>
               Contrasena
             </label>
             <input
@@ -102,7 +137,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500 ${dark ? "border-gray-700 bg-gray-800 text-gray-100 focus:border-blue-500 focus:bg-gray-800" : "border-gray-200 bg-gray-50 text-gray-900 focus:border-blue-500 focus:bg-white"}`}
               minLength={8}
             />
           </div>
@@ -124,8 +159,8 @@ export default function LoginPage() {
         </form>
 
         {/* Demo accounts */}
-        <div className="mt-6 border-t border-gray-100 pt-4">
-          <p className="mb-3 text-center text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+        <div className={`mt-6 border-t pt-4 ${dark ? "border-gray-800" : "border-gray-100"}`}>
+          <p className={`mb-3 text-center text-[10px] font-semibold uppercase tracking-widest ${dark ? "text-gray-600" : "text-gray-400"}`}>
             Cuentas demo
           </p>
           <div className="flex flex-wrap justify-center gap-2">
@@ -134,7 +169,7 @@ export default function LoginPage() {
                 key={account.email}
                 onClick={() => handleDemoLogin(account)}
                 disabled={loading}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${ROLE_COLORS[account.role] ?? ""}`}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${roleColors[account.role] ?? ""}`}
               >
                 {account.label}
               </button>
@@ -143,7 +178,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-4 text-center text-[10px] text-gray-300">
+        <p className={`mt-4 text-center text-[10px] ${dark ? "text-gray-700" : "text-gray-300"}`}>
           Skypro 360 + SRS
         </p>
       </div>
