@@ -88,6 +88,7 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
       const isActive = mission.status === "in_flight";
       const isSelected = mission.id === selectedId;
       const statusLabel = STATUS_LABELS[mission.status] ?? mission.status;
+      const size = isSelected ? 22 : isActive ? 18 : 14;
 
       // Wrapper with CSS tooltip — no MapLibre popup
       const wrapper = document.createElement("div");
@@ -96,7 +97,6 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
 
       // Marker dot
       const el = document.createElement("div");
-      const size = isSelected ? 22 : isActive ? 18 : 14;
       el.style.cssText = `
         width: ${size}px;
         height: ${size}px;
