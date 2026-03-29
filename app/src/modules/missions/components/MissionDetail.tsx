@@ -153,6 +153,12 @@ export default function MissionDetail({
           >
             Cerrar
           </button>
+          <a
+            href={`/missions/${mission.id}/compliance`}
+            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Compliance
+          </a>
           {!isTerminal(mission.status) && (
             <button
               onClick={onEdit}

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { Mission } from "@/lib/db/schema";
+import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import MissionsMap from "@/modules/missions/components/MissionsMap";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
+import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import { STATUS_LABELS, PRIORITY_LABELS } from "@/modules/missions/state-machine";
+
+type PilotWithUser = Pilot & { userName?: string };
 
 type Stats = {
   totalMissions: number;
@@ -20,9 +23,13 @@ type Stats = {
 export default function DashboardClient({
   missions,
   stats,
+  pilots,
+  drones,
 }: {
   missions: Mission[];
   stats: Stats;
+  pilots: PilotWithUser[];
+  drones: Drone[];
 }) {
   const [selected, setSelected] = useState<Mission | null>(null);
 
@@ -102,12 +109,27 @@ export default function DashboardClient({
               )}
             </dl>
 
-            <a
-              href="/missions"
-              className="mt-4 block rounded-md bg-blue-50 px-3 py-2 text-center text-xs font-medium text-blue-700 hover:bg-blue-100"
-            >
-              Ver en Misiones
-            </a>
+            <div className="mt-3 flex gap-2">
+              <a
+                href="/missions"
+                className="flex-1 rounded-md bg-blue-50 px-3 py-2 text-center text-xs font-medium text-blue-700 hover:bg-blue-100"
+              >
+                Ver en Misiones
+              </a>
+              <a
+                href={`/missions/${selected.id}/compliance`}
+                className="flex-1 rounded-md bg-indigo-50 px-3 py-2 text-center text-xs font-medium text-indigo-700 hover:bg-indigo-100"
+              >
+                Compliance
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Alerts panel (right side when no mission selected) */}
+        {!selected && (
+          <div className="w-80 flex-shrink-0 overflow-y-auto border-l border-gray-200 bg-gray-50 p-4">
+            <ExpiryAlerts pilots={pilots} drones={drones} />
           </div>
         )}
       </div>

@@ -1,7 +1,4 @@
 /**
- * Module barrel export.
- * Re-export actions, queries, schemas from this module.
+ * Reports module — PDF dossier AESA, exportaciones.
  */
-// export * from "./actions";
-// export * from "./queries";
-// export * from "./schemas";
+export { generateMissionDossierPdf } from "./pdf-dossier";

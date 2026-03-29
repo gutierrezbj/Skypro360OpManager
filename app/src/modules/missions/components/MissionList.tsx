@@ -116,12 +116,20 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
                         : "—"}
                     </td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => openEdit(m)}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                      >
-                        Editar
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <a
+                          href={`/missions/${m.id}/compliance`}
+                          className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                        >
+                          Compliance
+                        </a>
+                        <button
+                          onClick={() => openEdit(m)}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                        >
+                          Editar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
