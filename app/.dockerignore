@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env*
+!.env.production.example
+*.md
+tests
+e2e
+playwright-report
+playwright.config.ts
+vitest.config.ts
+drizzle/migrations

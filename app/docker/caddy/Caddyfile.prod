@@ -1,0 +1,25 @@
+# OpsManager — Caddy reverse proxy (production)
+# HTTPS automatico via Let's Encrypt
+
+skp360mgr.systemrapid.io {
+	reverse_proxy opsmanager-app:3000
+
+	# Headers de seguridad
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# Compresion
+	encode gzip zstd
+
+	# Logs
+	log {
+		output stdout
+		format json
+	}
+}

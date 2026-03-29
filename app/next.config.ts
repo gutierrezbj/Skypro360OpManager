@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // SRS OpsManager — Skypro360
+  output: "standalone",
   serverExternalPackages: ["postgres", "bcryptjs"],
   experimental: {
     serverActions: {

@@ -1,0 +1,65 @@
+## OpsManager — Docker Compose (production)
+## VPS Hostinger: skp360mgr.systemrapid.io
+## Port offset +100: app=3100, postgres=6100, redis=6101
+## Reverse proxy: Nginx nativo en VPS (no Caddy)
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opsmanager-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3000"
+    env_file: .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: opsmanager-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-opsmanager}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-opsmanager}
+    ports:
+      - "127.0.0.1:6100:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./docker/postgres/rls_policies.sql:/docker-entrypoint-initdb.d/02-rls.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-opsmanager}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: opsmanager-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "127.0.0.1:6101:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:
