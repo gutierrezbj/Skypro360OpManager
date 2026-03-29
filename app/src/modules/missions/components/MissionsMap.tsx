@@ -92,7 +92,7 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
       // Wrapper with CSS tooltip — no MapLibre popup
       const wrapper = document.createElement("div");
       wrapper.className = "marker-wrapper";
-      wrapper.style.cssText = "position: relative;";
+      wrapper.style.cssText = `position: relative; width: ${size}px; height: ${size}px; overflow: visible;`;
 
       // Marker dot
       const el = document.createElement("div");
