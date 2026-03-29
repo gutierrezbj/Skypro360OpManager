@@ -58,6 +58,7 @@ export default function DashboardClient({
           <MissionsMap
             missions={missions}
             onSelectMission={(m) => setSelected(m)}
+            selectedId={selected?.id ?? null}
           />
         </div>
 
@@ -83,10 +84,49 @@ export default function DashboardClient({
               <p className="mt-3 text-xs text-gray-600">{selected.description}</p>
             )}
 
+            {/* Assigned drone & pilot */}
+            <div className="mt-3 space-y-2">
+              {(() => {
+                const drone = drones.find((d) => d.id === selected.droneId);
+                return drone ? (
+                  <div className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2">
+                    <span className="text-base">&#9992;</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold text-gray-900">{drone.model}</p>
+                      <p className="text-[10px] text-gray-500">{drone.serialNumber} &middot; {drone.manufacturer}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                    Sin drone asignado
+                  </div>
+                );
+              })()}
+              {(() => {
+                const pilot = pilots.find((p) => p.id === selected.pilotId);
+                return pilot ? (
+                  <div className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2">
+                    <span className="text-base">&#128100;</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold text-gray-900">{pilot.userName ?? "Piloto"}</p>
+                      <p className="text-[10px] text-gray-500">{pilot.licenseNumber} &middot; {pilot.certificationStatus}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                    Sin piloto asignado
+                  </div>
+                );
+              })()}
+            </div>
+
             <dl className="mt-3 space-y-2 text-xs">
               <Row label="Prioridad" value={PRIORITY_LABELS[selected.priority] ?? selected.priority} />
               {selected.soraClass && <Row label="SORA" value={selected.soraClass} />}
               {selected.maxAltitude && <Row label="Alt. max" value={`${selected.maxAltitude}m`} />}
+              {selected.latitude && selected.longitude && (
+                <Row label="Coordenadas" value={`${parseFloat(selected.latitude).toFixed(4)}, ${parseFloat(selected.longitude).toFixed(4)}`} />
+              )}
               {selected.scheduledStart && (
                 <Row
                   label="Programada"
