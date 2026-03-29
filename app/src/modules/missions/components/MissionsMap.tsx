@@ -98,15 +98,14 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
         border-radius: 50%;
         cursor: pointer;
         box-shadow: 0 1px 4px rgba(0,0,0,${isSelected ? "0.5" : "0.3"});
-        transition: transform 0.15s;
         ${isActive ? "animation: pulse 2s infinite;" : ""}
       `;
 
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.5)";
+        el.style.boxShadow = `0 0 0 4px ${color}40, 0 1px 4px rgba(0,0,0,0.3)`;
       });
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)";
+        el.style.boxShadow = `0 1px 4px rgba(0,0,0,${isSelected ? "0.5" : "0.3"})`;
       });
       el.addEventListener("click", (e) => {
         e.stopPropagation();
