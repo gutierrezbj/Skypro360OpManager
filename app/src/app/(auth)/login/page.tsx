@@ -60,7 +60,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md">
         {/* Header */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <img src="/logo-skypro360.png" alt="Skypro360" className="h-24 w-auto" />
+          <img src="/logo-skypro360.png" alt="Skypro360" className="h-36 w-auto" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">OpsManager</h1>
             <p className="mt-0.5 text-xs font-medium uppercase tracking-widest text-gray-400">
