@@ -187,7 +187,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       `;
 
       const wrapper = document.createElement("div");
-      wrapper.style.cssText = "position:relative;";
+      wrapper.style.cssText = "position:relative;width:fit-content;";
       wrapper.appendChild(el);
       wrapper.appendChild(pointer);
 
