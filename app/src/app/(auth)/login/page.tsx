@@ -67,7 +67,7 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
+              Contrasena
             </label>
             <input
               id="password"

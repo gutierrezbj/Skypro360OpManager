@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 import MissionStatusBadge from "./MissionStatusBadge";
 import MissionForm from "./MissionForm";
@@ -117,12 +118,12 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
                     </td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-3">
-                        <a
+                        <Link
                           href={`/missions/${m.id}/compliance`}
                           className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
                         >
                           Compliance
-                        </a>
+                        </Link>
                         <button
                           onClick={() => openEdit(m)}
                           className="text-sm font-medium text-blue-600 hover:text-blue-700"

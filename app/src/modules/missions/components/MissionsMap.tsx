@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Mission } from "@/lib/db/schema";
-import { STATUS_LABELS, STATUS_COLORS } from "../state-machine";
+import { STATUS_LABELS } from "../state-machine";
 
 const MARKER_COLORS: Record<string, string> = {
   draft: "#9ca3af",
@@ -26,7 +26,7 @@ export default function MissionsMap({ missions, onSelectMission }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [, setSelectedId] = useState<string | null>(null);
 
   // Initialize map
   useEffect(() => {

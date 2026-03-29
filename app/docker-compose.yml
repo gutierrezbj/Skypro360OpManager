@@ -1,6 +1,8 @@
 ## OpsManager — Docker Compose (dev)
 ## Port offset +100: app=3100, postgres=6100, redis=6101
 
+name: opsmanager
+
 services:
   postgres:
     image: postgis/postgis:16-3.4-alpine

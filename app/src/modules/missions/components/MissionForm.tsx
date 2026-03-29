@@ -20,7 +20,7 @@ export default function MissionForm({
   mission,
   drones,
   pilots,
-  users,
+  users: _users,
   onClose,
 }: {
   mission?: Mission;

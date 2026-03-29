@@ -3,6 +3,8 @@
 ## Port offset +100: app=3100, postgres=6100, redis=6101
 ## Reverse proxy: Nginx nativo en VPS (no Caddy)
 
+name: opsmanager
+
 services:
   app:
     build:

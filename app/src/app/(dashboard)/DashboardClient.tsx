@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import MissionsMap from "@/modules/missions/components/MissionsMap";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
-import { STATUS_LABELS, PRIORITY_LABELS } from "@/modules/missions/state-machine";
+import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
+import { PRIORITY_LABELS } from "@/modules/missions/state-machine";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -109,19 +111,30 @@ export default function DashboardClient({
               )}
             </dl>
 
+            {/* Weather */}
+            {selected.latitude && selected.longitude && (
+              <div className="mt-3">
+                <WeatherWidget
+                  lat={parseFloat(selected.latitude)}
+                  lng={parseFloat(selected.longitude)}
+                  date={selected.scheduledStart ? new Date(selected.scheduledStart).toISOString().slice(0, 10) : undefined}
+                />
+              </div>
+            )}
+
             <div className="mt-3 flex gap-2">
-              <a
+              <Link
                 href="/missions"
                 className="flex-1 rounded-md bg-blue-50 px-3 py-2 text-center text-xs font-medium text-blue-700 hover:bg-blue-100"
               >
                 Ver en Misiones
-              </a>
-              <a
+              </Link>
+              <Link
                 href={`/missions/${selected.id}/compliance`}
                 className="flex-1 rounded-md bg-indigo-50 px-3 py-2 text-center text-xs font-medium text-indigo-700 hover:bg-indigo-100"
               >
                 Compliance
-              </a>
+              </Link>
             </div>
           </div>
         )}

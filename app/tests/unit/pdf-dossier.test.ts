@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from "vitest";
 import { generateMissionDossierPdf } from "@/modules/reports/pdf-dossier";
 import { PDFDocument } from "pdf-lib";

@@ -2,7 +2,7 @@
 
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { db, withTenantContext } from "@/lib/db";
+import { withTenantContext } from "@/lib/db";
 import {
   formPlanning,
   formPreflight,

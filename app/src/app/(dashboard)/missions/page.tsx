@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { requireAuth } from "@/server/middleware/auth";
-import { db, withTenantContext } from "@/lib/db";
+import { withTenantContext } from "@/lib/db";
 import { missions, drones, pilots, users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import MissionList from "@/modules/missions/components/MissionList";

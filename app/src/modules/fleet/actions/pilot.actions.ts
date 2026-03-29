@@ -2,7 +2,7 @@
 
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { db, withTenantContext } from "@/lib/db";
+import { withTenantContext } from "@/lib/db";
 import { pilots } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
 import { AuditService } from "@/modules/audit/service";

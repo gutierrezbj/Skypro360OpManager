@@ -1,0 +1,20 @@
+{
+  "name": "OpsManager — Skypro360",
+  "short_name": "OpsManager",
+  "description": "Plataforma de gestion de operaciones drone",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/logo-skypro360.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "es"
+}

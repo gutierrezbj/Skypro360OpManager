@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { requireAuth } from "@/server/middleware/auth";
-import { db, withTenantContext } from "@/lib/db";
+import { withTenantContext } from "@/lib/db";
 import { drones, pilots, users } from "@/lib/db/schema";
 import FleetTabs from "@/modules/fleet/components/FleetTabs";
 
