@@ -74,4 +74,6 @@ services:
 
 volumes:
   pgdata:
+    name: opsmanager_pgdata
   redisdata:
+    name: opsmanager_redisdata
