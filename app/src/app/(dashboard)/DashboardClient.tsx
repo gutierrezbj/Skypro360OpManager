@@ -57,6 +57,8 @@ export default function DashboardClient({
         <div className="flex-1">
           <MissionsMap
             missions={missions}
+            drones={drones}
+            pilots={pilots}
             onSelectMission={(m) => setSelected(m)}
             selectedId={selected?.id ?? null}
           />

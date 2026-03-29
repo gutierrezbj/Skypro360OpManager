@@ -6,7 +6,18 @@ import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 import MissionStatusBadge from "./MissionStatusBadge";
 import MissionForm from "./MissionForm";
 import MissionDetail from "./MissionDetail";
-import { PRIORITY_LABELS, PRIORITY_COLORS } from "../state-machine";
+import { PRIORITY_LABELS, PRIORITY_COLORS, STATUS_COLORS } from "../state-machine";
+
+const MARKER_COLORS: Record<string, string> = {
+  draft: "#9ca3af",
+  planned: "#3b82f6",
+  approved: "#6366f1",
+  preflight: "#eab308",
+  in_flight: "#10b981",
+  completed: "#22c55e",
+  aborted: "#ef4444",
+  cancelled: "#6b7280",
+};
 
 type PilotWithUser = Pilot & { userName?: string };
 type Props = {
@@ -63,7 +74,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
         </div>
       </div>
 
-      {/* Table */}
+      {/* Card grid */}
       {filtered.length === 0 ? (
         <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center">
           <p className="text-sm text-gray-500">No hay misiones{filter !== "all" ? " en este estado" : ""}.</p>
@@ -74,69 +85,78 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
           )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Codigo</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Mision</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Estado</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Prioridad</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Piloto</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Drone</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Fecha</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {filtered.map((m) => {
-                const pilot = pilots.find((p) => p.id === m.pilotId);
-                const drone = drones.find((d) => d.id === m.droneId);
-                return (
-                  <tr key={m.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => setViewing(m)}>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-600">{m.code}</td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-gray-900">{m.name}</div>
-                      {m.description && (
-                        <div className="max-w-xs truncate text-xs text-gray-500">{m.description}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <MissionStatusBadge status={m.status} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-sm font-medium ${PRIORITY_COLORS[m.priority] ?? ""}`}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((m) => {
+            const pilot = pilots.find((p) => p.id === m.pilotId);
+            const drone = drones.find((d) => d.id === m.droneId);
+            const statusColor = MARKER_COLORS[m.status] ?? "#9ca3af";
+            return (
+              <div
+                key={m.id}
+                onClick={() => setViewing(m)}
+                className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+              >
+                {/* Status color bar top */}
+                <div className="h-1.5" style={{ background: statusColor }} />
+
+                <div className="p-4">
+                  {/* Header: code + status */}
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="font-mono text-xs text-gray-400">{m.code}</span>
+                    <MissionStatusBadge status={m.status} />
+                  </div>
+
+                  {/* Name */}
+                  <h3 className="mb-1 text-sm font-semibold text-gray-900 line-clamp-2">{m.name}</h3>
+                  {m.description && (
+                    <p className="mb-3 text-xs text-gray-500 line-clamp-2">{m.description}</p>
+                  )}
+
+                  {/* Info rows */}
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">Prioridad</span>
+                      <span className={`font-medium ${PRIORITY_COLORS[m.priority] ?? ""}`}>
                         {PRIORITY_LABELS[m.priority] ?? m.priority}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{pilot?.userName ?? "—"}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{drone?.model ?? "—"}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {m.scheduledStart
-                        ? new Date(m.scheduledStart).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-3">
-                        <Link
-                          href={`/missions/${m.id}/compliance`}
-                          className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                        >
-                          Compliance
-                        </Link>
-                        <button
-                          onClick={() => openEdit(m)}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                        >
-                          Editar
-                        </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">&#9992; Drone</span>
+                      <span className="font-medium text-gray-700">{drone?.model ?? "—"}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">&#128100; Piloto</span>
+                      <span className="font-medium text-gray-700">{pilot?.userName ?? "—"}</span>
+                    </div>
+                    {m.scheduledStart && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400">Fecha</span>
+                        <span className="font-medium text-gray-700">
+                          {new Date(m.scheduledStart).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
+                        </span>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3" onClick={(e) => e.stopPropagation()}>
+                    <Link
+                      href={`/missions/${m.id}/compliance`}
+                      className="flex-1 rounded-md bg-indigo-50 px-2 py-1.5 text-center text-xs font-medium text-indigo-600 hover:bg-indigo-100"
+                    >
+                      Compliance
+                    </Link>
+                    <button
+                      onClick={() => openEdit(m)}
+                      className="flex-1 rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

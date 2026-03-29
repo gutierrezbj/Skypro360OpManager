@@ -3,8 +3,8 @@
 import { useEffect, useRef, useCallback } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Mission } from "@/lib/db/schema";
-import { STATUS_LABELS } from "../state-machine";
+import type { Mission, Drone, Pilot } from "@/lib/db/schema";
+import { STATUS_LABELS, PRIORITY_LABELS } from "../state-machine";
 
 const MARKER_COLORS: Record<string, string> = {
   draft: "#9ca3af",
@@ -17,16 +17,21 @@ const MARKER_COLORS: Record<string, string> = {
   cancelled: "#6b7280",
 };
 
+type PilotWithUser = Pilot & { userName?: string };
+
 type Props = {
   missions: Mission[];
+  drones: Drone[];
+  pilots: PilotWithUser[];
   onSelectMission?: (mission: Mission) => void;
   selectedId?: string | null;
 };
 
-export default function MissionsMap({ missions, onSelectMission, selectedId }: Props) {
+export default function MissionsMap({ missions, drones, pilots, onSelectMission, selectedId }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const popupRef = useRef<maplibregl.Popup | null>(null);
 
   const handleResize = useCallback(() => {
     const map = mapRef.current;
@@ -68,6 +73,47 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
     };
   }, [handleResize]);
 
+  // Build popup HTML for a mission
+  const buildPopupHTML = useCallback((mission: Mission) => {
+    const color = MARKER_COLORS[mission.status] ?? "#9ca3af";
+    const statusLabel = STATUS_LABELS[mission.status] ?? mission.status;
+    const priorityLabel = PRIORITY_LABELS[mission.priority] ?? mission.priority;
+    const drone = drones.find((d) => d.id === mission.droneId);
+    const pilot = pilots.find((p) => p.id === mission.pilotId);
+
+    return `<div style="font-family:system-ui,sans-serif;min-width:200px;max-width:260px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+        <span style="font-size:11px;font-weight:600;color:#374151;">${mission.code}</span>
+        <span style="font-size:10px;color:${color};font-weight:500;margin-left:auto;">${statusLabel}</span>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:#111827;margin-bottom:6px;">${mission.name}</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#6b7280;">
+        <div style="display:flex;justify-content:space-between;">
+          <span>Prioridad</span>
+          <span style="color:#374151;font-weight:500;">${priorityLabel}</span>
+        </div>
+        ${drone ? `<div style="display:flex;justify-content:space-between;">
+          <span>&#9992; Drone</span>
+          <span style="color:#374151;font-weight:500;">${drone.model}</span>
+        </div>` : ""}
+        ${pilot ? `<div style="display:flex;justify-content:space-between;">
+          <span>&#128100; Piloto</span>
+          <span style="color:#374151;font-weight:500;">${pilot.userName ?? "—"}</span>
+        </div>` : ""}
+        ${mission.scheduledStart ? `<div style="display:flex;justify-content:space-between;">
+          <span>Programada</span>
+          <span style="color:#374151;font-weight:500;">${new Date(mission.scheduledStart).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+        </div>` : ""}
+      </div>
+      <button data-mission-id="${mission.id}" style="
+        margin-top:10px;width:100%;padding:6px 0;
+        background:#3b82f6;color:white;border:none;border-radius:6px;
+        font-size:11px;font-weight:600;cursor:pointer;
+      ">Ver detalle completo</button>
+    </div>`;
+  }, [drones, pilots]);
+
   // Update markers when missions change
   useEffect(() => {
     const map = mapRef.current;
@@ -75,6 +121,7 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
 
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
+    popupRef.current?.remove();
 
     const geoMissions = missions.filter((m) => m.latitude && m.longitude);
 
@@ -86,48 +133,131 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
       const color = MARKER_COLORS[mission.status] ?? "#9ca3af";
       const isActive = mission.status === "in_flight";
       const isSelected = mission.id === selectedId;
-      const size = isSelected ? 22 : isActive ? 18 : 14;
 
+      // Card-style marker element
       const el = document.createElement("div");
-      el.title = `${mission.code} — ${mission.name} (${STATUS_LABELS[mission.status] ?? mission.status})`;
       el.style.cssText = `
-        width: ${size}px;
-        height: ${size}px;
-        background: ${color};
-        border: ${isSelected ? "3px" : "2px"} solid ${isSelected ? "#111827" : "white"};
-        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: ${isSelected ? "#1e3a5f" : "white"};
+        border: 1.5px solid ${isSelected ? "#3b82f6" : "#e5e7eb"};
+        border-radius: 8px;
+        padding: 3px 8px 3px 4px;
         cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0,0,0,${isSelected ? "0.5" : "0.3"});
-        ${isActive ? "animation: pulse 2s infinite;" : ""}
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        white-space: nowrap;
+        transition: box-shadow 0.15s;
       `;
 
+      // Status color dot
+      const dot = document.createElement("span");
+      dot.style.cssText = `
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: ${color};
+        flex-shrink: 0;
+        ${isActive ? "animation: marker-pulse 2s infinite;" : ""}
+      `;
+      el.appendChild(dot);
+
+      // Mission code
+      const code = document.createElement("span");
+      code.textContent = mission.code ?? "—";
+      code.style.cssText = `
+        font-size: 10px;
+        font-weight: 600;
+        font-family: ui-monospace, monospace;
+        color: ${isSelected ? "white" : "#374151"};
+        line-height: 1;
+      `;
+      el.appendChild(code);
+
+      // Pointer triangle below card
+      const pointer = document.createElement("div");
+      pointer.style.cssText = `
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0; height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid ${isSelected ? "#1e3a5f" : "white"};
+      `;
+
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "position:relative;";
+      wrapper.appendChild(el);
+      wrapper.appendChild(pointer);
+
+      // Hover
       el.addEventListener("mouseenter", () => {
-        el.style.boxShadow = `0 0 0 4px ${color}40, 0 1px 4px rgba(0,0,0,0.3)`;
+        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.25)";
       });
       el.addEventListener("mouseleave", () => {
-        el.style.boxShadow = `0 1px 4px rgba(0,0,0,${isSelected ? "0.5" : "0.3"})`;
-      });
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        onSelectMission?.(mission);
+        el.style.boxShadow = "0 1px 3px rgba(0,0,0,0.15)";
       });
 
-      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
+      // Click → popup card with basic info
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popupRef.current?.remove();
+
+        const popup = new maplibregl.Popup({
+          offset: [0, -10],
+          closeButton: true,
+          closeOnClick: true,
+          maxWidth: "280px",
+          className: "mission-popup",
+        })
+          .setLngLat([lng, lat])
+          .setHTML(buildPopupHTML(mission))
+          .addTo(map);
+
+        // Listen for "Ver detalle completo" click inside popup
+        const popupEl = popup.getElement();
+        popupEl?.addEventListener("click", (ev) => {
+          const target = ev.target as HTMLElement;
+          if (target.dataset.missionId) {
+            popup.remove();
+            onSelectMission?.(mission);
+          }
+        });
+
+        popupRef.current = popup;
+      });
+
+      const marker = new maplibregl.Marker({ element: wrapper, anchor: "bottom" })
         .setLngLat([lng, lat])
         .addTo(map);
 
       markersRef.current.push(marker);
     }
-  }, [missions, onSelectMission, selectedId]);
+  }, [missions, onSelectMission, selectedId, buildPopupHTML]);
 
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
       <style>{`
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-          70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        @keyframes marker-pulse {
+          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+          70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
           100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .mission-popup .maplibregl-popup-content {
+          border-radius: 12px;
+          padding: 14px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+          border: 1px solid #e5e7eb;
+        }
+        .mission-popup .maplibregl-popup-close-button {
+          font-size: 16px;
+          padding: 4px 8px;
+          color: #9ca3af;
+        }
+        .mission-popup .maplibregl-popup-tip {
+          border-top-color: white;
         }
       `}</style>
       {/* Legend */}
