@@ -60,49 +60,68 @@ export default function PilotList({
           </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Piloto</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Licencia</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Certificacion</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Horas</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Exp. medico</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {pilots.map((pilot) => (
-                <tr key={pilot.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="text-sm font-medium text-gray-900">{pilot.userName ?? "—"}</div>
-                    <div className="text-xs text-gray-500">{pilot.userEmail ?? ""}</div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{pilot.licenseNumber || "—"}</td>
-                  <td className="px-4 py-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {pilots.map((pilot) => {
+            const certColor: Record<string, string> = {
+              valid: "#22c55e",
+              expired: "#ef4444",
+              suspended: "#f97316",
+              pending: "#3b82f6",
+            };
+            return (
+              <div
+                key={pilot.id}
+                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="h-1.5" style={{ background: certColor[pilot.certificationStatus] ?? "#9ca3af" }} />
+                <div className="p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/people.svg" alt="" className="h-6 w-6" />
                     <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${CERT_COLORS[pilot.certificationStatus] ?? ""}`}>
                       {CERT_LABELS[pilot.certificationStatus] ?? pilot.certificationStatus}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{pilot.flightHours ?? "0"}h</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {pilot.medicalExpiry
-                      ? new Date(pilot.medicalExpiry).toLocaleDateString("es-ES")
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">{pilot.userName ?? "—"}</h3>
+                  {pilot.userEmail && <p className="mb-3 text-xs text-gray-500">{pilot.userEmail}</p>}
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Licencia</span>
+                      <span className="font-mono font-medium text-gray-700">{pilot.licenseNumber || "—"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Horas vuelo</span>
+                      <span className="font-medium text-gray-700">{pilot.flightHours ?? "0"}h</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Exp. medico</span>
+                      <span className="font-medium text-gray-700">
+                        {pilot.medicalExpiry
+                          ? new Date(pilot.medicalExpiry).toLocaleDateString("es-ES")
+                          : "—"}
+                      </span>
+                    </div>
+                    {pilot.certificationExpiry && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Exp. cert.</span>
+                        <span className="font-medium text-gray-700">
+                          {new Date(pilot.certificationExpiry).toLocaleDateString("es-ES")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3 border-t border-gray-100 pt-3">
                     <button
                       onClick={() => openEdit(pilot)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="w-full rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100"
                     >
                       Editar
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

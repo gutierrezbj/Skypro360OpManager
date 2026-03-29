@@ -39,45 +39,68 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
           </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Drone</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">S/N</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Registro</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Clase</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Estado</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {drones.map((drone) => (
-                <tr key={drone.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="text-sm font-medium text-gray-900">{drone.model}</div>
-                    <div className="text-xs text-gray-500">{drone.manufacturer}</div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{drone.serialNumber}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{drone.registrationNumber || "—"}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {drone.easaClass ? (
-                      <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium">{drone.easaClass}</span>
-                    ) : "—"}
-                  </td>
-                  <td className="px-4 py-3"><DroneStatusBadge status={drone.status} /></td>
-                  <td className="px-4 py-3 text-right">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {drones.map((drone) => {
+            const statusColor: Record<string, string> = {
+              active: "#22c55e",
+              maintenance: "#eab308",
+              retired: "#9ca3af",
+              pending_registration: "#3b82f6",
+            };
+            return (
+              <div
+                key={drone.id}
+                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="h-1.5" style={{ background: statusColor[drone.status] ?? "#9ca3af" }} />
+                <div className="p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/drone.svg" alt="" className="h-6 w-6" />
+                    <DroneStatusBadge status={drone.status} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">{drone.model}</h3>
+                  <p className="mb-3 text-xs text-gray-500">{drone.manufacturer}</p>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">S/N</span>
+                      <span className="font-mono font-medium text-gray-700">{drone.serialNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Registro</span>
+                      <span className="font-medium text-gray-700">{drone.registrationNumber || "—"}</span>
+                    </div>
+                    {drone.easaClass && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Clase EASA</span>
+                        <span className="rounded bg-gray-100 px-2 py-0.5 font-medium text-gray-700">{drone.easaClass}</span>
+                      </div>
+                    )}
+                    {drone.maxFlightTime && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Vuelo max</span>
+                        <span className="font-medium text-gray-700">{drone.maxFlightTime} min</span>
+                      </div>
+                    )}
+                    {drone.insuranceExpiry && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Seguro exp.</span>
+                        <span className="font-medium text-gray-700">{new Date(drone.insuranceExpiry).toLocaleDateString("es-ES")}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3 border-t border-gray-100 pt-3">
                     <button
                       onClick={() => openEdit(drone)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="w-full rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100"
                     >
                       Editar
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
