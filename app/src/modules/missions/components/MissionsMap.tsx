@@ -260,6 +260,19 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           border-top-color: white;
         }
       `}</style>
+      {/* Center button */}
+      <button
+        onClick={() => {
+          mapRef.current?.flyTo({ center: [-6.37, 39.15], zoom: 7.5, duration: 800 });
+        }}
+        className="absolute top-3 left-3 rounded-lg bg-white/95 p-2 shadow-md backdrop-blur-sm hover:bg-gray-100 transition-colors"
+        title="Centrar mapa"
+      >
+        <svg className="h-4 w-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
+        </svg>
+      </button>
       {/* Legend */}
       <div className="absolute bottom-6 left-3 rounded-lg bg-white/95 px-3 py-2 shadow-md backdrop-blur-sm">
         <div className="flex flex-wrap gap-x-3 gap-y-1">
