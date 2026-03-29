@@ -4,7 +4,7 @@ Plataforma de gestion de operaciones drone para Skypro360. Multi-tenant SaaS rea
 
 ## Estado actual
 
-**Fase 4 — Desarrollo Local** | Sub-fases 4A+4B+4C completadas (2026-03-29)
+**Fase 4 — Desarrollo Local** | Sub-fases 4A+4B+4C+4D completadas (2026-03-29)
 
 Fases 0-3 cerradas (paperwork, SDDs, infra reservada). Scaffold limpio en `app/`.
 Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: Opcion A — nuestro scaffold como base, extraer lo valioso de V2.6.
@@ -16,7 +16,7 @@ Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: O
 | 4A — Foundation | COMPLETADA | 2026-03-28 | Fleet CRUD (drones+pilotos), Zod validation, server actions, audit log, seed 5 drones + 2 pilotos reales |
 | 4B — Core Product | COMPLETADA | 2026-03-28 | Missions CRUD, state machine 8 estados, transiciones validadas, gates (piloto+drone requeridos para in_flight), auto-codigo SKY-YYYY-XXX, seed 12 misiones |
 | 4C — Visualization | COMPLETADA | 2026-03-29 | MapLibre GL JS, 12 markers geo-referenciados Extremadura, color-coding por status, click→panel detalle, dashboard stats bar, leyenda |
-| 4D — Compliance | PENDIENTE | — | AESA forms, alertas expiracion, PDF reportes |
+| 4D — Compliance | COMPLETADA | 2026-03-29 | AESA forms A.4-A.8+Anexo I con firma digital, SignaturePad, Zod+audit, compliance page /missions/[id]/compliance, PDF dossier pdf-lib, alertas expiracion pilotos+drones |
 | 4E — Advanced | DIFERIDA | — | AESA API, meteo, telemetria, NOTAM, PWA |
 
 ## Decision arquitectonica: Merge Strategy
