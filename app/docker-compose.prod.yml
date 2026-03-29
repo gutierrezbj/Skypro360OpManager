@@ -10,6 +10,10 @@ services:
       dockerfile: Dockerfile
     container_name: opsmanager-app
     restart: unless-stopped
+    labels:
+      srs.project: "OpsManager"
+      srs.domain: "skp360mgr.systemrapid.io"
+      srs.role: "app"
     ports:
       - "127.0.0.1:3100:3000"
     env_file: .env.production
@@ -19,7 +23,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/health').then(r=>{process.exit(r.ok?0:1)}).catch(()=>process.exit(1))\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -29,6 +33,9 @@ services:
     image: postgis/postgis:16-3.4-alpine
     container_name: opsmanager-db
     restart: unless-stopped
+    labels:
+      srs.project: "OpsManager"
+      srs.role: "database"
     environment:
       POSTGRES_USER: ${DB_USER:-opsmanager}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -49,6 +56,9 @@ services:
     image: redis:7-alpine
     container_name: opsmanager-redis
     restart: unless-stopped
+    labels:
+      srs.project: "OpsManager"
+      srs.role: "cache"
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
     ports:
       - "127.0.0.1:6101:6379"
