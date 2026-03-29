@@ -92,7 +92,8 @@ export default function DashboardClient({
                 const drone = drones.find((d) => d.id === selected.droneId);
                 return drone ? (
                   <div className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2">
-                    <span className="text-base">&#9992;</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/drone.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-gray-900">{drone.model}</p>
                       <p className="text-[10px] text-gray-500">{drone.serialNumber} &middot; {drone.manufacturer}</p>
@@ -108,7 +109,8 @@ export default function DashboardClient({
                 const pilot = pilots.find((p) => p.id === selected.pilotId);
                 return pilot ? (
                   <div className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2">
-                    <span className="text-base">&#128100;</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/people.svg" alt="" className="h-5 w-5 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-gray-900">{pilot.userName ?? "Piloto"}</p>
                       <p className="text-[10px] text-gray-500">{pilot.licenseNumber} &middot; {pilot.certificationStatus}</p>

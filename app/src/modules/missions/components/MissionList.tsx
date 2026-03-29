@@ -121,11 +121,11 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400">&#9992; Drone</span>
+                      <span className="text-gray-400">Drone</span>
                       <span className="font-medium text-gray-700">{drone?.model ?? "—"}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400">&#128100; Piloto</span>
+                      <span className="text-gray-400">Piloto</span>
                       <span className="font-medium text-gray-700">{pilot?.userName ?? "—"}</span>
                     </div>
                     {m.scheduledStart && (

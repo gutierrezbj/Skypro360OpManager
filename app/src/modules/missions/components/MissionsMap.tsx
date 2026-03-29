@@ -94,11 +94,11 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           <span style="color:#374151;font-weight:500;">${priorityLabel}</span>
         </div>
         ${drone ? `<div style="display:flex;justify-content:space-between;">
-          <span>&#9992; Drone</span>
+          <span>Drone</span>
           <span style="color:#374151;font-weight:500;">${drone.model}</span>
         </div>` : ""}
         ${pilot ? `<div style="display:flex;justify-content:space-between;">
-          <span>&#128100; Piloto</span>
+          <span>Piloto</span>
           <span style="color:#374151;font-weight:500;">${pilot.userName ?? "—"}</span>
         </div>` : ""}
         ${mission.scheduledStart ? `<div style="display:flex;justify-content:space-between;">
