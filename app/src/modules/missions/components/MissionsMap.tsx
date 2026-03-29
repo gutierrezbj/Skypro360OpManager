@@ -146,7 +146,7 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
 
       // Show popup on hover, not click
       el.addEventListener("mouseenter", () => {
-        popup.addTo(map);
+        popup.setLngLat([lng, lat]).addTo(map);
       });
       el.addEventListener("mouseleave", () => {
         popup.remove();
@@ -154,11 +154,11 @@ export default function MissionsMap({ missions, onSelectMission, selectedId }: P
 
       const marker = new maplibregl.Marker({ element: el, anchor: "center" })
         .setLngLat([lng, lat])
-        .setPopup(popup)
         .addTo(map);
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
+        popup.remove();
         onSelectMission?.(mission);
       });
 
