@@ -6,7 +6,7 @@ import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 import MissionStatusBadge from "./MissionStatusBadge";
 import MissionForm from "./MissionForm";
 import MissionDetail from "./MissionDetail";
-import { PRIORITY_LABELS, PRIORITY_COLORS, STATUS_COLORS } from "../state-machine";
+import { PRIORITY_LABELS, PRIORITY_COLORS } from "../state-machine";
 
 const MARKER_COLORS: Record<string, string> = {
   draft: "#9ca3af",
