@@ -5,6 +5,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import { STATUS_LABELS, PRIORITY_LABELS } from "../state-machine";
+import type { TelemetryPoint } from "@/modules/telemetry/hooks/useTelemetry";
 
 const MARKER_COLORS: Record<string, string> = {
   draft: "#9ca3af",
@@ -25,12 +26,14 @@ type Props = {
   pilots: PilotWithUser[];
   onSelectMission?: (mission: Mission) => void;
   selectedId?: string | null;
+  telemetry?: Map<string, TelemetryPoint>;
 };
 
-export default function MissionsMap({ missions, drones, pilots, onSelectMission, selectedId }: Props) {
+export default function MissionsMap({ missions, drones, pilots, onSelectMission, selectedId, telemetry }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
+  // Map by missionId for individual marker access
+  const markerMapRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const popupRef = useRef<maplibregl.Popup | null>(null);
 
   const handleResize = useCallback(() => {
@@ -114,13 +117,19 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     </div>`;
   }, [drones, pilots]);
 
-  // Update markers when missions change
+  // Create/update markers when missions change
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
+    // Remove old markers not in the new missions list
+    const newIds = new Set(missions.filter((m) => m.latitude && m.longitude).map((m) => m.id));
+    for (const [id, marker] of markerMapRef.current) {
+      if (!newIds.has(id)) {
+        marker.remove();
+        markerMapRef.current.delete(id);
+      }
+    }
     popupRef.current?.remove();
 
     const geoMissions = missions.filter((m) => m.latitude && m.longitude);
@@ -134,7 +143,25 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       const isActive = mission.status === "in_flight";
       const isSelected = mission.id === selectedId;
 
-      // Card-style marker element
+      // If marker already exists, just update styles
+      const existing = markerMapRef.current.get(mission.id);
+      if (existing) {
+        const wrapper = existing.getElement();
+        const card = wrapper.firstElementChild as HTMLElement | null;
+        const pointer = wrapper.lastElementChild as HTMLElement | null;
+        if (card) {
+          card.style.background = isSelected ? "#1e3a5f" : "white";
+          card.style.border = `1.5px solid ${isSelected ? "#3b82f6" : "#e5e7eb"}`;
+          const codeEl = card.lastElementChild as HTMLElement | null;
+          if (codeEl) codeEl.style.color = isSelected ? "white" : "#374151";
+        }
+        if (pointer) {
+          pointer.style.borderTopColor = isSelected ? "#1e3a5f" : "white";
+        }
+        continue;
+      }
+
+      // Create new card marker
       const el = document.createElement("div");
       el.style.cssText = `
         display: flex;
@@ -150,7 +177,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         transition: box-shadow 0.15s;
       `;
 
-      // Status color dot
       const dot = document.createElement("span");
       dot.style.cssText = `
         width: 8px; height: 8px;
@@ -161,7 +187,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       `;
       el.appendChild(dot);
 
-      // Mission code
       const code = document.createElement("span");
       code.textContent = mission.code ?? "—";
       code.style.cssText = `
@@ -173,7 +198,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       `;
       el.appendChild(code);
 
-      // Pointer triangle below card
       const pointer = document.createElement("div");
       pointer.style.cssText = `
         position: absolute;
@@ -191,7 +215,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       wrapper.appendChild(el);
       wrapper.appendChild(pointer);
 
-      // Hover
       el.addEventListener("mouseenter", () => {
         el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.25)";
       });
@@ -199,7 +222,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         el.style.boxShadow = "0 1px 3px rgba(0,0,0,0.15)";
       });
 
-      // Click → popup card with basic info
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         popupRef.current?.remove();
@@ -215,7 +237,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           .setHTML(buildPopupHTML(mission))
           .addTo(map);
 
-        // Listen for "Ver detalle completo" click inside popup
         const popupEl = popup.getElement();
         popupEl?.addEventListener("click", (ev) => {
           const target = ev.target as HTMLElement;
@@ -232,9 +253,21 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         .setLngLat([lng, lat])
         .addTo(map);
 
-      markersRef.current.push(marker);
+      markerMapRef.current.set(mission.id, marker);
     }
   }, [missions, onSelectMission, selectedId, buildPopupHTML]);
+
+  // Live telemetry: update marker positions without re-rendering
+  useEffect(() => {
+    if (!telemetry || telemetry.size === 0) return;
+
+    for (const [missionId, point] of telemetry) {
+      const marker = markerMapRef.current.get(missionId);
+      if (marker) {
+        marker.setLngLat([point.lng, point.lat]);
+      }
+    }
+  }, [telemetry]);
 
   return (
     <div className="relative h-full w-full">

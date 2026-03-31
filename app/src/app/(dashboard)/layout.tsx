@@ -18,13 +18,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       <Sidebar
         userName={session.user.name}
         userEmail={session.user.email}
         userRole={(session.user as { role?: string }).role}
       />
-      <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   );
 }
