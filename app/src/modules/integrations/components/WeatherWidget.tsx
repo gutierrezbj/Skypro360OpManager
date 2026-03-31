@@ -138,7 +138,6 @@ function FlightBadge({ apto }: { apto: boolean }) {
 
 function WeatherIcon({ estado }: { estado: string }) {
   // Simple SVG icons based on AEMET sky state codes
-  const isClear = !estado || estado.includes("despejado") || estado === "11";
   const isCloudy = estado.includes("nuboso") || ["12", "13", "14", "15", "16"].includes(estado);
   const isRain = estado.includes("lluvia") || ["23", "24", "25", "26", "43", "44", "45", "46"].includes(estado);
 

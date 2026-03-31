@@ -33,6 +33,7 @@ export default function Sidebar({
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-skypro360.png" alt="Skypro360" className="h-10 w-auto" />
         <span className="text-lg font-bold text-gray-900">OpsManager</span>
       </div>

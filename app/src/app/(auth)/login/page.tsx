@@ -92,6 +92,7 @@ export default function LoginPage() {
 
         {/* Header */}
         <div className="flex flex-col items-center gap-2 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-skypro360.png" alt="Skypro360" className="h-36 w-auto" />
           <p className={`text-xs font-medium uppercase tracking-widest transition-colors ${dark ? "text-gray-500" : "text-gray-400"}`}>
             Operations Console

@@ -146,6 +146,7 @@ export default function MissionCompliancePanel({
               {planning.signatureData && (
                 <div className="col-span-2">
                   <p className="text-xs text-gray-400">Firma planificador</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={planning.signatureData} alt="Firma" className="mt-1 h-12 rounded border border-gray-200 bg-gray-50 p-1" />
                 </div>
               )}
@@ -179,6 +180,7 @@ export default function MissionCompliancePanel({
                 <Field label="UAS" value={pf.uasId} />
               </div>
               {pf.signatureData && (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={pf.signatureData} alt="Firma" className="mt-2 h-10 rounded border border-gray-200 bg-white p-1" />
               )}
             </div>
@@ -211,6 +213,7 @@ export default function MissionCompliancePanel({
                 <Field label="UAS" value={pf.uasId} />
               </div>
               {pf.signatureData && (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={pf.signatureData} alt="Firma" className="mt-2 h-10 rounded border border-gray-200 bg-white p-1" />
               )}
             </div>

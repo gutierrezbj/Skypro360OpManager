@@ -20,7 +20,7 @@ export default function MissionForm({
   mission,
   drones,
   pilots,
-  users: _users,
+  users: _users, // eslint-disable-line @typescript-eslint/no-unused-vars
   onClose,
 }: {
   mission?: Mission;

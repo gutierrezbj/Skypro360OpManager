@@ -130,7 +130,8 @@ export async function requestFlightAuthorization(params: {
  * Submit an incident report to AESA.
  * STUB: Returns success acknowledgment.
  */
-export async function submitIncidentReport(params: {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function submitIncidentReport(_params: {
   missionCode: string;
   incidentType: string;
   description: string;
