@@ -155,7 +155,14 @@ function parseAemetForecast(
   }
 
   const temp = dayData.temperatura;
-  const viento = dayData.viento?.[0] ?? { direccion: "C", velocidad: 0 };
+  // Pick wind entry with highest velocity (00-24 aggregate is often empty in AEMET)
+  const vientoEntries = dayData.viento ?? [];
+  const viento = vientoEntries.reduce(
+    (best, v) => (v.velocidad > best.velocidad ? v : best),
+    { direccion: "C", velocidad: 0 },
+  );
+  // Normalize empty direction to Calma
+  if (!viento.direccion) viento.direccion = "C";
   const precip = dayData.probPrecipitacion?.reduce(
     (max, p) => Math.max(max, p.value ?? 0), 0,
   ) ?? 0;
