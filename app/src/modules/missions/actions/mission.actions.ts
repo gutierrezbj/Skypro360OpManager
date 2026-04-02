@@ -3,11 +3,12 @@
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, withTenantContext } from "@/lib/db";
-import { missions } from "@/lib/db/schema";
+import { missions, pilots, users } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
 import { AuditService } from "@/modules/audit/service";
 import { missionCreateSchema, missionUpdateSchema, missionTransitionSchema } from "../schemas/mission.schema";
 import { canTransition } from "../state-machine";
+import { notifyMissionTransition } from "@/modules/notifications/mission.emails";
 
 export type MissionActionResult = {
   success: boolean;
@@ -174,6 +175,9 @@ export async function transitionMission(
 
   const { id, status: newStatus } = parsed.data;
 
+  // Collect notification context after successful transition
+  let notificationCtx: Parameters<typeof notifyMissionTransition>[0] | null = null;
+
   try {
     await withTenantContext(tenantId, async (tx) => {
       const [current] = await tx
@@ -224,7 +228,58 @@ export async function transitionMission(
         },
         tx,
       );
+
+      // Resolve pilot + coordinator emails for notification (best-effort)
+      let pilotEmail: string | null = null;
+      let pilotName: string | null = null;
+      let coordinatorEmail: string | null = null;
+      let coordinatorName: string | null = null;
+
+      if (current.pilotId) {
+        const [pilotRow] = await tx
+          .select({ userId: pilots.userId })
+          .from(pilots)
+          .where(eq(pilots.id, current.pilotId));
+        if (pilotRow?.userId) {
+          const [userRow] = await tx
+            .select({ email: users.email, name: users.name })
+            .from(users)
+            .where(eq(users.id, pilotRow.userId));
+          if (userRow) {
+            pilotEmail = userRow.email;
+            pilotName = userRow.name;
+          }
+        }
+      }
+
+      if (current.coordinatorId) {
+        const [userRow] = await tx
+          .select({ email: users.email, name: users.name })
+          .from(users)
+          .where(eq(users.id, current.coordinatorId));
+        if (userRow) {
+          coordinatorEmail = userRow.email;
+          coordinatorName = userRow.name;
+        }
+      }
+
+      notificationCtx = {
+        code: current.code,
+        name: current.name,
+        oldStatus: current.status,
+        newStatus,
+        pilotEmail,
+        pilotName,
+        coordinatorEmail,
+        coordinatorName,
+        scheduledStart: current.scheduledStart,
+      };
     });
+
+    // Fire email after TX commits — non-blocking
+    if (notificationCtx) {
+      notifyMissionTransition(notificationCtx);
+    }
 
     revalidatePath("/missions");
     return { success: true };
