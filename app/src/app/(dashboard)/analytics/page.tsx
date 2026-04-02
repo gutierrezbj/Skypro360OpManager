@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { withTenantContext } from "@/lib/db/tenant";
+import { withTenantContext } from "@/lib/db";
 import { getAnalyticsData } from "@/lib/db/queries/analytics.queries";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 
