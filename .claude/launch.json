@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "opsmanager",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [".claude/dev.sh"],
       "port": 3100,
       "cwd": "app"
     }
