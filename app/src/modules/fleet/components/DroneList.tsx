@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Drone } from "@/lib/db/schema";
 import DroneForm from "./DroneForm";
 import DroneStatusBadge from "./DroneStatusBadge";
+import { DroneIcon } from "@/lib/icons";
 
 export default function DroneList({ drones }: { drones: Drone[] }) {
   const [showForm, setShowForm] = useState(false);
@@ -55,8 +56,7 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
                 <div className="h-1.5" style={{ background: statusColor[drone.status] ?? "#9ca3af" }} />
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/icons/drone.svg" alt="" className="h-6 w-6" />
+                    <DroneIcon className="h-6 w-6 text-gray-500" />
                     <DroneStatusBadge status={drone.status} />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-900">{drone.model}</h3>

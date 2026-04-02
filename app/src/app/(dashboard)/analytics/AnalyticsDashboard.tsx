@@ -1,6 +1,9 @@
 "use client";
 
 import type { AnalyticsData } from "@/lib/db/queries/analytics.queries";
+import { MissionIcon, CheckCircleIcon, DroneIcon, TimerIcon, PilotsIcon } from "@/lib/icons";
+import type { LucideProps } from "@/lib/icons";
+import type React from "react";
 
 const STATUS_COLORS: Record<string, string> = {
   draft:      "#9ca3af",
@@ -73,29 +76,33 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
 
         {/* KPI row */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <KpiCard label="Misiones totales" value={data.totalMissions} />
+          <KpiCard label="Misiones totales" value={data.totalMissions} icon={MissionIcon} />
           <KpiCard
             label="Completadas"
             value={data.completedMissions}
             sub={`${data.completionRate}% tasa éxito`}
             color="emerald"
+            icon={CheckCircleIcon}
           />
           <KpiCard
             label="En vuelo ahora"
             value={data.inFlightNow}
             color={data.inFlightNow > 0 ? "emerald" : "gray"}
             pulse={data.inFlightNow > 0}
+            icon={DroneIcon}
           />
           <KpiCard
             label="Horas de vuelo"
             value={`${flightHoursDisplay}h`}
             color="blue"
+            icon={TimerIcon}
           />
           <KpiCard
             label="Flota activa"
             value={`${data.activeDrones}/${data.totalDrones}`}
             sub={`${data.validPilots}/${data.totalPilots} pilotos cert.`}
             color="indigo"
+            icon={PilotsIcon}
           />
         </div>
 
@@ -286,13 +293,14 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
 }
 
 function KpiCard({
-  label, value, sub, color = "gray", pulse = false,
+  label, value, sub, color = "gray", pulse = false, icon: Icon,
 }: {
   label: string;
   value: string | number;
   sub?: string;
   color?: string;
   pulse?: boolean;
+  icon?: React.ComponentType<LucideProps>;
 }) {
   const colorMap: Record<string, string> = {
     emerald: "text-emerald-600 dark:text-emerald-400",
@@ -300,9 +308,18 @@ function KpiCard({
     indigo: "text-indigo-600 dark:text-indigo-400",
     gray: "text-gray-900 dark:text-white",
   };
+  const iconColorMap: Record<string, string> = {
+    emerald: "text-emerald-400 dark:text-emerald-500",
+    blue: "text-blue-400 dark:text-blue-500",
+    indigo: "text-indigo-400 dark:text-indigo-500",
+    gray: "text-gray-300 dark:text-gray-600",
+  };
   return (
     <div className="rounded-2xl bg-white dark:bg-gray-900 p-5 shadow-sm border border-gray-100 dark:border-gray-800">
-      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+        {Icon && <Icon className={`h-4 w-4 ${iconColorMap[color] ?? iconColorMap.gray}`} />}
+      </div>
       <div className="mt-1 flex items-center gap-2">
         {pulse && (
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />

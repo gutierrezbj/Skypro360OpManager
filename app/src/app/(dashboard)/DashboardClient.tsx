@@ -9,6 +9,7 @@ import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
 import { useTelemetry } from "@/modules/telemetry/hooks/useTelemetry";
 import { PRIORITY_LABELS } from "@/modules/missions/state-machine";
+import { DroneIcon, PilotIcon } from "@/lib/icons";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -165,8 +166,7 @@ function PanelContent({
       <div className="mt-3 space-y-2">
         {drone ? (
           <div className="flex items-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icons/drone.svg" alt="" className="h-5 w-5 flex-shrink-0 dark:invert" />
+            <DroneIcon className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-gray-900 dark:text-white">{drone.model}</p>
               <p className="text-[10px] text-gray-500 dark:text-gray-400">{drone.serialNumber} &middot; {drone.manufacturer}</p>
@@ -179,8 +179,7 @@ function PanelContent({
         )}
         {pilot ? (
           <div className="flex items-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icons/people.svg" alt="" className="h-5 w-5 flex-shrink-0 dark:invert" />
+            <PilotIcon className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-gray-900 dark:text-white">{pilot.userName ?? "Piloto"}</p>
               <p className="text-[10px] text-gray-500 dark:text-gray-400">{pilot.licenseNumber} &middot; {pilot.certificationStatus}</p>

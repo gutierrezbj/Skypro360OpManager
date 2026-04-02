@@ -27,6 +27,7 @@
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.1",
     "ioredis": "^5.10.1",
+    "lucide-react": "^0.475.0",
     "maplibre-gl": "^5.21.0",
     "next": "16.2.1",
     "next-auth": "^5.0.0-beta.30",

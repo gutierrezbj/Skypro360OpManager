@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Pilot, User } from "@/lib/db/schema";
 import PilotForm from "./PilotForm";
+import { PilotIcon } from "@/lib/icons";
 
 const CERT_COLORS: Record<string, string> = {
   valid: "bg-green-100 text-green-700",
@@ -76,8 +77,7 @@ export default function PilotList({
                 <div className="h-1.5" style={{ background: certColor[pilot.certificationStatus] ?? "#9ca3af" }} />
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/icons/people.svg" alt="" className="h-6 w-6" />
+                    <PilotIcon className="h-6 w-6 text-gray-500" />
                     <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${CERT_COLORS[pilot.certificationStatus] ?? ""}`}>
                       {CERT_LABELS[pilot.certificationStatus] ?? pilot.certificationStatus}
                     </span>
