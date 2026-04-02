@@ -11,6 +11,9 @@
 
 import { sendEmail } from "./email.service";
 
+const APP_URL = process.env.NEXTAUTH_URL ?? "https://skp360mgr.systemrapid.io";
+const LOGO_URL = `${APP_URL}/logo-skypro360.png`;
+
 type MissionStatus =
   | "draft" | "planned" | "approved" | "preflight"
   | "in_flight" | "completed" | "aborted" | "cancelled";
@@ -38,202 +41,278 @@ const STATUS_LABELS: Record<MissionStatus, string> = {
   cancelled: "Cancelada",
 };
 
-const STATUS_COLORS: Record<MissionStatus, string> = {
-  draft: "#9ca3af",
-  planned: "#3b82f6",
-  approved: "#6366f1",
-  preflight: "#eab308",
-  in_flight: "#10b981",
-  completed: "#22c55e",
-  aborted: "#ef4444",
-  cancelled: "#6b7280",
+// Status accent colors
+const STATUS_META: Record<MissionStatus, { color: string; bg: string; icon: string }> = {
+  draft:      { color: "#6b7280", bg: "#f3f4f6", icon: "&#9711;" },
+  planned:    { color: "#2563eb", bg: "#eff6ff", icon: "&#128336;" },
+  approved:   { color: "#7c3aed", bg: "#f5f3ff", icon: "&#10003;" },
+  preflight:  { color: "#d97706", bg: "#fffbeb", icon: "&#9997;" },
+  in_flight:  { color: "#059669", bg: "#ecfdf5", icon: "&#9992;" },
+  completed:  { color: "#16a34a", bg: "#f0fdf4", icon: "&#9989;" },
+  aborted:    { color: "#dc2626", bg: "#fef2f2", icon: "&#9888;" },
+  cancelled:  { color: "#6b7280", bg: "#f9fafb", icon: "&#10005;" },
 };
 
-function baseTemplate(content: string): string {
+function baseTemplate({
+  status,
+  headline,
+  recipientName,
+  missionCode,
+  missionName,
+  scheduledStart,
+  bodyHtml,
+  ctaLabel,
+  ctaUrl,
+}: {
+  status: MissionStatus;
+  headline: string;
+  recipientName?: string | null;
+  missionCode: string;
+  missionName: string;
+  scheduledStart?: Date | null;
+  bodyHtml: string;
+  ctaLabel: string;
+  ctaUrl: string;
+}): string {
+  const meta = STATUS_META[status];
+  const label = STATUS_LABELS[status];
+
+  const scheduled = scheduledStart
+    ? new Date(scheduledStart).toLocaleString("es-ES", {
+        weekday: "long", day: "2-digit", month: "long",
+        year: "numeric", hour: "2-digit", minute: "2-digit",
+      })
+    : null;
+
   return `<!DOCTYPE html>
 <html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 0;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${headline}</title>
+</head>
+<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+
+  <!-- Outer wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+         style="background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 100%);min-height:100vh;padding:40px 16px;">
     <tr><td align="center">
-      <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <!-- Header -->
+
+      <!-- Card -->
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation"
+             style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.4);">
+
+        <!-- ── HEADER HERO ── -->
         <tr>
-          <td style="background:#0f172a;padding:24px 32px;">
-            <p style="margin:0;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Skypro360</p>
-            <p style="margin:4px 0 0;color:#ffffff;font-size:20px;font-weight:700;">OpsManager</p>
+          <td style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);padding:40px 40px 32px;text-align:center;position:relative;">
+
+            <!-- Grid texture overlay (inline SVG background) -->
+            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 40px);pointer-events:none;border-radius:20px 20px 0 0;"></div>
+
+            <!-- Logo -->
+            <img src="${LOGO_URL}" alt="Skypro360"
+                 style="height:52px;width:auto;display:block;margin:0 auto 20px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4));">
+
+            <!-- Status badge -->
+            <div style="display:inline-block;background:${meta.color};color:#ffffff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 16px;border-radius:100px;margin-bottom:16px;">
+              ${meta.icon}&nbsp;&nbsp;${label}
+            </div>
+
+            <!-- Headline -->
+            <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1.2;">
+              ${headline}
+            </h1>
+
+            <!-- Greeting -->
+            ${recipientName ? `<p style="margin:10px 0 0;color:#94a3b8;font-size:14px;">Para&nbsp;<strong style="color:#e2e8f0;">${recipientName}</strong></p>` : ""}
           </td>
         </tr>
-        <!-- Content -->
-        <tr><td style="padding:32px;">${content}</td></tr>
-        <!-- Footer -->
+
+        <!-- ── MISSION CARD ── -->
         <tr>
-          <td style="background:#f8fafc;padding:16px 32px;border-top:1px solid #e2e8f0;">
-            <p style="margin:0;color:#94a3b8;font-size:11px;">
-              Este mensaje es autom&aacute;tico. No respondas a este email.
+          <td style="padding:0 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                   style="background:${meta.bg};border:1.5px solid ${meta.color}22;border-radius:14px;margin-top:-1px;overflow:hidden;">
+              <!-- Color bar -->
+              <tr><td style="height:4px;background:linear-gradient(90deg,${meta.color},${meta.color}88);"></td></tr>
+              <tr>
+                <td style="padding:20px 24px;">
+                  <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${meta.color};font-family:monospace;">${missionCode}</p>
+                  <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;line-height:1.3;">${missionName}</p>
+                  ${scheduled ? `
+                  <p style="margin:10px 0 0;font-size:13px;color:#64748b;">
+                    <span style="display:inline-block;background:#e2e8f0;border-radius:6px;padding:3px 10px;font-weight:600;">
+                      &#128197;&nbsp;${scheduled}
+                    </span>
+                  </p>` : ""}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ── BODY ── -->
+        <tr>
+          <td style="padding:28px 40px 8px;">
+            ${bodyHtml}
+          </td>
+        </tr>
+
+        <!-- ── CTA BUTTON ── -->
+        <tr>
+          <td style="padding:8px 40px 36px;text-align:center;">
+            <a href="${ctaUrl}"
+               style="display:inline-block;background:linear-gradient(135deg,${meta.color},${meta.color}cc);color:#ffffff;font-size:15px;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;letter-spacing:0.3px;box-shadow:0 4px 15px ${meta.color}44;">
+              ${ctaLabel} &nbsp;&#8594;
+            </a>
+          </td>
+        </tr>
+
+        <!-- ── DIVIDER ── -->
+        <tr>
+          <td style="padding:0 40px;">
+            <div style="height:1px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);"></div>
+          </td>
+        </tr>
+
+        <!-- ── FOOTER ── -->
+        <tr>
+          <td style="padding:24px 40px;text-align:center;background:#f8fafc;">
+            <img src="${LOGO_URL}" alt="Skypro360" style="height:28px;width:auto;opacity:0.5;margin-bottom:10px;display:block;margin:0 auto 10px;">
+            <p style="margin:0;color:#94a3b8;font-size:11px;line-height:1.6;">
+              Skypro360 OpsManager &mdash; Sistema de Gesti&oacute;n de Operaciones UAS<br>
+              Este mensaje es autom&aacute;tico. No respondas a este correo.
+            </p>
+            <p style="margin:8px 0 0;">
+              <a href="${APP_URL}" style="color:#6366f1;font-size:11px;text-decoration:none;font-weight:600;">skp360mgr.systemrapid.io</a>
             </p>
           </td>
         </tr>
+
       </table>
+      <!-- /Card -->
+
     </td></tr>
   </table>
+
 </body>
 </html>`;
 }
 
-function statusBadge(status: MissionStatus): string {
-  const color = STATUS_COLORS[status] ?? "#9ca3af";
-  const label = STATUS_LABELS[status] ?? status;
-  return `<span style="display:inline-block;background:${color};color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;">${label}</span>`;
+function bodyText(lines: string[]): string {
+  return lines.map(line =>
+    `<p style="margin:0 0 12px;font-size:15px;color:#334155;line-height:1.65;">${line}</p>`
+  ).join("");
 }
 
-function missionBlock(ctx: MissionEmailContext): string {
-  const scheduled = ctx.scheduledStart
-    ? new Date(ctx.scheduledStart).toLocaleString("es-ES", {
-        day: "2-digit", month: "long", year: "numeric",
-        hour: "2-digit", minute: "2-digit",
-      })
-    : null;
+// ─────────────────────────────────────────
+// Public dispatcher — fire-and-forget
+// ─────────────────────────────────────────
 
-  return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:20px 0;">
-      <tr>
-        <td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
-          <p style="margin:0;font-size:11px;color:#94a3b8;font-family:monospace;">${ctx.code}</p>
-          <p style="margin:4px 0 0;font-size:16px;font-weight:600;color:#0f172a;">${ctx.name}</p>
-        </td>
-      </tr>
-      <tr>
-        <td style="padding:12px 20px;">
-          <table cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding:2px 0;color:#64748b;font-size:13px;width:120px;">Estado</td>
-              <td style="padding:2px 0;">${statusBadge(ctx.newStatus)}</td>
-            </tr>
-            ${scheduled ? `
-            <tr>
-              <td style="padding:2px 0;color:#64748b;font-size:13px;">Programada</td>
-              <td style="padding:2px 0;font-size:13px;color:#0f172a;">${scheduled}</td>
-            </tr>` : ""}
-          </table>
-        </td>
-      </tr>
-    </table>`;
-}
-
-function ctaButton(text: string, url: string): string {
-  return `<p style="margin:24px 0 0;">
-    <a href="${url}" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;">${text}</a>
-  </p>`;
-}
-
-const APP_URL = process.env.NEXTAUTH_URL ?? "https://skp360mgr.systemrapid.io";
-
-/**
- * Fire-and-forget — call after a successful mission transition.
- * Does not await, does not throw.
- */
 export function notifyMissionTransition(ctx: MissionEmailContext): void {
-  // Run async without blocking
-  _sendNotifications(ctx).catch(() => {
-    // already handled inside sendEmail
-  });
+  _sendNotifications(ctx).catch(() => {});
 }
 
 async function _sendNotifications(ctx: MissionEmailContext): Promise<void> {
-  const { code, name, newStatus, pilotEmail, pilotName, coordinatorEmail, coordinatorName } = ctx;
-
-  const missionUrl = `${APP_URL}/missions`;
+  const { code, name, newStatus, pilotEmail, pilotName, coordinatorEmail, coordinatorName, scheduledStart } = ctx;
+  const missionsUrl = `${APP_URL}/missions`;
 
   switch (newStatus) {
+
     case "approved": {
       if (pilotEmail) {
         await sendEmail({
           to: pilotEmail,
-          subject: `[${code}] Misi\u00f3n aprobada — ${name}`,
-          html: baseTemplate(`
-            <p style="margin:0;font-size:16px;color:#0f172a;">Hola${pilotName ? ` ${pilotName}` : ""},</p>
-            <p style="color:#475569;font-size:14px;line-height:1.6;">
-              Has sido asignado como piloto a una misi\u00f3n que acaba de ser <strong>aprobada</strong>.
-            </p>
-            ${missionBlock(ctx)}
-            <p style="color:#475569;font-size:14px;">
-              Revisa los detalles y completa el checklist pre-vuelo antes de la operaci\u00f3n.
-            </p>
-            ${ctaButton("Ver misi\u00f3n", missionUrl)}
-          `),
+          subject: `✅ [${code}] Misión aprobada — ${name}`,
+          html: baseTemplate({
+            status: "approved",
+            headline: "Misión aprobada",
+            recipientName: pilotName,
+            missionCode: code,
+            missionName: name,
+            scheduledStart,
+            bodyHtml: bodyText([
+              `Has sido asignado como piloto a esta misi&oacute;n, que acaba de recibir la <strong>aprobaci&oacute;n operacional</strong>.`,
+              `Revisa los detalles, confirma tu disponibilidad y prepara el checklist pre-vuelo antes de la operaci&oacute;n.`,
+            ]),
+            ctaLabel: "Ver misión",
+            ctaUrl: missionsUrl,
+          }),
         });
       }
       break;
     }
 
     case "in_flight": {
-      const recipients: { email: string; name?: string | null }[] = [];
-      if (pilotEmail) recipients.push({ email: pilotEmail, name: pilotName });
-      if (coordinatorEmail && coordinatorEmail !== pilotEmail)
-        recipients.push({ email: coordinatorEmail, name: coordinatorName });
-
+      const recipients = buildRecipients(pilotEmail, pilotName, coordinatorEmail, coordinatorName);
       for (const r of recipients) {
         await sendEmail({
           to: r.email,
-          subject: `[${code}] \u{1F7E2} Vuelo iniciado — ${name}`,
-          html: baseTemplate(`
-            <p style="margin:0;font-size:16px;color:#0f172a;">Hola${r.name ? ` ${r.name}` : ""},</p>
-            <p style="color:#475569;font-size:14px;line-height:1.6;">
-              La misi\u00f3n ha <strong>iniciado vuelo</strong>.
-            </p>
-            ${missionBlock(ctx)}
-            ${ctaButton("Seguimiento en tiempo real", missionUrl)}
-          `),
+          subject: `🟢 [${code}] Vuelo iniciado — ${name}`,
+          html: baseTemplate({
+            status: "in_flight",
+            headline: "Vuelo en progreso",
+            recipientName: r.name,
+            missionCode: code,
+            missionName: name,
+            scheduledStart,
+            bodyHtml: bodyText([
+              `La misi&oacute;n ha <strong>iniciado vuelo</strong> correctamente.`,
+              `El sistema est&aacute; registrando telemetr&iacute;a en tiempo real. Puedes seguir el progreso desde el mapa de operaciones.`,
+            ]),
+            ctaLabel: "Seguimiento en tiempo real",
+            ctaUrl: missionsUrl,
+          }),
         });
       }
       break;
     }
 
     case "completed": {
-      const recipients: { email: string; name?: string | null }[] = [];
-      if (pilotEmail) recipients.push({ email: pilotEmail, name: pilotName });
-      if (coordinatorEmail && coordinatorEmail !== pilotEmail)
-        recipients.push({ email: coordinatorEmail, name: coordinatorName });
-
+      const recipients = buildRecipients(pilotEmail, pilotName, coordinatorEmail, coordinatorName);
       for (const r of recipients) {
         await sendEmail({
           to: r.email,
-          subject: `[${code}] Misi\u00f3n completada — ${name}`,
-          html: baseTemplate(`
-            <p style="margin:0;font-size:16px;color:#0f172a;">Hola${r.name ? ` ${r.name}` : ""},</p>
-            <p style="color:#475569;font-size:14px;line-height:1.6;">
-              La misi\u00f3n ha sido <strong>completada con \u00e9xito</strong>.
-            </p>
-            ${missionBlock(ctx)}
-            <p style="color:#475569;font-size:14px;">
-              Recuerda completar el informe post-vuelo y los formularios de compliance AESA.
-            </p>
-            ${ctaButton("Ver compliance", missionUrl)}
-          `),
+          subject: `✅ [${code}] Misión completada — ${name}`,
+          html: baseTemplate({
+            status: "completed",
+            headline: "Misión completada con éxito",
+            recipientName: r.name,
+            missionCode: code,
+            missionName: name,
+            scheduledStart,
+            bodyHtml: bodyText([
+              `La misi&oacute;n ha sido <strong>completada satisfactoriamente</strong>. ¡Buen trabajo!`,
+              `Recuerda completar el <strong>informe post-vuelo</strong> y los formularios de compliance AESA (Ap&eacute;ndices A.7 y A.8) para cerrar el expediente operacional.`,
+            ]),
+            ctaLabel: "Completar compliance AESA",
+            ctaUrl: missionsUrl,
+          }),
         });
       }
       break;
     }
 
     case "aborted": {
-      const recipients: { email: string; name?: string | null }[] = [];
-      if (pilotEmail) recipients.push({ email: pilotEmail, name: pilotName });
-      if (coordinatorEmail && coordinatorEmail !== pilotEmail)
-        recipients.push({ email: coordinatorEmail, name: coordinatorName });
-
+      const recipients = buildRecipients(pilotEmail, pilotName, coordinatorEmail, coordinatorName);
       for (const r of recipients) {
         await sendEmail({
           to: r.email,
-          subject: `[${code}] \u26a0\ufe0f Misi\u00f3n abortada — ${name}`,
-          html: baseTemplate(`
-            <p style="margin:0;font-size:16px;color:#0f172a;">Hola${r.name ? ` ${r.name}` : ""},</p>
-            <p style="color:#475569;font-size:14px;line-height:1.6;">
-              La misi\u00f3n ha sido <strong>abortada</strong>. Es necesario registrar el incidente en el sistema.
-            </p>
-            ${missionBlock(ctx)}
-            ${ctaButton("Registrar incidente", missionUrl)}
-          `),
+          subject: `⚠️ [${code}] Misión abortada — ${name}`,
+          html: baseTemplate({
+            status: "aborted",
+            headline: "Misión abortada",
+            recipientName: r.name,
+            missionCode: code,
+            missionName: name,
+            scheduledStart,
+            bodyHtml: bodyText([
+              `La misi&oacute;n ha sido <strong>abortada durante la operaci&oacute;n</strong>.`,
+              `Es obligatorio registrar el incidente en el sistema de compliance AESA y documentar las causas del abandono seg&uacute;n el protocolo establecido.`,
+            ]),
+            ctaLabel: "Registrar incidente",
+            ctaUrl: missionsUrl,
+          }),
         });
       }
       break;
@@ -243,17 +322,37 @@ async function _sendNotifications(ctx: MissionEmailContext): Promise<void> {
       if (pilotEmail) {
         await sendEmail({
           to: pilotEmail,
-          subject: `[${code}] Misi\u00f3n cancelada — ${name}`,
-          html: baseTemplate(`
-            <p style="margin:0;font-size:16px;color:#0f172a;">Hola${pilotName ? ` ${pilotName}` : ""},</p>
-            <p style="color:#475569;font-size:14px;line-height:1.6;">
-              La misi\u00f3n en la que estabas asignado ha sido <strong>cancelada</strong>.
-            </p>
-            ${missionBlock(ctx)}
-          `),
+          subject: `[${code}] Misión cancelada — ${name}`,
+          html: baseTemplate({
+            status: "cancelled",
+            headline: "Misión cancelada",
+            recipientName: pilotName,
+            missionCode: code,
+            missionName: name,
+            scheduledStart,
+            bodyHtml: bodyText([
+              `La misi&oacute;n en la que estabas asignado ha sido <strong>cancelada</strong>.`,
+              `Si tienes dudas sobre esta decisi&oacute;n, contacta con tu coordinador de operaciones.`,
+            ]),
+            ctaLabel: "Ver misiones",
+            ctaUrl: missionsUrl,
+          }),
         });
       }
       break;
     }
   }
+}
+
+function buildRecipients(
+  pilotEmail?: string | null,
+  pilotName?: string | null,
+  coordinatorEmail?: string | null,
+  coordinatorName?: string | null,
+): { email: string; name?: string | null }[] {
+  const out: { email: string; name?: string | null }[] = [];
+  if (pilotEmail) out.push({ email: pilotEmail, name: pilotName });
+  if (coordinatorEmail && coordinatorEmail !== pilotEmail)
+    out.push({ email: coordinatorEmail, name: coordinatorName });
+  return out;
 }
