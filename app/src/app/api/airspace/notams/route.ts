@@ -13,7 +13,7 @@ const NOTAM_URL =
   "?where=1=1&outFields=notamId,notamSerie,notamNumber,notamYear,itemA,itemE,LOWER_VAL,UPPER_VAL,FLYING_LEVELS_DESC,DESCRIPTION,fir" +
   "&f=geojson&resultOffset=0&resultRecordCount=1000";
 
-const CACHE_TTL = 24 * 60 * 60 * 1000;
+const CACHE_TTL = 30 * 60 * 1000; // 30 min — NOTAMs son dinamicos, no ciclo AIRAC
 
 type CacheEntry = { data: unknown; ts: number };
 let _cache: CacheEntry | null = null;
