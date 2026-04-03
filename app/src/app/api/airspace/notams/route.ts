@@ -1,19 +1,41 @@
 /**
  * GET /api/airspace/notams
  * Proxy ENAIRE NOTAM_UAS_APP_V3 → normalized GeoJSON.
+ * Uses node:https (not fetch) — ENAIRE ArcGIS rejects percent-encoded where clauses.
  * In-memory cache 24h (AIRAC cycle).
  */
 import { NextResponse } from "next/server";
+import https from "node:https";
 
+// ENAIRE ArcGIS REST requires raw '=' in where — do NOT use URLSearchParams
 const NOTAM_URL =
   "https://servais.enaire.es/insignias/rest/services/NOTAM/NOTAM_UAS_APP_V3/MapServer/1/query" +
   "?where=1=1&outFields=IDENT_TXT,NAME_TXT,TYPE_CODE,NIVEL_INF,NIVEL_SUP,REMARKS_TXT,REMARKS_TXT_en" +
   "&f=geojson&resultOffset=0&resultRecordCount=1000";
 
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 type CacheEntry = { data: unknown; ts: number };
 let _cache: CacheEntry | null = null;
+
+function httpsGet(url: string): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers: { "User-Agent": "OpsManager-Skypro360/1.0" } }, (res) => {
+      if (res.statusCode && res.statusCode >= 400) {
+        res.resume();
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      let data = "";
+      res.on("data", (chunk: Buffer) => { data += chunk; });
+      res.on("end", () => {
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(new Error("Invalid JSON from ENAIRE")); }
+      });
+    });
+    req.setTimeout(15_000, () => { req.destroy(); reject(new Error("Timeout")); });
+    req.on("error", reject);
+  });
+}
 
 function stripHtml(html: string | undefined): string {
   if (!html) return "";
@@ -60,16 +82,7 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(NOTAM_URL, {
-      headers: { "User-Agent": "OpsManager-Skypro360/1.0" },
-      signal: AbortSignal.timeout(15_000),
-    });
-
-    if (!res.ok) {
-      throw new Error(`ENAIRE HTTP ${res.status}`);
-    }
-
-    const raw = await res.json();
+    const raw = await httpsGet(NOTAM_URL);
     const data = normalize(raw);
     _cache = { data, ts: Date.now() };
 
@@ -80,7 +93,6 @@ export async function GET() {
     const msg = err instanceof Error ? err.message : "Unknown error";
     console.error("[notams] ENAIRE fetch failed:", msg);
 
-    // Return stale cache if available rather than hard fail
     if (_cache) {
       return NextResponse.json(_cache.data, {
         headers: { "X-Cache": "STALE", "X-Cache-Error": msg },
