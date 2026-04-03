@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 
 const NOTAM_URL =
   "https://servais.enaire.es/insignias/rest/services/NOTAM/NOTAM_UAS_APP_V3/MapServer/1/query" +
-  "?where=1%3D1&outFields=IDENT_TXT,NAME_TXT,TYPE_CODE,NIVEL_INF,NIVEL_SUP,REMARKS_TXT,REMARKS_TXT_en" +
+  "?where=1=1&outFields=IDENT_TXT,NAME_TXT,TYPE_CODE,NIVEL_INF,NIVEL_SUP,REMARKS_TXT,REMARKS_TXT_en" +
   "&f=geojson&resultOffset=0&resultRecordCount=1000";
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
