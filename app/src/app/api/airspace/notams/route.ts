@@ -7,10 +7,10 @@
 import { NextResponse } from "next/server";
 import https from "node:https";
 
-// ENAIRE ArcGIS REST requires raw '=' in where — do NOT use URLSearchParams
+// ENAIRE ArcGIS REST requires raw '=' in where — do NOT use URLSearchParams or fetch (encodes =)
 const NOTAM_URL =
   "https://servais.enaire.es/insignias/rest/services/NOTAM/NOTAM_UAS_APP_V3/MapServer/1/query" +
-  "?where=1=1&outFields=IDENT_TXT,NAME_TXT,TYPE_CODE,NIVEL_INF,NIVEL_SUP,REMARKS_TXT,REMARKS_TXT_en" +
+  "?where=1=1&outFields=notamId,notamSerie,notamNumber,notamYear,itemA,itemE,LOWER_VAL,UPPER_VAL,FLYING_LEVELS_DESC,DESCRIPTION,fir" +
   "&f=geojson&resultOffset=0&resultRecordCount=1000";
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
@@ -50,17 +50,19 @@ function normalize(raw: any) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .map((f: any) => {
       const p = f.properties ?? {};
+      const notamCode = p.notamSerie
+        ? `${p.notamSerie}${String(p.notamNumber ?? "").padStart(4, "0")}/${String(p.notamYear ?? "").slice(-2)}`
+        : p.notamId ?? "";
       return {
         ...f,
         properties: {
-          id: p.IDENT_TXT ?? "",
-          name: p.NAME_TXT ?? p.IDENT_TXT ?? "NOTAM sin nombre",
+          id: notamCode,
+          name: p.itemA ? `FIR ${p.itemA}` : (p.fir ?? "NOTAM"),
           type: "NOTAM",
           restriction: "CONDITIONAL",
-          altitudeFloor: p.NIVEL_INF ?? "SFC",
-          altitudeCeiling: p.NIVEL_SUP ?? "",
-          description:
-            stripHtml(p.REMARKS_TXT) || stripHtml(p.REMARKS_TXT_en) || "",
+          altitudeFloor: p.LOWER_VAL ?? "SFC",
+          altitudeCeiling: p.UPPER_VAL ?? "",
+          description: stripHtml(p.DESCRIPTION) || stripHtml(p.FLYING_LEVELS_DESC) || stripHtml(p.itemE) || "",
           source: "ENAIRE NOTAM_UAS_APP_V3",
         },
       };
