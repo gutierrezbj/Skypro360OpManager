@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Mission, Drone, Pilot } from "@/lib/db/schema";
@@ -18,6 +18,9 @@ const MARKER_COLORS: Record<string, string> = {
   cancelled: "#6b7280",
 };
 
+const NOTAM_FILL = "rgba(56,189,248,0.18)";
+const NOTAM_LINE = "#38bdf8";
+
 type PilotWithUser = Pilot & { userName?: string };
 
 type Props = {
@@ -32,9 +35,14 @@ type Props = {
 export default function MissionsMap({ missions, drones, pilots, onSelectMission, selectedId, telemetry }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  // Map by missionId for individual marker access
   const markerMapRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const popupRef = useRef<maplibregl.Popup | null>(null);
+
+  // NOTAM state
+  const [notamData, setNotamData] = useState<{ type: string; features: unknown[] } | null>(null);
+  const [showNotams, setShowNotams] = useState(true);
+  const [notamLoading, setNotamLoading] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const handleResize = useCallback(() => {
     const map = mapRef.current;
@@ -44,6 +52,16 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     map.resize();
     map.setCenter(center);
     map.setZoom(zoom);
+  }, []);
+
+  // Fetch NOTAMs once on mount
+  useEffect(() => {
+    setNotamLoading(true);
+    fetch("/api/airspace/notams")
+      .then((r) => r.json())
+      .then((d) => setNotamData(d))
+      .catch((e) => console.error("[MissionsMap] NOTAM fetch failed:", e))
+      .finally(() => setNotamLoading(false));
   }, []);
 
   // Initialize map
@@ -64,6 +82,84 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       "bottom-right",
     );
 
+    map.on("load", () => {
+      // Add empty NOTAM GeoJSON source + layers
+      map.addSource("notams", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+
+      map.addLayer({
+        id: "notam-fill",
+        type: "fill",
+        source: "notams",
+        paint: {
+          "fill-color": NOTAM_FILL,
+          "fill-opacity": 1,
+        },
+      });
+
+      map.addLayer({
+        id: "notam-line",
+        type: "line",
+        source: "notams",
+        paint: {
+          "line-color": NOTAM_LINE,
+          "line-width": 1.5,
+          "line-dasharray": [3, 2],
+        },
+      });
+
+      // NOTAM click → popup
+      map.on("click", "notam-fill", (e) => {
+        if (!e.features?.length) return;
+        const p = e.features[0].properties as Record<string, string>;
+        const coords = e.lngLat;
+
+        popupRef.current?.remove();
+        const popup = new maplibregl.Popup({
+          offset: [0, -4],
+          closeButton: true,
+          closeOnClick: true,
+          maxWidth: "280px",
+          className: "notam-popup",
+        })
+          .setLngLat(coords)
+          .setHTML(`
+            <div style="font-family:system-ui,sans-serif;min-width:210px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${NOTAM_LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span style="font-size:10px;font-weight:700;color:${NOTAM_LINE};letter-spacing:0.05em;">NOTAM ACTIVO</span>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:4px;">${p.id ?? "—"}</div>
+              ${p.name && p.name !== p.id ? `<div style="font-size:11px;color:#374151;margin-bottom:6px;">${p.name}</div>` : ""}
+              <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#6b7280;border-top:1px solid #f3f4f6;padding-top:6px;margin-top:4px;">
+                ${p.altitudeFloor || p.altitudeCeiling ? `
+                <div style="display:flex;justify-content:space-between;">
+                  <span>Altitud</span>
+                  <span style="color:#374151;font-weight:500;">${p.altitudeFloor ?? "SFC"} → ${p.altitudeCeiling ?? "??"}</span>
+                </div>` : ""}
+                ${p.description ? `<div style="margin-top:4px;font-size:10px;color:#6b7280;line-height:1.4;max-height:60px;overflow:hidden;">${p.description.substring(0, 160)}${p.description.length > 160 ? "…" : ""}</div>` : ""}
+              </div>
+              <div style="margin-top:6px;font-size:9px;color:#9ca3af;">ENAIRE NOTAM_UAS_APP_V3</div>
+            </div>
+          `)
+          .addTo(map);
+        popupRef.current = popup;
+      });
+
+      map.on("mouseenter", "notam-fill", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "notam-fill", () => {
+        map.getCanvas().style.cursor = "";
+      });
+
+      setMapLoaded(true);
+    });
+
     mapRef.current = map;
 
     const observer = new ResizeObserver(() => handleResize());
@@ -75,6 +171,22 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       mapRef.current = null;
     };
   }, [handleResize]);
+
+  // Update NOTAM source data when data arrives or toggle changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+    const source = map.getSource("notams") as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    const data =
+      showNotams && notamData
+        ? notamData
+        : { type: "FeatureCollection", features: [] };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    source.setData(data as any);
+  }, [notamData, showNotams, mapLoaded]);
 
   // Build popup HTML for a mission
   const buildPopupHTML = useCallback((mission: Mission) => {
@@ -122,7 +234,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     const map = mapRef.current;
     if (!map) return;
 
-    // Remove old markers not in the new missions list
     const newIds = new Set(missions.filter((m) => m.latitude && m.longitude).map((m) => m.id));
     for (const [id, marker] of markerMapRef.current) {
       if (!newIds.has(id)) {
@@ -143,7 +254,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       const isActive = mission.status === "in_flight";
       const isSelected = mission.id === selectedId;
 
-      // If marker already exists, just update styles
       const existing = markerMapRef.current.get(mission.id);
       if (existing) {
         const wrapper = existing.getElement();
@@ -161,7 +271,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         continue;
       }
 
-      // Create new card marker
       const el = document.createElement("div");
       el.style.cssText = `
         display: flex;
@@ -278,13 +387,18 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
           100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        .mission-popup .maplibregl-popup-content {
+        .mission-popup .maplibregl-popup-content,
+        .notam-popup .maplibregl-popup-content {
           border-radius: 12px;
           padding: 14px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.15);
           border: 1px solid #e5e7eb;
         }
-        .mission-popup .maplibregl-popup-close-button {
+        .notam-popup .maplibregl-popup-content {
+          border-color: #38bdf8;
+        }
+        .mission-popup .maplibregl-popup-close-button,
+        .notam-popup .maplibregl-popup-close-button {
           font-size: 16px;
           padding: 4px 8px;
           color: #9ca3af;
@@ -292,7 +406,11 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         .mission-popup .maplibregl-popup-tip {
           border-top-color: white;
         }
+        .notam-popup .maplibregl-popup-tip {
+          border-top-color: #38bdf8;
+        }
       `}</style>
+
       {/* Center button */}
       <button
         onClick={() => {
@@ -306,6 +424,31 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
         </svg>
       </button>
+
+      {/* NOTAM toggle */}
+      <button
+        onClick={() => setShowNotams((v) => !v)}
+        className={`absolute top-12 left-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold shadow-md backdrop-blur-sm transition-all ${
+          showNotams
+            ? "bg-sky-400/90 text-white hover:bg-sky-500/90"
+            : "bg-white/95 text-gray-500 hover:bg-gray-100"
+        }`}
+        title={showNotams ? "Ocultar NOTAMs" : "Mostrar NOTAMs"}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+        </svg>
+        NOTAM
+        {notamLoading && (
+          <span className="ml-0.5 inline-block h-2 w-2 animate-spin rounded-full border border-current border-t-transparent" />
+        )}
+        {!notamLoading && notamData && (
+          <span className={`rounded-full px-1 text-[9px] font-bold ${showNotams ? "bg-white/30" : "bg-gray-100 text-sky-500"}`}>
+            {(notamData as { count?: number }).count ?? notamData.features.length}
+          </span>
+        )}
+      </button>
+
       {/* Legend */}
       <div className="absolute bottom-6 left-3 rounded-lg bg-white/95 px-3 py-2 shadow-md backdrop-blur-sm">
         <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -318,6 +461,12 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
               <span className="text-[10px] text-gray-600">{STATUS_LABELS[s]}</span>
             </div>
           ))}
+          {showNotams && (
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-2.5 w-2.5 rounded" style={{ background: NOTAM_LINE, opacity: 0.8 }} />
+              <span className="text-[10px] text-gray-600">NOTAM</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
