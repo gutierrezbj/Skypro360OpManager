@@ -20,25 +20,27 @@ export default function FleetTabs({
 
   return (
     <div>
-      <div className="mb-6 border-b border-gray-200">
+      <div style={{ borderBottom: "1px solid #162338" }} className="mb-6">
         <div className="-mb-px flex gap-6">
           <button
             onClick={() => setTab("drones")}
-            className={`border-b-2 pb-3 text-sm font-medium ${
+            style={
               tab === "drones"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-            }`}
+                ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
+                : { borderBottom: "2px solid transparent", color: "#4A7FA0" }
+            }
+            className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
           >
             Drones ({drones.length})
           </button>
           <button
             onClick={() => setTab("pilots")}
-            className={`border-b-2 pb-3 text-sm font-medium ${
+            style={
               tab === "pilots"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-            }`}
+                ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
+                : { borderBottom: "2px solid transparent", color: "#4A7FA0" }
+            }
+            className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
           >
             Pilotos ({pilots.length})
           </button>

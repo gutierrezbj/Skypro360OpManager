@@ -5,18 +5,15 @@ import type { Pilot, User } from "@/lib/db/schema";
 import PilotForm from "./PilotForm";
 import { PilotIcon } from "@/lib/icons";
 
-const CERT_COLORS: Record<string, string> = {
-  valid: "bg-green-100 text-green-700",
-  expired: "bg-red-100 text-red-700",
-  suspended: "bg-orange-100 text-orange-700",
-  pending: "bg-blue-100 text-blue-700",
+const CERT_HEX: Record<string, string> = {
+  valid:     "#00D97E",
+  expired:   "#E53E3E",
+  suspended: "#F04E1C",
+  pending:   "#4A8FD4",
 };
 
 const CERT_LABELS: Record<string, string> = {
-  valid: "Valido",
-  expired: "Expirado",
-  suspended: "Suspendido",
-  pending: "Pendiente",
+  valid: "Valido", expired: "Expirado", suspended: "Suspendido", pending: "Pendiente",
 };
 
 type PilotWithUser = Pilot & { userName?: string; userEmail?: string };
@@ -44,58 +41,71 @@ export default function PilotList({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-gray-500">{pilots.length} piloto{pilots.length !== 1 ? "s" : ""} registrado{pilots.length !== 1 ? "s" : ""}</p>
+        <p style={{ color: "#4A7FA0" }} className="text-sm">
+          {pilots.length} piloto{pilots.length !== 1 ? "s" : ""} registrado{pilots.length !== 1 ? "s" : ""}
+        </p>
         <button
           onClick={openCreate}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          style={{ background: "#0C9FD8", color: "#fff" }}
+          className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
         >
           + Nuevo Piloto
         </button>
       </div>
 
       {pilots.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center">
-          <p className="text-sm text-gray-500">No hay pilotos registrados.</p>
-          <button onClick={openCreate} className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+        <div style={{ border: "1px dashed #1E3A5F", color: "#4A7FA0" }} className="rounded-lg py-12 text-center">
+          <p className="text-sm">No hay pilotos registrados.</p>
+          <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
             Registrar el primero
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {pilots.map((pilot) => {
-            const certColor: Record<string, string> = {
-              valid: "#22c55e",
-              expired: "#ef4444",
-              suspended: "#f97316",
-              pending: "#3b82f6",
-            };
+            const certColor = CERT_HEX[pilot.certificationStatus] ?? "#3A5570";
             return (
               <div
                 key={pilot.id}
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                style={{ background: "#0D1520", border: "1px solid #162338" }}
+                className="overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
               >
-                <div className="h-1.5" style={{ background: certColor[pilot.certificationStatus] ?? "#9ca3af" }} />
+                <div className="h-1" style={{ background: certColor }} />
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <PilotIcon className="h-6 w-6 text-gray-500" />
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${CERT_COLORS[pilot.certificationStatus] ?? ""}`}>
+                    <PilotIcon style={{ color: "#0C9FD8" }} className="h-6 w-6" />
+                    <span
+                      style={{
+                        background: `${certColor}18`,
+                        color: certColor,
+                        border: `1px solid ${certColor}40`,
+                      }}
+                      className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    >
                       {CERT_LABELS[pilot.certificationStatus] ?? pilot.certificationStatus}
                     </span>
                   </div>
-                  <h3 className="text-sm font-semibold text-gray-900">{pilot.userName ?? "—"}</h3>
-                  {pilot.userEmail && <p className="mb-3 text-xs text-gray-500">{pilot.userEmail}</p>}
+                  <h3 style={{ color: "#D6E8F5" }} className="text-sm font-semibold">{pilot.userName ?? "—"}</h3>
+                  {pilot.userEmail && (
+                    <p style={{ color: "#4A7FA0" }} className="mb-3 text-xs">{pilot.userEmail}</p>
+                  )}
                   <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Licencia</span>
-                      <span className="font-mono font-medium text-gray-700">{pilot.licenseNumber || "—"}</span>
+                      <span style={{ color: "#4A7FA0" }}>Licencia</span>
+                      <span
+                        style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
+                        className="font-medium"
+                      >
+                        {pilot.licenseNumber || "—"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Horas vuelo</span>
-                      <span className="font-medium text-gray-700">{pilot.flightHours ?? "0"}h</span>
+                      <span style={{ color: "#4A7FA0" }}>Horas vuelo</span>
+                      <span style={{ color: "#D6E8F5" }} className="font-medium">{pilot.flightHours ?? "0"}h</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Exp. medico</span>
-                      <span className="font-medium text-gray-700">
+                      <span style={{ color: "#4A7FA0" }}>Exp. medico</span>
+                      <span style={{ color: "#D6E8F5" }} className="font-medium">
                         {pilot.medicalExpiry
                           ? new Date(pilot.medicalExpiry).toLocaleDateString("es-ES")
                           : "—"}
@@ -103,17 +113,18 @@ export default function PilotList({
                     </div>
                     {pilot.certificationExpiry && (
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Exp. cert.</span>
-                        <span className="font-medium text-gray-700">
+                        <span style={{ color: "#4A7FA0" }}>Exp. cert.</span>
+                        <span style={{ color: "#D6E8F5" }} className="font-medium">
                           {new Date(pilot.certificationExpiry).toLocaleDateString("es-ES")}
                         </span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-3 border-t border-gray-100 pt-3">
+                  <div style={{ borderTop: "1px solid #162338" }} className="mt-3 pt-3">
                     <button
                       onClick={() => openEdit(pilot)}
-                      className="w-full rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100"
+                      style={{ background: "rgba(12,159,216,0.06)", color: "#4A7FA0", border: "1px solid #162338" }}
+                      className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
                     >
                       Editar
                     </button>

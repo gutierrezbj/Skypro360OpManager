@@ -35,57 +35,64 @@ export default function MissionDetail({
   const nextStatuses = getNextStatuses(mission.status);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
+      <div
+        style={{ background: "#0D1520", border: "1px solid #1E3A5F" }}
+        className="w-full max-w-md rounded-xl p-6 shadow-2xl"
+      >
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <p className="text-xs font-mono text-gray-400">{mission.code}</p>
-            <h2 className="text-lg font-semibold text-gray-900">{mission.name}</h2>
+            <p style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }} className="text-xs">
+              {mission.code}
+            </p>
+            <h2 style={{ color: "#D6E8F5" }} className="text-lg font-semibold">{mission.name}</h2>
           </div>
           <MissionStatusBadge status={mission.status} />
         </div>
 
         {state?.error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+          <div
+            style={{ background: "rgba(229,62,62,0.08)", border: "1px solid rgba(229,62,62,0.3)", color: "#FC8181" }}
+            className="mb-4 rounded-md p-3 text-sm"
+          >
+            {state.error}
+          </div>
         )}
 
         {mission.description && (
-          <p className="mb-4 text-sm text-gray-600">{mission.description}</p>
+          <p style={{ color: "#4A7FA0" }} className="mb-4 text-sm">{mission.description}</p>
         )}
 
         <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-          <dt className="text-gray-500">Prioridad</dt>
-          <dd className="font-medium">{PRIORITY_LABELS[mission.priority] ?? mission.priority}</dd>
+          <dt style={{ color: "#4A7FA0" }}>Prioridad</dt>
+          <dd style={{ color: "#D6E8F5" }} className="font-medium">{PRIORITY_LABELS[mission.priority] ?? mission.priority}</dd>
 
-          <dt className="text-gray-500">Piloto</dt>
-          <dd className="font-medium">{pilot?.userName ?? "Sin asignar"}</dd>
+          <dt style={{ color: "#4A7FA0" }}>Piloto</dt>
+          <dd style={{ color: "#D6E8F5" }} className="font-medium">{pilot?.userName ?? "Sin asignar"}</dd>
 
-          <dt className="text-gray-500">Drone</dt>
-          <dd className="font-medium">{drone?.model ?? "Sin asignar"}</dd>
+          <dt style={{ color: "#4A7FA0" }}>Drone</dt>
+          <dd style={{ color: "#D6E8F5" }} className="font-medium">{drone?.model ?? "Sin asignar"}</dd>
 
           {mission.soraClass && (
             <>
-              <dt className="text-gray-500">SORA</dt>
-              <dd className="font-medium">{mission.soraClass}</dd>
+              <dt style={{ color: "#4A7FA0" }}>SORA</dt>
+              <dd style={{ color: "#D6E8F5" }} className="font-medium">{mission.soraClass}</dd>
             </>
           )}
 
           {mission.maxAltitude && (
             <>
-              <dt className="text-gray-500">Alt. max</dt>
-              <dd className="font-medium">{mission.maxAltitude}m</dd>
+              <dt style={{ color: "#4A7FA0" }}>Alt. max</dt>
+              <dd style={{ color: "#D6E8F5" }} className="font-medium">{mission.maxAltitude}m</dd>
             </>
           )}
 
           {mission.scheduledStart && (
             <>
-              <dt className="text-gray-500">Inicio</dt>
-              <dd className="font-medium">
+              <dt style={{ color: "#4A7FA0" }}>Inicio</dt>
+              <dd style={{ color: "#D6E8F5" }} className="font-medium">
                 {new Date(mission.scheduledStart).toLocaleString("es-ES", {
-                  day: "2-digit",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
+                  day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
                 })}
               </dd>
             </>
@@ -93,13 +100,10 @@ export default function MissionDetail({
 
           {mission.actualStart && (
             <>
-              <dt className="text-gray-500">Inicio real</dt>
-              <dd className="font-medium">
+              <dt style={{ color: "#4A7FA0" }}>Inicio real</dt>
+              <dd style={{ color: "#D6E8F5" }} className="font-medium">
                 {new Date(mission.actualStart).toLocaleString("es-ES", {
-                  day: "2-digit",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
+                  day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
                 })}
               </dd>
             </>
@@ -107,13 +111,10 @@ export default function MissionDetail({
 
           {mission.actualEnd && (
             <>
-              <dt className="text-gray-500">Fin real</dt>
-              <dd className="font-medium">
+              <dt style={{ color: "#4A7FA0" }}>Fin real</dt>
+              <dd style={{ color: "#D6E8F5" }} className="font-medium">
                 {new Date(mission.actualEnd).toLocaleString("es-ES", {
-                  day: "2-digit",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
+                  day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
                 })}
               </dd>
             </>
@@ -123,7 +124,9 @@ export default function MissionDetail({
         {/* Transition buttons */}
         {nextStatuses.length > 0 && (
           <div className="mb-4 space-y-2">
-            <p className="text-xs font-medium uppercase text-gray-400">Cambiar estado</p>
+            <p style={{ color: "#4A7FA0" }} className="text-xs font-medium uppercase tracking-wider">
+              Cambiar estado
+            </p>
             <div className="flex flex-wrap gap-2">
               {nextStatuses.map((ns) => (
                 <form key={ns} action={formAction}>
@@ -132,11 +135,12 @@ export default function MissionDetail({
                   <button
                     type="submit"
                     disabled={isPending}
-                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
+                    style={
                       ns === "cancelled" || ns === "aborted"
-                        ? "border border-red-300 text-red-600 hover:bg-red-50"
-                        : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                    }`}
+                        ? { border: "1px solid rgba(229,62,62,0.4)", color: "#FC8181", background: "rgba(229,62,62,0.06)" }
+                        : { border: "1px solid rgba(12,159,216,0.3)", color: "#0C9FD8", background: "rgba(12,159,216,0.08)" }
+                    }
+                    className="rounded-md px-3 py-1.5 text-sm font-medium transition-opacity disabled:opacity-50 hover:opacity-80"
                   >
                     {STATUS_LABELS[ns]}
                   </button>
@@ -146,23 +150,26 @@ export default function MissionDetail({
           </div>
         )}
 
-        <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+        <div style={{ borderTop: "1px solid #162338" }} className="flex justify-end gap-3 pt-4">
           <button
             onClick={onClose}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            style={{ border: "1px solid #1E3A5F", color: "#4A7FA0" }}
+            className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
           >
             Cerrar
           </button>
           <a
             href={`/missions/${mission.id}/compliance`}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            style={{ background: "rgba(12,159,216,0.1)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.25)" }}
+            className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
           >
             Compliance
           </a>
           {!isTerminal(mission.status) && (
             <button
               onClick={onEdit}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              style={{ background: "#0C9FD8", color: "#fff" }}
+              className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
               Editar
             </button>

@@ -5,7 +5,6 @@ import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
 
-
 type PilotWithUser = Pilot & { userName?: string };
 
 export default function ComplianceOverview({
@@ -17,57 +16,46 @@ export default function ComplianceOverview({
   drones: Drone[];
   pilots: PilotWithUser[];
 }) {
-  // Missions that need compliance work (not draft, not cancelled)
-  const activeMissions = missions.filter(
-    (m) => !["draft", "cancelled"].includes(m.status),
-  );
-
-  // Group by compliance readiness
-  const needsPlanning = activeMissions.filter((m) =>
-    ["planned", "approved"].includes(m.status),
-  );
+  const activeMissions = missions.filter((m) => !["draft", "cancelled"].includes(m.status));
+  const needsPlanning  = activeMissions.filter((m) => ["planned", "approved"].includes(m.status));
   const needsPreflight = activeMissions.filter((m) => m.status === "preflight");
-  const needsPostflight = activeMissions.filter((m) =>
-    ["completed", "aborted"].includes(m.status),
-  );
-  const inFlight = activeMissions.filter((m) => m.status === "in_flight");
+  const needsPostflight = activeMissions.filter((m) => ["completed", "aborted"].includes(m.status));
+  const inFlight       = activeMissions.filter((m) => m.status === "in_flight");
 
-  // Drones with pending registration
-  const pendingDrones = drones.filter((d) => d.status === "pending_registration");
-  // Pilots with expired/suspended certs
-  const problematicPilots = pilots.filter((p) =>
-    ["expired", "suspended"].includes(p.certificationStatus),
-  );
+  const pendingDrones      = drones.filter((d) => d.status === "pending_registration");
+  const problematicPilots  = pilots.filter((p) => ["expired", "suspended"].includes(p.certificationStatus));
 
   return (
     <div className="p-6">
-      <h1 className="text-lg font-semibold text-gray-900">Compliance AESA</h1>
-      <p className="mt-1 text-sm text-gray-500">
+      <h1 style={{ color: "#D6E8F5" }} className="text-lg font-semibold">Compliance AESA</h1>
+      <p style={{ color: "#4A7FA0" }} className="mt-1 text-sm">
         Documentacion AESA, SORA, EAROs y certificaciones.
       </p>
 
-      {/* Stats cards */}
+      {/* Stats */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Planificacion pendiente" value={needsPlanning.length} color="blue" />
-        <StatCard label="Pre-vuelo pendiente" value={needsPreflight.length} color="yellow" />
-        <StatCard label="En vuelo" value={inFlight.length} color="emerald" />
-        <StatCard label="Post-vuelo pendiente" value={needsPostflight.length} color="indigo" />
+        <StatCard label="Planificacion pendiente" value={needsPlanning.length}  accent="#4A8FD4" />
+        <StatCard label="Pre-vuelo pendiente"      value={needsPreflight.length} accent="#F5C518" />
+        <StatCard label="En vuelo"                 value={inFlight.length}       accent="#00D97E" />
+        <StatCard label="Post-vuelo pendiente"     value={needsPostflight.length} accent="#0C9FD8" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Left: Expiry alerts */}
-        <div className="lg:col-span-1">
+        {/* Left: alerts */}
+        <div className="lg:col-span-1 space-y-4">
           <ExpiryAlerts pilots={pilots} drones={drones} />
 
-          {/* Registration alerts */}
           {pendingDrones.length > 0 && (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <h3 className="text-sm font-semibold text-amber-800">
+            <div
+              style={{ background: "rgba(245,197,24,0.06)", border: "1px solid rgba(245,197,24,0.25)" }}
+              className="rounded-lg p-4"
+            >
+              <h3 style={{ color: "#F5C518" }} className="text-sm font-semibold">
                 Registro pendiente ({pendingDrones.length})
               </h3>
               <ul className="mt-2 space-y-1">
                 {pendingDrones.map((d) => (
-                  <li key={d.id} className="text-xs text-amber-700">
+                  <li key={d.id} style={{ color: "#D6E8F5" }} className="text-xs">
                     {d.model} — {d.serialNumber}
                   </li>
                 ))}
@@ -75,15 +63,17 @@ export default function ComplianceOverview({
             </div>
           )}
 
-          {/* Problem pilots */}
           {problematicPilots.length > 0 && (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
-              <h3 className="text-sm font-semibold text-red-800">
+            <div
+              style={{ background: "rgba(229,62,62,0.06)", border: "1px solid rgba(229,62,62,0.25)" }}
+              className="rounded-lg p-4"
+            >
+              <h3 style={{ color: "#FC8181" }} className="text-sm font-semibold">
                 Pilotos sin certificacion valida ({problematicPilots.length})
               </h3>
               <ul className="mt-2 space-y-1">
                 {problematicPilots.map((p) => (
-                  <li key={p.id} className="text-xs text-red-700">
+                  <li key={p.id} style={{ color: "#D6E8F5" }} className="text-xs">
                     {p.userName ?? p.licenseNumber} — {p.certificationStatus}
                   </li>
                 ))}
@@ -91,31 +81,33 @@ export default function ComplianceOverview({
             </div>
           )}
 
-          {/* No alerts fallback */}
           {pilots.length > 0 && drones.length > 0 && pendingDrones.length === 0 && problematicPilots.length === 0 && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-              <h3 className="text-sm font-semibold text-green-800">Todo en regla</h3>
-              <p className="mt-1 text-xs text-green-700">
+            <div
+              style={{ background: "rgba(0,217,126,0.06)", border: "1px solid rgba(0,217,126,0.25)" }}
+              className="rounded-lg p-4"
+            >
+              <h3 style={{ color: "#00D97E" }} className="text-sm font-semibold">Todo en regla</h3>
+              <p style={{ color: "#4A7FA0" }} className="mt-1 text-xs">
                 Sin alertas de expiracion ni registros pendientes.
               </p>
             </div>
           )}
         </div>
 
-        {/* Right: Active missions needing compliance */}
+        {/* Right: missions list */}
         <div className="lg:col-span-2">
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <div className="border-b border-gray-200 px-4 py-3">
-              <h3 className="text-sm font-semibold text-gray-900">
+          <div style={{ background: "#0D1520", border: "1px solid #162338" }} className="rounded-xl overflow-hidden">
+            <div style={{ borderBottom: "1px solid #162338" }} className="px-4 py-3">
+              <h3 style={{ color: "#D6E8F5" }} className="text-sm font-semibold">
                 Misiones con documentacion pendiente
               </h3>
             </div>
             {activeMissions.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-gray-500">
+              <div style={{ color: "#4A7FA0" }} className="px-4 py-8 text-center text-sm">
                 No hay misiones activas que requieran documentacion.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div>
                 {activeMissions.map((m) => {
                   const pilot = pilots.find((p) => p.id === m.pilotId);
                   const drone = drones.find((d) => d.id === m.droneId);
@@ -123,23 +115,26 @@ export default function ComplianceOverview({
                     <Link
                       key={m.id}
                       href={`/missions/${m.id}/compliance`}
-                      className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                      style={{ borderBottom: "1px solid #162338", display: "flex" }}
+                      className="items-center justify-between px-4 py-3 transition-colors hover:bg-[#111D2E]"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-gray-400">{m.code}</span>
+                          <span
+                            style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
+                            className="text-xs"
+                          >
+                            {m.code}
+                          </span>
                           <MissionStatusBadge status={m.status} />
                         </div>
-                        <p className="mt-0.5 text-sm font-medium text-gray-900">{m.name}</p>
-                        <div className="mt-0.5 flex gap-3 text-xs text-gray-500">
+                        <p style={{ color: "#D6E8F5" }} className="mt-0.5 text-sm font-medium">{m.name}</p>
+                        <div style={{ color: "#4A7FA0" }} className="mt-0.5 flex gap-3 text-xs">
                           {pilot && <span>Piloto: {pilot.userName ?? pilot.licenseNumber}</span>}
                           {drone && <span>Drone: {drone.model}</span>}
                           {m.scheduledStart && (
                             <span>
-                              {new Date(m.scheduledStart).toLocaleDateString("es-ES", {
-                                day: "2-digit",
-                                month: "short",
-                              })}
+                              {new Date(m.scheduledStart).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
                             </span>
                           )}
                         </div>
@@ -159,37 +154,25 @@ export default function ComplianceOverview({
   );
 }
 
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  const styles: Record<string, string> = {
-    blue: "bg-blue-50 border-blue-200 text-blue-700",
-    yellow: "bg-yellow-50 border-yellow-200 text-yellow-700",
-    emerald: "bg-emerald-50 border-emerald-200 text-emerald-700",
-    indigo: "bg-indigo-50 border-indigo-200 text-indigo-700",
-  };
+function StatCard({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className={`rounded-lg border p-4 ${styles[color] ?? ""}`}>
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs font-medium">{label}</p>
+    <div
+      style={{ background: `${accent}0D`, border: `1px solid ${accent}30` }}
+      className="rounded-xl p-4"
+    >
+      <p style={{ color: accent }} className="text-2xl font-bold">{value}</p>
+      <p style={{ color: "#4A7FA0" }} className="text-xs font-medium mt-0.5">{label}</p>
     </div>
   );
 }
 
 function ComplianceStage({ status }: { status: string }) {
   const stages = [
-    { key: "planning", label: "A.4" },
-    { key: "preflight", label: "A.5/6" },
+    { key: "planning",   label: "A.4" },
+    { key: "preflight",  label: "A.5/6" },
     { key: "postflight", label: "A.7/8" },
   ];
 
-  // Which stage is "current" based on mission status
   let activeIdx = 0;
   if (["preflight", "in_flight"].includes(status)) activeIdx = 1;
   if (["completed", "aborted"].includes(status)) activeIdx = 2;
@@ -199,13 +182,14 @@ function ComplianceStage({ status }: { status: string }) {
       {stages.map((s, i) => (
         <span
           key={s.key}
-          className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+          style={
             i < activeIdx
-              ? "bg-green-100 text-green-700"
+              ? { background: "rgba(0,217,126,0.12)", color: "#00D97E", border: "1px solid rgba(0,217,126,0.3)" }
               : i === activeIdx
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-400"
-          }`}
+                ? { background: "rgba(12,159,216,0.12)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.3)" }
+                : { background: "#111D2E", color: "#3A5570", border: "1px solid #162338" }
+          }
+          className="rounded px-1.5 py-0.5 text-[10px] font-medium"
         >
           {s.label}
         </span>

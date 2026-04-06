@@ -6,17 +6,13 @@ import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 import MissionStatusBadge from "./MissionStatusBadge";
 import MissionForm from "./MissionForm";
 import MissionDetail from "./MissionDetail";
-import { PRIORITY_LABELS, PRIORITY_COLORS } from "../state-machine";
+import { PRIORITY_LABELS, STATUS_HEX } from "../state-machine";
 
-const MARKER_COLORS: Record<string, string> = {
-  draft: "#9ca3af",
-  planned: "#3b82f6",
-  approved: "#6366f1",
-  preflight: "#eab308",
-  in_flight: "#10b981",
-  completed: "#22c55e",
-  aborted: "#ef4444",
-  cancelled: "#6b7280",
+const PRIORITY_HEX: Record<string, string> = {
+  low:    "#4A8FD4",
+  normal: "#D6E8F5",
+  high:   "#F5C518",
+  urgent: "#F04E1C",
 };
 
 type PilotWithUser = Pilot & { userName?: string };
@@ -34,9 +30,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
   const [filter, setFilter] = useState<string>("all");
 
   const filtered =
-    filter === "all"
-      ? missions
-      : missions.filter((m) => m.status === filter);
+    filter === "all" ? missions : missions.filter((m) => m.status === filter);
 
   const statusCounts = missions.reduce<Record<string, number>>((acc, m) => {
     acc[m.status] = (acc[m.status] ?? 0) + 1;
@@ -59,15 +53,16 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
       {/* Filter bar */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <FilterChip label="Todas" value="all" count={missions.length} active={filter} onClick={setFilter} />
-        <FilterChip label="Borrador" value="draft" count={statusCounts.draft} active={filter} onClick={setFilter} />
-        <FilterChip label="Planificadas" value="planned" count={statusCounts.planned} active={filter} onClick={setFilter} />
-        <FilterChip label="Aprobadas" value="approved" count={statusCounts.approved} active={filter} onClick={setFilter} />
-        <FilterChip label="En vuelo" value="in_flight" count={statusCounts.in_flight} active={filter} onClick={setFilter} />
+        <FilterChip label="Borrador"    value="draft"     count={statusCounts.draft}     active={filter} onClick={setFilter} />
+        <FilterChip label="Planificadas" value="planned"  count={statusCounts.planned}   active={filter} onClick={setFilter} />
+        <FilterChip label="Aprobadas"   value="approved"  count={statusCounts.approved}  active={filter} onClick={setFilter} />
+        <FilterChip label="En vuelo"    value="in_flight" count={statusCounts.in_flight} active={filter} onClick={setFilter} />
         <FilterChip label="Completadas" value="completed" count={statusCounts.completed} active={filter} onClick={setFilter} />
         <div className="ml-auto">
           <button
             onClick={openCreate}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            style={{ background: "#0C9FD8", color: "#fff" }}
+            className="rounded-md px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
           >
             + Nueva Mision
           </button>
@@ -76,10 +71,17 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
 
       {/* Card grid */}
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center">
-          <p className="text-sm text-gray-500">No hay misiones{filter !== "all" ? " en este estado" : ""}.</p>
+        <div
+          style={{ border: "1px dashed #1E3A5F", color: "#4A7FA0" }}
+          className="rounded-lg py-12 text-center"
+        >
+          <p className="text-sm">No hay misiones{filter !== "all" ? " en este estado" : ""}.</p>
           {filter === "all" && (
-            <button onClick={openCreate} className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+            <button
+              onClick={openCreate}
+              style={{ color: "#0C9FD8" }}
+              className="mt-2 text-sm font-medium hover:opacity-80"
+            >
               Crear la primera
             </button>
           )}
@@ -89,66 +91,71 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
           {filtered.map((m) => {
             const pilot = pilots.find((p) => p.id === m.pilotId);
             const drone = drones.find((d) => d.id === m.droneId);
-            const statusColor = MARKER_COLORS[m.status] ?? "#9ca3af";
+            const statusColor = STATUS_HEX[m.status as keyof typeof STATUS_HEX] ?? "#3A5570";
             return (
               <div
                 key={m.id}
                 onClick={() => setViewing(m)}
-                className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                style={{ background: "#0D1520", border: "1px solid #162338" }}
+                className="group relative cursor-pointer overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
               >
-                {/* Status color bar top */}
-                <div className="h-1.5" style={{ background: statusColor }} />
+                {/* Status bar */}
+                <div className="h-1" style={{ background: statusColor }} />
 
                 <div className="p-4">
-                  {/* Header: code + status */}
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="font-mono text-xs text-gray-400">{m.code}</span>
+                    <span style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }} className="text-xs">
+                      {m.code}
+                    </span>
                     <MissionStatusBadge status={m.status} />
                   </div>
 
-                  {/* Name */}
-                  <h3 className="mb-1 text-sm font-semibold text-gray-900 line-clamp-2">{m.name}</h3>
+                  <h3 style={{ color: "#D6E8F5" }} className="mb-1 text-sm font-semibold line-clamp-2">{m.name}</h3>
                   {m.description && (
-                    <p className="mb-3 text-xs text-gray-500 line-clamp-2">{m.description}</p>
+                    <p style={{ color: "#4A7FA0" }} className="mb-3 text-xs line-clamp-2">{m.description}</p>
                   )}
 
-                  {/* Info rows */}
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Prioridad</span>
-                      <span className={`font-medium ${PRIORITY_COLORS[m.priority] ?? ""}`}>
+                      <span style={{ color: "#4A7FA0" }}>Prioridad</span>
+                      <span style={{ color: PRIORITY_HEX[m.priority] ?? "#D6E8F5" }} className="font-medium">
                         {PRIORITY_LABELS[m.priority] ?? m.priority}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Drone</span>
-                      <span className="font-medium text-gray-700">{drone?.model ?? "—"}</span>
+                      <span style={{ color: "#4A7FA0" }}>Drone</span>
+                      <span style={{ color: "#D6E8F5" }} className="font-medium">{drone?.model ?? "—"}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Piloto</span>
-                      <span className="font-medium text-gray-700">{pilot?.userName ?? "—"}</span>
+                      <span style={{ color: "#4A7FA0" }}>Piloto</span>
+                      <span style={{ color: "#D6E8F5" }} className="font-medium">{pilot?.userName ?? "—"}</span>
                     </div>
                     {m.scheduledStart && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">Fecha</span>
-                        <span className="font-medium text-gray-700">
+                        <span style={{ color: "#4A7FA0" }}>Fecha</span>
+                        <span style={{ color: "#D6E8F5" }} className="font-medium">
                           {new Date(m.scheduledStart).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    style={{ borderTop: "1px solid #162338" }}
+                    className="mt-3 flex gap-2 pt-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Link
                       href={`/missions/${m.id}/compliance`}
-                      className="flex-1 rounded-md bg-indigo-50 px-2 py-1.5 text-center text-xs font-medium text-indigo-600 hover:bg-indigo-100"
+                      style={{ background: "rgba(12,159,216,0.08)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.2)" }}
+                      className="flex-1 rounded-md px-2 py-1.5 text-center text-xs font-medium hover:opacity-80"
                     >
                       Compliance
                     </Link>
                     <button
                       onClick={() => openEdit(m)}
-                      className="flex-1 rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100"
+                      style={{ background: "rgba(12,159,216,0.06)", color: "#4A7FA0", border: "1px solid #162338" }}
+                      className="flex-1 rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
                     >
                       Editar
                     </button>
@@ -184,11 +191,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
 }
 
 function FilterChip({
-  label,
-  value,
-  count,
-  active,
-  onClick,
+  label, value, count, active, onClick,
 }: {
   label: string;
   value: string;
@@ -201,11 +204,12 @@ function FilterChip({
   return (
     <button
       onClick={() => onClick(value)}
-      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+      style={
         isActive
-          ? "bg-blue-600 text-white"
-          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-      }`}
+          ? { background: "#0C9FD8", color: "#fff" }
+          : { background: "#111D2E", color: "#4A7FA0", border: "1px solid #162338" }
+      }
+      className="rounded-full px-3 py-1 text-xs font-medium transition-all hover:opacity-80"
     >
       {label} {count !== undefined ? `(${count})` : ""}
     </button>
