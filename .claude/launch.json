@@ -4,8 +4,10 @@
     {
       "name": "opsmanager",
       "runtimeExecutable": "/usr/local/bin/node",
-      "runtimeArgs": ["node_modules/.bin/next", "dev", "--port", "3100"],
+      "runtimeArgs": ["node_modules/.bin/next", "dev", "--port", "${PORT}"],
       "port": 3100,
+      "autoPort": true,
+      "env": { "PATH": "/usr/local/bin:/usr/bin:/bin" },
       "cwd": "app"
     }
   ]
