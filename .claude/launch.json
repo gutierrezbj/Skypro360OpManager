@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "opsmanager",
-      "runtimeExecutable": "/bin/bash",
-      "runtimeArgs": [".claude/dev.sh"],
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["node_modules/.bin/next", "dev", "--port", "3100"],
       "port": 3100,
       "cwd": "app"
     }

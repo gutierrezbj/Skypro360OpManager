@@ -8,7 +8,7 @@ import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
 import { useTelemetry } from "@/modules/telemetry/hooks/useTelemetry";
-import { PRIORITY_LABELS } from "@/modules/missions/state-machine";
+import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
 import { DroneIcon, PilotIcon } from "@/lib/icons";
 
 type PilotWithUser = Pilot & { userName?: string };
@@ -24,20 +24,18 @@ type Stats = {
   validPilots: number;
 };
 
-// ── Status colors ─────────────────────────────────────────────────────────────
-
-const DRONE_STATUS: Record<string, { label: string; dot: string; badge: string }> = {
-  active:               { label: "Activo",        dot: "#10b981", badge: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  maintenance:          { label: "Mantenimiento",  dot: "#f59e0b", badge: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  retired:              { label: "Retirado",       dot: "#9ca3af", badge: "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400" },
-  pending_registration: { label: "Pendiente",      dot: "#3b82f6", badge: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+const DRONE_STATUS_DOT: Record<string, string> = {
+  active:               "#00D97E",
+  maintenance:          "#F5C518",
+  retired:              "#3A5570",
+  pending_registration: "#0C9FD8",
 };
 
-const PILOT_STATUS: Record<string, { label: string; dot: string; badge: string }> = {
-  valid:     { label: "Certificado", dot: "#10b981", badge: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  expired:   { label: "Expirado",    dot: "#ef4444", badge: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-  suspended: { label: "Suspendido",  dot: "#f97316", badge: "bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-  pending:   { label: "Pendiente",   dot: "#3b82f6", badge: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+const PILOT_STATUS_DOT: Record<string, string> = {
+  valid:     "#00D97E",
+  expired:   "#E53E3E",
+  suspended: "#F04E1C",
+  pending:   "#0C9FD8",
 };
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -68,31 +66,53 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col" style={{ background: "#080D14" }}>
+
       {/* ── Stats bar ─────────────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 lg:px-6 py-3">
+      <div
+        className="flex-shrink-0 px-4 lg:px-6 py-3"
+        style={{ background: "#0D1520", borderBottom: "1px solid #162338" }}
+      >
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Mapa de Operaciones</h1>
-          <div className="flex flex-wrap gap-3 text-sm">
-            <StatPill label="En vuelo"      value={stats.activeMissions}  color="emerald" />
-            <StatPill label="Planificadas"  value={stats.plannedMissions} color="blue" />
-            <StatPill label="Completadas"   value={stats.completedMissions} color="gray" />
-            <span className="hidden sm:block border-l border-gray-200 dark:border-gray-700" />
-            <StatPill label="Drones activos" value={`${stats.activeDrones}/${stats.totalDrones}`}  color="indigo" />
-            <StatPill label="Pilotos cert."  value={`${stats.validPilots}/${stats.totalPilots}`}   color="indigo" />
+          <h1
+            className="text-base font-semibold tracking-wide"
+            style={{
+              color: "#D6E8F5",
+              fontFamily: "var(--font-barlow-condensed), sans-serif",
+              fontSize: "16px",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Mapa de <span style={{ color: "#0C9FD8" }}>Operaciones</span>
+          </h1>
+
+          <div className="flex flex-wrap gap-2">
+            <StatChip label="En vuelo"     value={stats.activeMissions}   color="#00D97E" />
+            <StatChip label="Planificadas" value={stats.plannedMissions}  color="#4A8FD4" />
+            <StatChip label="Completadas"  value={stats.completedMissions} color="#4A7FA0" />
+            <div style={{ width: "1px", background: "#162338", alignSelf: "stretch" }} className="hidden sm:block" />
+            <StatChip label="Drones"  value={`${stats.activeDrones}/${stats.totalDrones}`}  color="#0C9FD8" />
+            <StatChip label="Pilotos" value={`${stats.validPilots}/${stats.totalPilots}`}    color="#0C9FD8" />
             {telemetry.size > 0 && (
-              <span className="flex items-center gap-1.5 rounded-md bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              <div
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1"
+                style={{ background: "rgba(0,217,126,0.08)", border: "1px solid rgba(0,217,126,0.2)" }}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ background: "#00D97E", boxShadow: "0 0 6px #00D97E", animation: "sky-pulse 2s infinite" }}
+                />
+                <span className="text-xs font-semibold" style={{ color: "#00D97E" }}>
                   {telemetry.size} live
                 </span>
-              </span>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ── Main area: left column + right panel ──────────────────────────── */}
+      {/* ── Main area ─────────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
 
         {/* Left column: map + fleet strip */}
@@ -111,13 +131,19 @@ export default function DashboardClient({
           </div>
 
           {/* Fleet strip */}
-          <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5">
+          <div
+            className="flex-shrink-0 px-4 py-2.5"
+            style={{ background: "#0D1520", borderTop: "1px solid #162338" }}
+          >
             <FleetStrip drones={drones} pilots={pilots} />
           </div>
         </div>
 
-        {/* Right panel — desktop only, always visible */}
-        <div className="hidden lg:flex w-80 flex-shrink-0 flex-col overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+        {/* Right panel — desktop */}
+        <div
+          className="hidden lg:flex w-72 flex-shrink-0 flex-col overflow-y-auto p-4"
+          style={{ background: "#0D1520", borderLeft: "1px solid #162338" }}
+        >
           {selected ? (
             <PanelContent
               selected={selected}
@@ -132,8 +158,11 @@ export default function DashboardClient({
 
         {/* Mobile bottom sheet */}
         {selected && panelOpen && (
-          <div className="lg:hidden fixed inset-x-0 bottom-0 z-30 max-h-[70vh] overflow-y-auto rounded-t-2xl bg-white dark:bg-gray-900 shadow-2xl border-t border-gray-200 dark:border-gray-700 p-4">
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-300 dark:bg-gray-600" />
+          <div
+            className="lg:hidden fixed inset-x-0 bottom-0 z-30 max-h-[70vh] overflow-y-auto rounded-t-2xl p-4 shadow-2xl"
+            style={{ background: "#0D1520", borderTop: "1px solid #1E3A5F" }}
+          >
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full" style={{ background: "#162338" }} />
             <PanelContent
               selected={selected}
               drones={drones}
@@ -152,17 +181,17 @@ export default function DashboardClient({
 function FleetStrip({ drones, pilots }: { drones: Drone[]; pilots: PilotWithUser[] }) {
   return (
     <div className="flex items-center gap-3">
-      {/* Label */}
-      <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+      <span
+        className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-widest"
+        style={{ color: "#243A52" }}
+      >
         Flota
       </span>
-
-      {/* Horizontal scroll */}
-      <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+      <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
         {drones.map((d) => <DroneCard key={d.id} drone={d} />)}
         {pilots.map((p) => <PilotCard key={p.id} pilot={p} />)}
         {drones.length === 0 && pilots.length === 0 && (
-          <span className="text-xs text-gray-400 dark:text-gray-600 py-1">Sin flota registrada</span>
+          <span className="text-xs py-1" style={{ color: "#243A52" }}>Sin flota registrada</span>
         )}
       </div>
     </div>
@@ -170,50 +199,77 @@ function FleetStrip({ drones, pilots }: { drones: Drone[]; pilots: PilotWithUser
 }
 
 function DroneCard({ drone }: { drone: Drone }) {
-  const s = DRONE_STATUS[drone.status] ?? DRONE_STATUS.pending_registration;
+  const dot = DRONE_STATUS_DOT[drone.status] ?? "#3A5570";
   return (
     <Link
       href="/fleet"
-      className="flex-shrink-0 flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-700 transition-colors"
+      className="flex-shrink-0 flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all"
+      style={{ background: "#111D2E", border: "1px solid #162338" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "#1E3A5F";
+        (e.currentTarget as HTMLElement).style.background = "#162338";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "#162338";
+        (e.currentTarget as HTMLElement).style.background = "#111D2E";
+      }}
     >
-      <DroneIcon className="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+      <DroneIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#4A7FA0" }} />
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-gray-900 dark:text-white leading-tight truncate max-w-[100px]">
+        <p
+          className="text-[11px] font-semibold leading-tight truncate max-w-[90px]"
+          style={{ color: "#D6E8F5" }}
+        >
           {drone.model}
         </p>
-        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-mono leading-tight">
+        <p
+          className="text-[9px] leading-tight"
+          style={{ color: "#4A7FA0", fontFamily: "var(--font-jetbrains), monospace" }}
+        >
           {drone.serialNumber}
         </p>
       </div>
       <span
         className="flex-shrink-0 h-1.5 w-1.5 rounded-full"
-        style={{ background: s.dot }}
-        title={s.label}
+        style={{ background: dot }}
+        title={drone.status}
       />
     </Link>
   );
 }
 
 function PilotCard({ pilot }: { pilot: PilotWithUser }) {
-  const s = PILOT_STATUS[pilot.certificationStatus ?? "pending"] ?? PILOT_STATUS.pending;
+  const dot = PILOT_STATUS_DOT[pilot.certificationStatus ?? "pending"] ?? "#3A5570";
   return (
     <Link
       href="/fleet"
-      className="flex-shrink-0 flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-700 transition-colors"
+      className="flex-shrink-0 flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all"
+      style={{ background: "#111D2E", border: "1px solid #162338" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "#1E3A5F";
+        (e.currentTarget as HTMLElement).style.background = "#162338";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "#162338";
+        (e.currentTarget as HTMLElement).style.background = "#111D2E";
+      }}
     >
-      <PilotIcon className="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+      <PilotIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#4A7FA0" }} />
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-gray-900 dark:text-white leading-tight truncate max-w-[100px]">
+        <p
+          className="text-[11px] font-semibold leading-tight truncate max-w-[90px]"
+          style={{ color: "#D6E8F5" }}
+        >
           {pilot.userName ?? "Piloto"}
         </p>
-        <p className="text-[9px] text-gray-400 dark:text-gray-500 leading-tight">
+        <p className="text-[9px] leading-tight" style={{ color: "#4A7FA0" }}>
           {pilot.flightHours ?? 0}h vuelo
         </p>
       </div>
       <span
         className="flex-shrink-0 h-1.5 w-1.5 rounded-full"
-        style={{ background: s.dot }}
-        title={s.label}
+        style={{ background: dot }}
+        title={pilot.certificationStatus ?? "pending"}
       />
     </Link>
   );
@@ -234,63 +290,122 @@ function PanelContent({
 }) {
   const drone = drones.find((d) => d.id === selected.droneId);
   const pilot = pilots.find((p) => p.id === selected.pilotId);
+  const statusColor = STATUS_HEX[selected.status as keyof typeof STATUS_HEX] ?? "#3A5570";
 
   return (
     <>
-      <div className="mb-3 flex items-start justify-between">
+      {/* Mission header */}
+      <div className="mb-4 flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-mono text-gray-400 dark:text-gray-500">{selected.code}</p>
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{selected.name}</h3>
+          <p
+            className="text-[10px] font-medium tracking-widest"
+            style={{ color: "#4A7FA0", fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            {selected.code}
+          </p>
+          <h3 className="mt-0.5 text-sm font-semibold" style={{ color: "#D6E8F5" }}>
+            {selected.name}
+          </h3>
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none"
+          className="flex-shrink-0 rounded-md p-1 text-lg leading-none transition-colors"
+          style={{ color: "#4A7FA0" }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#D6E8F5")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#4A7FA0")}
         >
           &times;
         </button>
       </div>
 
+      {/* Status accent bar */}
+      <div
+        className="mb-3 h-0.5 rounded-full"
+        style={{ background: `linear-gradient(90deg, ${statusColor}, transparent)` }}
+      />
+
       <MissionStatusBadge status={selected.status} />
 
       {selected.description && (
-        <p className="mt-3 text-xs text-gray-600 dark:text-gray-400">{selected.description}</p>
+        <p className="mt-3 text-xs" style={{ color: "#4A7FA0", lineHeight: "1.6" }}>
+          {selected.description}
+        </p>
       )}
 
-      <div className="mt-3 space-y-2">
+      {/* Assigned assets */}
+      <div className="mt-4 space-y-2">
         {drone ? (
-          <div className="flex items-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2">
-            <DroneIcon className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400" />
+          <div
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5"
+            style={{ background: "#111D2E", border: "1px solid #162338" }}
+          >
+            <DroneIcon className="h-4 w-4 flex-shrink-0" style={{ color: "#0C9FD8" }} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-gray-900 dark:text-white">{drone.model}</p>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400">{drone.serialNumber} &middot; {drone.manufacturer}</p>
+              <p className="truncate text-xs font-semibold" style={{ color: "#D6E8F5" }}>{drone.model}</p>
+              <p
+                className="text-[10px]"
+                style={{ color: "#4A7FA0", fontFamily: "var(--font-jetbrains), monospace" }}
+              >
+                {drone.serialNumber}
+              </p>
             </div>
           </div>
         ) : (
-          <div className="rounded-md bg-amber-50 dark:bg-amber-900/30 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+          <div
+            className="rounded-lg px-3 py-2.5 text-xs"
+            style={{
+              background: "rgba(245,197,24,0.06)",
+              border: "1px solid rgba(245,197,24,0.2)",
+              color: "#F5C518",
+            }}
+          >
             Sin drone asignado
           </div>
         )}
+
         {pilot ? (
-          <div className="flex items-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2">
-            <PilotIcon className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400" />
+          <div
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5"
+            style={{ background: "#111D2E", border: "1px solid #162338" }}
+          >
+            <PilotIcon className="h-4 w-4 flex-shrink-0" style={{ color: "#0C9FD8" }} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-gray-900 dark:text-white">{pilot.userName ?? "Piloto"}</p>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400">{pilot.licenseNumber} &middot; {pilot.certificationStatus}</p>
+              <p className="truncate text-xs font-semibold" style={{ color: "#D6E8F5" }}>
+                {pilot.userName ?? "Piloto"}
+              </p>
+              <p className="text-[10px]" style={{ color: "#4A7FA0" }}>
+                {pilot.licenseNumber} · {pilot.certificationStatus}
+              </p>
             </div>
           </div>
         ) : (
-          <div className="rounded-md bg-amber-50 dark:bg-amber-900/30 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+          <div
+            className="rounded-lg px-3 py-2.5 text-xs"
+            style={{
+              background: "rgba(245,197,24,0.06)",
+              border: "1px solid rgba(245,197,24,0.2)",
+              color: "#F5C518",
+            }}
+          >
             Sin piloto asignado
           </div>
         )}
       </div>
 
-      <dl className="mt-3 space-y-2 text-xs">
+      {/* Data rows */}
+      <dl
+        className="mt-4 space-y-2 text-xs"
+        style={{ borderTop: "1px solid #162338", paddingTop: "12px" }}
+      >
         <Row label="Prioridad" value={PRIORITY_LABELS[selected.priority] ?? selected.priority} />
-        {selected.soraClass && <Row label="SORA" value={selected.soraClass} />}
-        {selected.maxAltitude && <Row label="Alt. max" value={`${selected.maxAltitude}m`} />}
+        {selected.soraClass    && <Row label="SORA"       value={selected.soraClass} />}
+        {selected.maxAltitude  && <Row label="Alt. máx"   value={`${selected.maxAltitude}m`} />}
         {selected.latitude && selected.longitude && (
-          <Row label="Coordenadas" value={`${parseFloat(selected.latitude).toFixed(4)}, ${parseFloat(selected.longitude).toFixed(4)}`} />
+          <Row
+            label="Coords"
+            value={`${parseFloat(selected.latitude).toFixed(4)}, ${parseFloat(selected.longitude).toFixed(4)}`}
+            mono
+          />
         )}
         {selected.scheduledStart && (
           <Row
@@ -310,26 +425,44 @@ function PanelContent({
         )}
       </dl>
 
+      {/* Weather */}
       {selected.latitude && selected.longitude && (
-        <div className="mt-3">
+        <div className="mt-4">
           <WeatherWidget
             lat={parseFloat(selected.latitude)}
             lng={parseFloat(selected.longitude)}
-            date={selected.scheduledStart ? new Date(selected.scheduledStart).toISOString().slice(0, 10) : undefined}
+            date={selected.scheduledStart
+              ? new Date(selected.scheduledStart).toISOString().slice(0, 10)
+              : undefined}
           />
         </div>
       )}
 
-      <div className="mt-3 flex gap-2">
+      {/* Actions */}
+      <div className="mt-4 flex gap-2">
         <Link
           href="/missions"
-          className="flex-1 rounded-md bg-blue-50 dark:bg-blue-900/30 px-3 py-2 text-center text-xs font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+          className="flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all"
+          style={{
+            background: "rgba(12,159,216,0.08)",
+            border: "1px solid rgba(12,159,216,0.2)",
+            color: "#0C9FD8",
+          }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(12,159,216,0.15)")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(12,159,216,0.08)")}
         >
-          Ver en Misiones
+          Misiones
         </Link>
         <Link
           href={`/missions/${selected.id}/compliance`}
-          className="flex-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 text-center text-xs font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
+          className="flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all"
+          style={{
+            background: "rgba(240,78,28,0.08)",
+            border: "1px solid rgba(240,78,28,0.2)",
+            color: "#F04E1C",
+          }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(240,78,28,0.15)")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(240,78,28,0.08)")}
         >
           Compliance
         </Link>
@@ -340,28 +473,50 @@ function PanelContent({
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, color }: { label: string; value: number | string; color: string }) {
-  const colorMap: Record<string, string> = {
-    emerald: "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30",
-    blue:    "text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30",
-    gray:    "text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-700",
-    indigo:  "text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/30",
-  };
+function StatChip({ label, value, color }: { label: string; value: number | string; color: string }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${colorMap[color] ?? ""}`}>
+    <div
+      className="flex items-center gap-1.5 rounded-md px-2.5 py-1"
+      style={{ background: `${color}10`, border: `1px solid ${color}22` }}
+    >
+      <span
+        className="text-xs font-bold"
+        style={{
+          color,
+          fontFamily: "var(--font-jetbrains), monospace",
+          fontSize: "12px",
+        }}
+      >
         {value}
       </span>
-      <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-[10px]" style={{ color: "#4A7FA0" }}>{label}</span>
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
   return (
-    <div className="flex justify-between">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
-      <dd className="font-medium text-gray-900 dark:text-white">{value}</dd>
+    <div className="flex items-baseline justify-between gap-2">
+      <dt className="text-[10px] uppercase tracking-wider flex-shrink-0" style={{ color: "#4A7FA0" }}>
+        {label}
+      </dt>
+      <dd
+        className="text-[11px] font-medium text-right"
+        style={{
+          color: "#D6E8F5",
+          fontFamily: mono ? "var(--font-jetbrains), monospace" : undefined,
+        }}
+      >
+        {value}
+      </dd>
     </div>
   );
 }

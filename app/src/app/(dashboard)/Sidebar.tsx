@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { signOut } from "next-auth/react";
 import {
   MapIcon,
@@ -10,8 +10,6 @@ import {
   DroneIcon,
   ComplianceIcon,
   AnalyticsIcon,
-  SunIcon,
-  MoonIcon,
   LogOutIcon,
   MenuIcon,
   CloseIcon,
@@ -22,11 +20,11 @@ import type React from "react";
 type NavIcon = React.ComponentType<LucideProps>;
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIcon }[] = [
-  { href: "/", label: "Mapa", icon: MapIcon },
-  { href: "/missions", label: "Misiones", icon: MissionIcon },
-  { href: "/fleet", label: "Flota", icon: DroneIcon },
-  { href: "/compliance", label: "Compliance", icon: ComplianceIcon },
-  { href: "/analytics", label: "Analytics", icon: AnalyticsIcon },
+  { href: "/",           label: "Operaciones", icon: MapIcon },
+  { href: "/missions",   label: "Misiones",    icon: MissionIcon },
+  { href: "/fleet",      label: "Flota",       icon: DroneIcon },
+  { href: "/compliance", label: "Compliance",  icon: ComplianceIcon },
+  { href: "/analytics",  label: "Analytics",   icon: AnalyticsIcon },
 ];
 
 export default function Sidebar({
@@ -40,24 +38,6 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dark, setDark] = useState(false);
-
-  // Sync with current html class on mount
-  useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  function toggleDark() {
-    const next = !dark;
-    setDark(next);
-    if (next) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("opsmanager-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("opsmanager-theme", "light");
-    }
-  }
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -65,16 +45,35 @@ export default function Sidebar({
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white dark:bg-gray-900">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-gray-200 dark:border-gray-700 px-4">
+    <div
+      className="flex h-full flex-col"
+      style={{ background: "#0D1520", borderRight: "1px solid #162338" }}
+    >
+      {/* ── Logo ──────────────────────────────────────────────────────────── */}
+      <div
+        className="flex h-16 items-center gap-3 px-4"
+        style={{ borderBottom: "1px solid #162338" }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-skypro360.png" alt="Skypro360" className="h-10 w-auto" />
-        <span className="text-lg font-bold text-gray-900 dark:text-white">OpsManager</span>
+        <img src="/logo-skypro360.png" alt="Skypro360" className="h-9 w-auto" />
+        <div className="flex flex-col leading-tight">
+          <span
+            className="text-sm font-semibold tracking-wide"
+            style={{ color: "#D6E8F5", fontFamily: "var(--font-barlow-condensed), sans-serif", fontSize: "15px", letterSpacing: "0.06em" }}
+          >
+            OPS<span style={{ color: "#0C9FD8" }}>MANAGER</span>
+          </span>
+          <span
+            className="text-[9px] font-medium uppercase tracking-widest"
+            style={{ color: "#4A7FA0" }}
+          >
+            Skypro360
+          </span>
+        </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 space-y-1 p-4">
+      {/* ── Nav ───────────────────────────────────────────────────────────── */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
@@ -82,53 +81,82 @@ export default function Sidebar({
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-              }`}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all"
+              style={{
+                background:  active ? "rgba(12,159,216,0.1)"  : "transparent",
+                color:       active ? "#0C9FD8"               : "#4A7FA0",
+                borderLeft:  active ? "2px solid #0C9FD8"     : "2px solid transparent",
+                paddingLeft: "10px",
+              }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  (e.currentTarget as HTMLElement).style.color = "#D6E8F5";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(22,35,56,0.6)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  (e.currentTarget as HTMLElement).style.color = "#4A7FA0";
+                  (e.currentTarget as HTMLElement).style.background = "transparent";
+                }
+              }}
             >
-              <Icon className={`h-4 w-4 ${active ? "text-blue-600 dark:text-blue-400" : "text-gray-400"}`} />
-              {label}
+              <Icon
+                className="h-4 w-4 flex-shrink-0"
+                style={{ color: active ? "#0C9FD8" : "#4A7FA0" }}
+              />
+              <span style={{ fontFamily: "var(--font-barlow), sans-serif", fontWeight: 500 }}>
+                {label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Dark mode toggle */}
-      <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
-        <button
-          onClick={toggleDark}
-          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          {dark ? (
-            <SunIcon className="h-4 w-4" />
-          ) : (
-            <MoonIcon className="h-4 w-4" />
-          )}
-          <span>{dark ? "Modo claro" : "Modo oscuro"}</span>
-        </button>
+      {/* ── System status indicator ──────────────────────────────────────── */}
+      <div className="px-4 py-3" style={{ borderTop: "1px solid #162338" }}>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-md" style={{ background: "rgba(0,217,126,0.06)", border: "1px solid rgba(0,217,126,0.15)" }}>
+          <span className="h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: "#00D97E", boxShadow: "0 0 6px #00D97E" }} />
+          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#00D97E" }}>
+            Sistema operativo
+          </span>
+        </div>
       </div>
 
-      {/* User + logout */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-200">{userName}</p>
-            <p className="truncate text-xs text-gray-400 dark:text-gray-500">{userEmail}</p>
+      {/* ── User + logout ─────────────────────────────────────────────────── */}
+      <div className="px-4 py-4" style={{ borderTop: "1px solid #162338" }}>
+        <div className="flex items-center gap-3">
+          {/* Avatar placeholder */}
+          <div
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
+            style={{ background: "rgba(12,159,216,0.15)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.3)" }}
+          >
+            {(userName ?? "?")[0]?.toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold" style={{ color: "#D6E8F5" }}>{userName}</p>
+            <p className="truncate text-[10px]" style={{ color: "#4A7FA0" }}>{userEmail}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Cerrar sesion"
-            className="ml-2 flex-shrink-0 rounded-md p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600"
+            className="flex-shrink-0 rounded-md p-1.5 transition-colors"
+            style={{ color: "#4A7FA0" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#F04E1C")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#4A7FA0")}
           >
             <LogOutIcon className="h-4 w-4" />
           </button>
         </div>
         {userRole && (
-          <span className="mt-1.5 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[10px] font-medium uppercase text-gray-500 dark:text-gray-400">
-            {userRole}
-          </span>
+          <div className="mt-2 px-3">
+            <span
+              className="text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-sm"
+              style={{ background: "rgba(12,159,216,0.1)", color: "#4A7FA0", border: "1px solid rgba(12,159,216,0.15)" }}
+            >
+              {userRole}
+            </span>
+          </div>
         )}
       </div>
     </div>
@@ -139,25 +167,31 @@ export default function Sidebar({
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-40 rounded-md bg-white dark:bg-gray-800 p-2 shadow-md lg:hidden"
+        className="fixed left-4 top-4 z-40 rounded-md p-2 shadow-md lg:hidden"
+        style={{ background: "#0D1520", border: "1px solid #162338" }}
         aria-label="Abrir menu"
       >
-        <MenuIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+        <MenuIcon className="h-5 w-5" style={{ color: "#D6E8F5" }} />
       </button>
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 lg:block">
+      <aside className="hidden w-60 flex-shrink-0 lg:block">
         {sidebarContent}
       </aside>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-64 shadow-xl" style={{ height: "100%" }}>
+          <div
+            className="absolute inset-0"
+            style={{ background: "rgba(8,13,20,0.8)" }}
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="relative w-60 shadow-2xl" style={{ height: "100%" }}>
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute right-3 top-4 rounded-md p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="absolute right-3 top-4 rounded-md p-1"
+              style={{ color: "#4A7FA0" }}
               aria-label="Cerrar menu"
             >
               <CloseIcon className="h-5 w-5" />
@@ -169,4 +203,3 @@ export default function Sidebar({
     </>
   );
 }
-

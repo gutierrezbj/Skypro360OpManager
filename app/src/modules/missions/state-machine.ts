@@ -5,7 +5,7 @@ import type { Mission } from "@/lib/db/schema";
  *
  * draft → planned → approved → preflight → in_flight → completed
  *                                                     → aborted
- * Cualquier estado (excepto completed) → cancelled
+ * Cualquier estado (excepto completed/aborted) → cancelled
  */
 
 type MissionStatus = Mission["status"];
@@ -34,37 +34,50 @@ export function isTerminal(status: MissionStatus): boolean {
 }
 
 export const STATUS_LABELS: Record<MissionStatus, string> = {
-  draft: "Borrador",
-  planned: "Planificada",
-  approved: "Aprobada",
-  preflight: "Pre-vuelo",
-  in_flight: "En vuelo",
-  completed: "Completada",
-  aborted: "Abortada",
-  cancelled: "Cancelada",
+  draft:      "Borrador",
+  planned:    "Planificada",
+  approved:   "Aprobada",
+  preflight:  "Pre-vuelo",
+  in_flight:  "En vuelo",
+  completed:  "Completada",
+  aborted:    "Abortada",
+  cancelled:  "Cancelada",
 };
 
+// Cockpit dark theme — SRS Identity Sprint Skypro360
 export const STATUS_COLORS: Record<MissionStatus, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  planned: "bg-blue-100 text-blue-700",
-  approved: "bg-indigo-100 text-indigo-700",
-  preflight: "bg-yellow-100 text-yellow-700",
-  in_flight: "bg-emerald-100 text-emerald-700",
-  completed: "bg-green-100 text-green-700",
-  aborted: "bg-red-100 text-red-700",
-  cancelled: "bg-gray-100 text-gray-500",
+  draft:      "bg-[#3A5570]/20 text-[#6A9AB0] border border-[#3A5570]/40",
+  planned:    "bg-[#4A8FD4]/15 text-[#4A8FD4] border border-[#4A8FD4]/30",
+  approved:   "bg-[#0C9FD8]/15 text-[#0C9FD8] border border-[#0C9FD8]/30",
+  preflight:  "bg-[#F5C518]/12 text-[#F5C518] border border-[#F5C518]/30",
+  in_flight:  "bg-[#00D97E]/12 text-[#00D97E] border border-[#00D97E]/30",
+  completed:  "bg-[#2ECC71]/12 text-[#2ECC71] border border-[#2ECC71]/30",
+  aborted:    "bg-[#E53E3E]/12 text-[#E53E3E] border border-[#E53E3E]/30",
+  cancelled:  "bg-[#3A5570]/20 text-[#6A9AB0] border border-[#3A5570]/40",
+};
+
+// Hex values for use in non-Tailwind contexts (canvas, inline styles)
+export const STATUS_HEX: Record<MissionStatus, string> = {
+  draft:      "#3A5570",
+  planned:    "#4A8FD4",
+  approved:   "#0C9FD8",
+  preflight:  "#F5C518",
+  in_flight:  "#00D97E",
+  completed:  "#2ECC71",
+  aborted:    "#E53E3E",
+  cancelled:  "#3A5570",
 };
 
 export const PRIORITY_LABELS: Record<string, string> = {
-  low: "Baja",
+  low:    "Baja",
   normal: "Normal",
-  high: "Alta",
+  high:   "Alta",
   urgent: "Urgente",
 };
 
 export const PRIORITY_COLORS: Record<string, string> = {
-  low: "text-gray-500",
-  normal: "text-blue-600",
-  high: "text-orange-600",
-  urgent: "text-red-600",
+  low:    "text-sky-muted",
+  normal: "text-sky-text",
+  high:   "text-sky-orange",
+  urgent: "text-[#E53E3E]",
 };

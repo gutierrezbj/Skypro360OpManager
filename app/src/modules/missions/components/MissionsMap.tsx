@@ -8,18 +8,18 @@ import { STATUS_LABELS, PRIORITY_LABELS } from "../state-machine";
 import type { TelemetryPoint } from "@/modules/telemetry/hooks/useTelemetry";
 
 const MARKER_COLORS: Record<string, string> = {
-  draft: "#9ca3af",
-  planned: "#3b82f6",
-  approved: "#6366f1",
-  preflight: "#eab308",
-  in_flight: "#10b981",
-  completed: "#22c55e",
-  aborted: "#ef4444",
-  cancelled: "#6b7280",
+  draft:      "#3A5570",
+  planned:    "#4A8FD4",
+  approved:   "#0C9FD8",
+  preflight:  "#F5C518",
+  in_flight:  "#00D97E",
+  completed:  "#2ECC71",
+  aborted:    "#E53E3E",
+  cancelled:  "#3A5570",
 };
 
-const NOTAM_FILL = "rgba(56,189,248,0.18)";
-const NOTAM_LINE = "#38bdf8";
+const NOTAM_FILL = "rgba(12,159,216,0.12)";
+const NOTAM_LINE = "#0C9FD8";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -196,36 +196,41 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     const drone = drones.find((d) => d.id === mission.droneId);
     const pilot = pilots.find((p) => p.id === mission.pilotId);
 
-    return `<div style="font-family:system-ui,sans-serif;min-width:200px;max-width:260px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
-        <span style="font-size:11px;font-weight:600;color:#374151;">${mission.code}</span>
-        <span style="font-size:10px;color:${color};font-weight:500;margin-left:auto;">${statusLabel}</span>
+    return `<div style="font-family:system-ui,sans-serif;min-width:200px;max-width:260px;padding:14px;">
+      <div style="height:2px;background:linear-gradient(90deg,${color},transparent);border-radius:2px;margin-bottom:10px;"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${color};flex-shrink:0;box-shadow:0 0 6px ${color}80;"></span>
+        <span style="font-size:10px;font-weight:700;color:${color};letter-spacing:0.08em;font-family:monospace;">${mission.code}</span>
+        <span style="font-size:9px;color:${color};font-weight:600;margin-left:auto;background:${color}18;border:1px solid ${color}33;border-radius:4px;padding:1px 6px;text-transform:uppercase;letter-spacing:0.05em;">${statusLabel}</span>
       </div>
-      <div style="font-size:12px;font-weight:600;color:#111827;margin-bottom:6px;">${mission.name}</div>
-      <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#6b7280;">
+      <div style="font-size:12px;font-weight:600;color:#D6E8F5;margin-bottom:8px;line-height:1.3;">${mission.name}</div>
+      <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;border-top:1px solid #162338;padding-top:8px;margin-top:4px;">
         <div style="display:flex;justify-content:space-between;">
-          <span>Prioridad</span>
-          <span style="color:#374151;font-weight:500;">${priorityLabel}</span>
+          <span style="color:#4A7FA0;">Prioridad</span>
+          <span style="color:#D6E8F5;font-weight:500;">${priorityLabel}</span>
         </div>
         ${drone ? `<div style="display:flex;justify-content:space-between;">
-          <span>Drone</span>
-          <span style="color:#374151;font-weight:500;">${drone.model}</span>
+          <span style="color:#4A7FA0;">Drone</span>
+          <span style="color:#D6E8F5;font-weight:500;">${drone.model}</span>
         </div>` : ""}
         ${pilot ? `<div style="display:flex;justify-content:space-between;">
-          <span>Piloto</span>
-          <span style="color:#374151;font-weight:500;">${pilot.userName ?? "—"}</span>
+          <span style="color:#4A7FA0;">Piloto</span>
+          <span style="color:#D6E8F5;font-weight:500;">${pilot.userName ?? "—"}</span>
         </div>` : ""}
         ${mission.scheduledStart ? `<div style="display:flex;justify-content:space-between;">
-          <span>Programada</span>
-          <span style="color:#374151;font-weight:500;">${new Date(mission.scheduledStart).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+          <span style="color:#4A7FA0;">Programada</span>
+          <span style="color:#D6E8F5;font-weight:500;">${new Date(mission.scheduledStart).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
         </div>` : ""}
       </div>
       <button data-mission-id="${mission.id}" style="
-        margin-top:10px;width:100%;padding:6px 0;
-        background:#3b82f6;color:white;border:none;border-radius:6px;
+        margin-top:10px;width:100%;padding:7px 0;
+        background:rgba(12,159,216,0.12);color:#0C9FD8;
+        border:1px solid rgba(12,159,216,0.3);border-radius:6px;
         font-size:11px;font-weight:600;cursor:pointer;
-      ">Ver detalle completo</button>
+        letter-spacing:0.04em;transition:background 0.15s;
+      " onmouseover="this.style.background='rgba(12,159,216,0.22)'" onmouseout="this.style.background='rgba(12,159,216,0.12)'">
+        Ver detalle
+      </button>
     </div>`;
   }, [drones, pilots]);
 
@@ -263,10 +268,10 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           card.style.background = isSelected ? "#1e3a5f" : "white";
           card.style.border = `1.5px solid ${isSelected ? "#3b82f6" : "#e5e7eb"}`;
           const codeEl = card.lastElementChild as HTMLElement | null;
-          if (codeEl) codeEl.style.color = isSelected ? "white" : "#374151";
+          if (codeEl) codeEl.style.color = isSelected ? "#D6E8F5" : "#A8C8E0";
         }
         if (pointer) {
-          pointer.style.borderTopColor = isSelected ? "#1e3a5f" : "white";
+          pointer.style.borderTopColor = isSelected ? "#0C9FD8" : "#111D2E";
         }
         continue;
       }
@@ -275,24 +280,25 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       el.style.cssText = `
         display: flex;
         align-items: center;
-        gap: 4px;
-        background: ${isSelected ? "#1e3a5f" : "white"};
-        border: 1.5px solid ${isSelected ? "#3b82f6" : "#e5e7eb"};
+        gap: 5px;
+        background: ${isSelected ? "#162338" : "#0D1520"};
+        border: 1.5px solid ${isSelected ? "#0C9FD8" : "#1E3A5F"};
         border-radius: 8px;
-        padding: 3px 8px 3px 4px;
+        padding: 3px 8px 3px 5px;
         cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.5)${isSelected ? ", 0 0 0 1px rgba(12,159,216,0.2)" : ""};
         white-space: nowrap;
-        transition: box-shadow 0.15s;
+        transition: box-shadow 0.15s, border-color 0.15s;
       `;
 
       const dot = document.createElement("span");
       dot.style.cssText = `
-        width: 8px; height: 8px;
+        width: 7px; height: 7px;
         border-radius: 50%;
         background: ${color};
         flex-shrink: 0;
-        ${isActive ? "animation: marker-pulse 2s infinite;" : ""}
+        box-shadow: 0 0 ${isActive ? "6px" : "4px"} ${color}80;
+        ${isActive ? "animation: sky-pulse 2s infinite;" : ""}
       `;
       el.appendChild(dot);
 
@@ -301,9 +307,10 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       code.style.cssText = `
         font-size: 10px;
         font-weight: 600;
-        font-family: ui-monospace, monospace;
-        color: ${isSelected ? "white" : "#374151"};
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        color: ${isSelected ? "#D6E8F5" : "#A8C8E0"};
         line-height: 1;
+        letter-spacing: 0.04em;
       `;
       el.appendChild(code);
 
@@ -316,7 +323,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         width: 0; height: 0;
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
-        border-top: 6px solid ${isSelected ? "#1e3a5f" : "white"};
+        border-top: 6px solid ${isSelected ? "#0C9FD8" : "#111D2E"};
       `;
 
       const wrapper = document.createElement("div");
@@ -325,10 +332,14 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       wrapper.appendChild(pointer);
 
       el.addEventListener("mouseenter", () => {
-        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.25)";
+        el.style.boxShadow = `0 4px 16px rgba(0,0,0,0.6), 0 0 0 1px rgba(12,159,216,0.15)`;
+        el.style.borderColor = "#0C9FD8";
       });
       el.addEventListener("mouseleave", () => {
-        el.style.boxShadow = "0 1px 3px rgba(0,0,0,0.15)";
+        el.style.boxShadow = isSelected
+          ? "0 2px 8px rgba(0,0,0,0.5), 0 0 0 1px rgba(12,159,216,0.2)"
+          : "0 2px 8px rgba(0,0,0,0.5)";
+        el.style.borderColor = isSelected ? "#0C9FD8" : "#1E3A5F";
       });
 
       el.addEventListener("click", (e) => {
@@ -381,45 +392,28 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
-      <style>{`
-        @keyframes marker-pulse {
-          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-          70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        .mission-popup .maplibregl-popup-content,
-        .notam-popup .maplibregl-popup-content {
-          border-radius: 12px;
-          padding: 14px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-          border: 1px solid #e5e7eb;
-        }
-        .notam-popup .maplibregl-popup-content {
-          border-color: #38bdf8;
-        }
-        .mission-popup .maplibregl-popup-close-button,
-        .notam-popup .maplibregl-popup-close-button {
-          font-size: 16px;
-          padding: 4px 8px;
-          color: #9ca3af;
-        }
-        .mission-popup .maplibregl-popup-tip {
-          border-top-color: white;
-        }
-        .notam-popup .maplibregl-popup-tip {
-          border-top-color: #38bdf8;
-        }
-      `}</style>
 
       {/* Center button */}
       <button
         onClick={() => {
           mapRef.current?.flyTo({ center: [-6.37, 39.15], zoom: 7.5, duration: 800 });
         }}
-        className="absolute top-3 left-3 rounded-lg bg-white/95 p-2 shadow-md backdrop-blur-sm hover:bg-gray-100 transition-colors"
+        className="absolute top-3 left-3 rounded-lg p-2 transition-all"
+        style={{
+          background: "rgba(13,21,32,0.92)",
+          border: "1px solid #1E3A5F",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+        }}
         title="Centrar mapa"
+        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "#0C9FD8")}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "#1E3A5F")}
       >
-        <svg className="h-4 w-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          className="h-4 w-4"
+          style={{ color: "#4A7FA0" }}
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
           <circle cx="12" cy="12" r="3" />
           <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
         </svg>
@@ -428,43 +422,63 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       {/* NOTAM toggle */}
       <button
         onClick={() => setShowNotams((v) => !v)}
-        className={`absolute top-12 left-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold shadow-md backdrop-blur-sm transition-all ${
-          showNotams
-            ? "bg-sky-400/90 text-white hover:bg-sky-500/90"
-            : "bg-white/95 text-gray-500 hover:bg-gray-100"
-        }`}
+        className="absolute top-14 left-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all"
+        style={{
+          background: showNotams ? "rgba(12,159,216,0.18)" : "rgba(13,21,32,0.92)",
+          border: showNotams ? "1px solid rgba(12,159,216,0.4)" : "1px solid #1E3A5F",
+          color: showNotams ? "#0C9FD8" : "#4A7FA0",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+        }}
         title={showNotams ? "Ocultar NOTAMs" : "Mostrar NOTAMs"}
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
         </svg>
         NOTAM
         {notamLoading && (
-          <span className="ml-0.5 inline-block h-2 w-2 animate-spin rounded-full border border-current border-t-transparent" />
+          <span
+            className="ml-0.5 inline-block h-2 w-2 rounded-full border border-current border-t-transparent"
+            style={{ animation: "sky-spin 0.7s linear infinite" }}
+          />
         )}
         {!notamLoading && notamData && (
-          <span className={`rounded-full px-1 text-[9px] font-bold ${showNotams ? "bg-white/30" : "bg-gray-100 text-sky-500"}`}>
+          <span
+            className="rounded-full px-1.5 text-[9px] font-bold"
+            style={{
+              background: showNotams ? "rgba(12,159,216,0.2)" : "rgba(12,159,216,0.1)",
+              color: "#0C9FD8",
+            }}
+          >
             {(notamData as { count?: number }).count ?? notamData.features.length}
           </span>
         )}
       </button>
 
       {/* Legend */}
-      <div className="absolute bottom-6 left-3 rounded-lg bg-white/95 px-3 py-2 shadow-md backdrop-blur-sm">
+      <div
+        className="absolute bottom-6 left-3 rounded-lg px-3 py-2"
+        style={{
+          background: "rgba(13,21,32,0.92)",
+          border: "1px solid #162338",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+        }}
+      >
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           {(["in_flight", "preflight", "approved", "planned", "draft", "completed"] as const).map((s) => (
             <div key={s} className="flex items-center gap-1.5">
               <span
-                className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ background: MARKER_COLORS[s] }}
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ background: MARKER_COLORS[s], boxShadow: `0 0 4px ${MARKER_COLORS[s]}60` }}
               />
-              <span className="text-[10px] text-gray-600">{STATUS_LABELS[s]}</span>
+              <span className="text-[10px]" style={{ color: "#4A7FA0" }}>{STATUS_LABELS[s]}</span>
             </div>
           ))}
           {showNotams && (
             <div className="flex items-center gap-1.5">
-              <span className="inline-block h-2.5 w-2.5 rounded" style={{ background: NOTAM_LINE, opacity: 0.8 }} />
-              <span className="text-[10px] text-gray-600">NOTAM</span>
+              <span className="inline-block h-2 w-2 rounded-sm" style={{ background: NOTAM_LINE, opacity: 0.9 }} />
+              <span className="text-[10px]" style={{ color: "#4A7FA0" }}>NOTAM</span>
             </div>
           )}
         </div>

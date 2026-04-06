@@ -2,10 +2,6 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Sidebar from "./Sidebar";
 
-/**
- * Dashboard layout — requiere autenticacion.
- * Sidebar + content area.
- */
 export default async function DashboardLayout({
   children,
 }: {
@@ -18,13 +14,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen overflow-hidden bg-sky-bg">
       <Sidebar
         userName={session.user.name}
         userEmail={session.user.email}
         userRole={(session.user as { role?: string }).role}
       />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto bg-sky-bg">{children}</main>
     </div>
   );
 }
