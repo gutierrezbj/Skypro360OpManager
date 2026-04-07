@@ -6,6 +6,7 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import {
   MapIcon,
+  RadarIcon,
   MissionIcon,
   DroneIcon,
   ComplianceIcon,
@@ -23,11 +24,12 @@ import { useTheme } from "@/lib/theme/ThemeContext";
 type NavIcon = React.ComponentType<LucideProps>;
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIcon }[] = [
-  { href: "/",           label: "Operaciones", icon: MapIcon },
-  { href: "/missions",   label: "Misiones",    icon: MissionIcon },
-  { href: "/fleet",      label: "Flota",       icon: DroneIcon },
-  { href: "/compliance", label: "Compliance",  icon: ComplianceIcon },
-  { href: "/analytics",  label: "Analytics",   icon: AnalyticsIcon },
+  { href: "/",             label: "Operaciones",  icon: MapIcon },
+  { href: "/espacio-ops",  label: "Espacio OPS",  icon: RadarIcon },
+  { href: "/missions",     label: "Misiones",     icon: MissionIcon },
+  { href: "/fleet",        label: "Flota",        icon: DroneIcon },
+  { href: "/compliance",   label: "Compliance",   icon: ComplianceIcon },
+  { href: "/analytics",    label: "Analytics",    icon: AnalyticsIcon },
 ];
 
 export default function Sidebar({

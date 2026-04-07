@@ -7,7 +7,7 @@ import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
-import { DroneIcon, PilotIcon, MissionIcon, ClockIcon, CheckCircleIcon } from "@/lib/icons";
+import { DroneIcon, PilotIcon, MissionIcon, ClockIcon } from "@/lib/icons";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -192,27 +192,20 @@ export default function DashboardClient({
               href="/missions"
               linkLabel="Ver todas"
             />
-            <div
-              className="rounded-xl overflow-hidden"
-              style={{ border: "1px solid var(--sky-border)" }}
-            >
-              {recentMissions.length === 0 ? (
-                <div
-                  className="py-8 text-center text-sm"
-                  style={{ color: "var(--sky-muted)", background: "var(--sky-surface)" }}
-                >
-                  No hay misiones registradas
-                </div>
-              ) : (
-                recentMissions.map((m, i) => (
-                  <MissionRow
-                    key={m.id}
-                    mission={m}
-                    isLast={i === recentMissions.length - 1}
-                  />
-                ))
-              )}
-            </div>
+            {recentMissions.length === 0 ? (
+              <div
+                className="rounded-xl py-8 text-center text-sm"
+                style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }}
+              >
+                No hay misiones registradas
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {recentMissions.map((m) => (
+                  <MiniMissionCard key={m.id} mission={m} />
+                ))}
+              </div>
+            )}
           </section>
 
         </div>
@@ -366,34 +359,33 @@ function ActiveMissionCard({
   );
 }
 
-// ── Mission row ───────────────────────────────────────────────────────────────
+// ── Mini mission card (historial) ─────────────────────────────────────────────
 
-function MissionRow({ mission, isLast }: { mission: Mission; isLast: boolean }) {
+function MiniMissionCard({ mission }: { mission: Mission }) {
   const statusColor = STATUS_HEX[mission.status as keyof typeof STATUS_HEX] ?? "#3A5570";
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3"
-      style={{
-        background: "var(--sky-surface)",
-        borderBottom: isLast ? "none" : "1px solid var(--sky-border)",
-      }}
+      className="rounded-xl overflow-hidden"
+      style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
     >
-      <span
-        className="flex-shrink-0 h-2 w-2 rounded-full"
-        style={{ background: statusColor }}
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold truncate" style={{ color: "var(--sky-text)" }}>
+      <div className="h-0.5" style={{ background: statusColor }} />
+      <div className="p-3">
+        <p
+          className="text-[10px] font-medium mb-1"
+          style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains), monospace" }}
+        >
+          {mission.code}
+        </p>
+        <p className="text-xs font-semibold leading-snug mb-2 line-clamp-2" style={{ color: "var(--sky-text)" }}>
           {mission.name}
         </p>
-        <p
-          className="text-[10px]"
-          style={{ color: "var(--sky-muted)", fontFamily: "var(--font-jetbrains), monospace" }}
-        >
-          {mission.code} · {PRIORITY_LABELS[mission.priority] ?? mission.priority}
-        </p>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px]" style={{ color: "var(--sky-muted)" }}>
+            {PRIORITY_LABELS[mission.priority] ?? mission.priority}
+          </span>
+          <MissionStatusBadge status={mission.status} />
+        </div>
       </div>
-      <MissionStatusBadge status={mission.status} />
     </div>
   );
 }
