@@ -120,30 +120,30 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         const popup = new maplibregl.Popup({
           offset: [0, -4],
           closeButton: true,
-          closeOnClick: true,
-          maxWidth: "280px",
+          closeOnClick: false,
+          maxWidth: "300px",
           className: "notam-popup",
         })
           .setLngLat(coords)
           .setHTML(`
-            <div style="font-family:system-ui,sans-serif;width:256px;box-sizing:border-box;overflow-wrap:break-word;word-break:break-word;">
+            <div style="font-family:system-ui,sans-serif;padding:14px;max-width:268px;box-sizing:border-box;overflow-wrap:break-word;word-break:break-word;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${NOTAM_LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span style="font-size:10px;font-weight:700;color:${NOTAM_LINE};letter-spacing:0.05em;">NOTAM ACTIVO</span>
               </div>
-              <div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:4px;line-height:1.4;">${p.id ?? "—"}</div>
-              ${p.name && p.name !== p.id ? `<div style="font-size:11px;color:#374151;margin-bottom:6px;line-height:1.4;">${p.name}</div>` : ""}
-              <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#6b7280;border-top:1px solid #f3f4f6;padding-top:6px;margin-top:4px;">
+              <div style="font-size:12px;font-weight:700;color:#D6E8F5;margin-bottom:4px;line-height:1.4;">${p.id ?? "—"}</div>
+              ${p.name && p.name !== p.id ? `<div style="font-size:11px;color:#D6E8F5;margin-bottom:6px;line-height:1.4;">${p.name}</div>` : ""}
+              <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#6BA3C0;border-top:1px solid #1E3A5F;padding-top:6px;margin-top:4px;">
                 ${p.altitudeFloor || p.altitudeCeiling ? `
                 <div style="display:flex;justify-content:space-between;gap:8px;">
                   <span style="flex-shrink:0;">Altitud</span>
-                  <span style="color:#374151;font-weight:500;text-align:right;">${p.altitudeFloor ?? "SFC"} → ${p.altitudeCeiling ?? "??"}</span>
+                  <span style="color:#D6E8F5;font-weight:500;text-align:right;">${p.altitudeFloor ?? "SFC"} → ${p.altitudeCeiling ?? "??"}</span>
                 </div>` : ""}
-                ${p.description ? `<div style="margin-top:4px;font-size:10px;color:#6b7280;line-height:1.5;">${p.description.substring(0, 220)}${p.description.length > 220 ? "…" : ""}</div>` : ""}
+                ${p.description ? `<div style="margin-top:4px;font-size:10px;color:#6BA3C0;line-height:1.5;">${p.description.substring(0, 220)}${p.description.length > 220 ? "…" : ""}</div>` : ""}
               </div>
-              <div style="margin-top:6px;font-size:9px;color:#9ca3af;">ENAIRE NOTAM_UAS_APP_V3</div>
+              <div style="margin-top:6px;font-size:9px;color:#3A5570;">ENAIRE NOTAM_UAS_APP_V3</div>
             </div>
           `)
           .addTo(map);
