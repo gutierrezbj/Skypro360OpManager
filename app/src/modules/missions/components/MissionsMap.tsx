@@ -172,21 +172,24 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     };
   }, [handleResize]);
 
-  // Update NOTAM source data when data arrives or toggle changes
+  // Load NOTAM data into source once it arrives
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !notamData) return;
+    const source = map.getSource("notams") as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    source.setData(notamData as any);
+  }, [notamData, mapLoaded]);
+
+  // Toggle NOTAM layer visibility — never touch the source data
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
-    const source = map.getSource("notams") as maplibregl.GeoJSONSource | undefined;
-    if (!source) return;
-
-    const data =
-      showNotams && notamData
-        ? notamData
-        : { type: "FeatureCollection", features: [] };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    source.setData(data as any);
-  }, [notamData, showNotams, mapLoaded]);
+    const visibility = showNotams ? "visible" : "none";
+    if (map.getLayer("notam-fill")) map.setLayoutProperty("notam-fill", "visibility", visibility);
+    if (map.getLayer("notam-line")) map.setLayoutProperty("notam-line", "visibility", visibility);
+  }, [showNotams, mapLoaded]);
 
   // Build popup HTML for a mission
   const buildPopupHTML = useCallback((mission: Mission) => {
