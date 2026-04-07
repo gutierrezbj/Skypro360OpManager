@@ -6,6 +6,7 @@ import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
+import BoeAlertsWidget from "@/modules/integrations/components/BoeAlertsWidget";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
 import { DroneIcon, PilotIcon, MissionIcon, ClockIcon, MapPinIcon } from "@/lib/icons";
 
@@ -224,6 +225,8 @@ export default function DashboardClient({
           className="w-full lg:w-72 xl:w-80 flex-shrink-0 p-4 space-y-4 overflow-y-auto"
           style={{ borderLeft: "1px solid var(--sky-border)" }}
         >
+          <BoeAlertsWidget />
+
           <ExpiryAlerts pilots={pilots} drones={drones} />
 
           <div>
