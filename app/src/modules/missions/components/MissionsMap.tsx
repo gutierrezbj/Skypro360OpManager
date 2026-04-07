@@ -148,6 +148,10 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           `)
           .addTo(map);
         popupRef.current = popup;
+
+        // Close on next map click (not this same click — skip with setTimeout)
+        const closeOnNextClick = () => { popup.remove(); };
+        setTimeout(() => map.once("click", closeOnNextClick), 50);
       });
 
       map.on("mouseenter", "notam-fill", () => {
