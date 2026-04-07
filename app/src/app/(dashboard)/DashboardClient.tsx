@@ -7,7 +7,7 @@ import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
-import { DroneIcon, PilotIcon, MissionIcon, ClockIcon } from "@/lib/icons";
+import { DroneIcon, PilotIcon, MissionIcon, ClockIcon, MapPinIcon } from "@/lib/icons";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -50,6 +50,7 @@ export default function DashboardClient({
   drones: Drone[];
 }) {
   const [now, setNow] = useState(() => new Date());
+  const [weatherLoc, setWeatherLoc] = useState<{ lat: number; lng: number; label: string } | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -63,7 +64,15 @@ export default function DashboardClient({
     .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
     .slice(0, 8);
 
-  const firstActiveMission = activeMissions[0];
+  // Weather location: default to first active mission or Madrid
+  const defaultWeatherLoc = activeMissions.find((m) => m.latitude && m.longitude)
+    ? {
+        lat: parseFloat(activeMissions.find((m) => m.latitude)!.latitude!),
+        lng: parseFloat(activeMissions.find((m) => m.longitude)!.longitude!),
+        label: activeMissions.find((m) => m.latitude)!.code,
+      }
+    : { lat: 40.4168, lng: -3.7038, label: "Madrid" };
+  const currentWeatherLoc = weatherLoc ?? defaultWeatherLoc;
 
   return (
     <div className="flex h-full flex-col overflow-y-auto" style={{ background: "var(--sky-bg)" }}>
@@ -217,18 +226,20 @@ export default function DashboardClient({
         >
           <ExpiryAlerts pilots={pilots} drones={drones} />
 
-          {firstActiveMission?.latitude && firstActiveMission?.longitude && (
-            <div>
-              <SectionHeader title="Meteorologia" />
+          <div>
+            <SectionHeader title="Meteorologia" />
+            <WeatherLocationPicker
+              activeMissions={activeMissions}
+              selected={currentWeatherLoc}
+              onSelect={setWeatherLoc}
+            />
+            <div className="mt-2">
               <WeatherWidget
-                lat={parseFloat(firstActiveMission.latitude)}
-                lng={parseFloat(firstActiveMission.longitude)}
-                date={firstActiveMission.scheduledStart
-                  ? new Date(firstActiveMission.scheduledStart).toISOString().slice(0, 10)
-                  : undefined}
+                lat={currentWeatherLoc.lat}
+                lng={currentWeatherLoc.lng}
               />
             </div>
-          )}
+          </div>
 
           {/* Stats completados */}
           <div
@@ -453,6 +464,57 @@ function PilotChip({ pilot }: { pilot: PilotWithUser }) {
       </div>
       <span className="flex-shrink-0 h-1.5 w-1.5 rounded-full" style={{ background: dot }} title={pilot.certificationStatus ?? "pending"} />
     </Link>
+  );
+}
+
+// ── Weather location picker ───────────────────────────────────────────────────
+
+const PRESET_CITIES = [
+  { label: "Madrid",    lat: 40.4168, lng: -3.7038 },
+  { label: "Sevilla",   lat: 37.3886, lng: -5.9823 },
+  { label: "Barcelona", lat: 41.3851, lng:  2.1734 },
+  { label: "Valencia",  lat: 39.4699, lng: -0.3763 },
+  { label: "Badajoz",   lat: 38.8794, lng: -6.9706 },
+  { label: "Bilbao",    lat: 43.2630, lng: -2.9350 },
+  { label: "Zaragoza",  lat: 41.6488, lng: -0.8891 },
+  { label: "Murcia",    lat: 37.9922, lng: -1.1307 },
+];
+
+function WeatherLocationPicker({
+  activeMissions,
+  selected,
+  onSelect,
+}: {
+  activeMissions: Mission[];
+  selected: { lat: number; lng: number; label: string };
+  onSelect: (loc: { lat: number; lng: number; label: string }) => void;
+}) {
+  const missionOptions = activeMissions
+    .filter((m) => m.latitude && m.longitude)
+    .map((m) => ({ label: m.code, lat: parseFloat(m.latitude!), lng: parseFloat(m.longitude!) }));
+
+  const allOptions = [...missionOptions, ...PRESET_CITIES];
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {allOptions.map((opt) => {
+        const active = selected.label === opt.label;
+        return (
+          <button
+            key={opt.label}
+            onClick={() => onSelect(opt)}
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-all"
+            style={active
+              ? { background: "rgba(12,159,216,0.15)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.4)" }
+              : { background: "var(--sky-surface-2)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }
+            }
+          >
+            <MapPinIcon className="h-2.5 w-2.5 flex-shrink-0" />
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
