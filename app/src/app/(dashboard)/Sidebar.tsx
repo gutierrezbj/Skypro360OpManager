@@ -65,7 +65,7 @@ export default function Sidebar({
           </span>
           <span
             className="text-[9px] font-medium uppercase tracking-widest"
-            style={{ color: "#4A7FA0" }}
+            style={{ color: "#6BA3C0" }}
           >
             Skypro360
           </span>
@@ -84,7 +84,7 @@ export default function Sidebar({
               className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all"
               style={{
                 background:  active ? "rgba(12,159,216,0.1)"  : "transparent",
-                color:       active ? "#0C9FD8"               : "#4A7FA0",
+                color:       active ? "#0C9FD8"               : "#6BA3C0",
                 borderLeft:  active ? "2px solid #0C9FD8"     : "2px solid transparent",
                 paddingLeft: "10px",
               }}
@@ -96,14 +96,14 @@ export default function Sidebar({
               }}
               onMouseLeave={(e) => {
                 if (!active) {
-                  (e.currentTarget as HTMLElement).style.color = "#4A7FA0";
+                  (e.currentTarget as HTMLElement).style.color = "#6BA3C0";
                   (e.currentTarget as HTMLElement).style.background = "transparent";
                 }
               }}
             >
               <Icon
                 className="h-4 w-4 flex-shrink-0"
-                style={{ color: active ? "#0C9FD8" : "#4A7FA0" }}
+                style={{ color: active ? "#0C9FD8" : "#6BA3C0" }}
               />
               <span style={{ fontFamily: "var(--font-barlow), sans-serif", fontWeight: 500 }}>
                 {label}
@@ -135,15 +135,15 @@ export default function Sidebar({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-semibold" style={{ color: "#D6E8F5" }}>{userName}</p>
-            <p className="truncate text-[10px]" style={{ color: "#4A7FA0" }}>{userEmail}</p>
+            <p className="truncate text-[10px]" style={{ color: "#6BA3C0" }}>{userEmail}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Cerrar sesion"
             className="flex-shrink-0 rounded-md p-1.5 transition-colors"
-            style={{ color: "#4A7FA0" }}
+            style={{ color: "#6BA3C0" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#F04E1C")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#4A7FA0")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#6BA3C0")}
           >
             <LogOutIcon className="h-4 w-4" />
           </button>
@@ -152,7 +152,7 @@ export default function Sidebar({
           <div className="mt-2 px-3">
             <span
               className="text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-sm"
-              style={{ background: "rgba(12,159,216,0.1)", color: "#4A7FA0", border: "1px solid rgba(12,159,216,0.15)" }}
+              style={{ background: "rgba(12,159,216,0.1)", color: "#6BA3C0", border: "1px solid rgba(12,159,216,0.15)" }}
             >
               {userRole}
             </span>
@@ -191,7 +191,7 @@ export default function Sidebar({
             <button
               onClick={() => setMobileOpen(false)}
               className="absolute right-3 top-4 rounded-md p-1"
-              style={{ color: "#4A7FA0" }}
+              style={{ color: "#6BA3C0" }}
               aria-label="Cerrar menu"
             >
               <CloseIcon className="h-5 w-5" />

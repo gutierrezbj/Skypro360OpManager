@@ -19,7 +19,11 @@ Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: O
 | 4D — Compliance | COMPLETADA | 2026-03-29 | AESA forms A.4-A.8+Anexo I con firma digital, SignaturePad, Zod+audit, compliance page /missions/[id]/compliance, PDF dossier pdf-lib, alertas expiracion pilotos+drones |
 | 4C.1 — UI Cards | COMPLETADA | 2026-03-31 | Grid de tarjetas cuadradas para misiones, drones y pilotos (reemplazo tablas). Iconos SVG custom (cuadricoptero, people). Deploy automatico SSH a VPS |
 | 4E.1 — AEMET Real | COMPLETADA | 2026-03-31 | AEMET OpenData activado (API key configurada). WeatherWidget muestra datos reales: temp, viento, precipitacion, aptoVuelo. Fallback estacional si API falla. Fix parser viento (pick max velocidad) |
-| 4E — Advanced resto | DIFERIDA | — | AESA API real, telemetria real-time, NOTAM, email notifications, PWA |
+| 4F — NOTAM + Email | COMPLETADA | 2026-04-06 | Capa NOTAM en mapa (ENAIRE NOTAM_UAS_APP_V3, 678 NOTAMs reales, cache 30min), email notifications (nodemailer + Google Workspace SMTP alias), templates HTML premium |
+| 4G — Tests | COMPLETADA | 2026-04-06 | 153 tests Vitest: fleet schemas, NOTAM route (mock node:https), email notifications (mock nodemailer), state machine, compliance, PDF |
+| 4H — Fleet Strip + Panel | COMPLETADA | 2026-04-06 | Dashboard fleet strip (drones+pilotos scroll horizontal), panel derecho permanente, ExpiryAlerts "Todo en regla" |
+| 4I — Identity Sprint | COMPLETADA | 2026-04-06 | SRS Design System aplicado: paleta corporativa Skypro360, Barlow Condensed + JetBrains Mono, cockpit dark nativo, login/sidebar/markers/popups/badges |
+| 4E — Advanced resto | DIFERIDA | — | AESA API real, telemetria real-time Socket.IO, PWA offline-first |
 
 ## Decision arquitectonica: Merge Strategy
 
@@ -76,7 +80,9 @@ Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: O
 |------|------------|
 | Framework | Next.js 16 + React 19 + App Router |
 | Lenguaje | TypeScript strict |
-| Estilos | Tailwind CSS 4 |
+| Estilos | Tailwind CSS 4 + SRS Design System (Identity Sprint Skypro360) |
+| Tipografia | Barlow Condensed (display) + Barlow (body) + JetBrains Mono (codigos) |
+| Paleta | #080D14 bg · #0C9FD8 azul logo · #F04E1C naranja aviacion · always dark |
 | Base de datos | PostgreSQL 16 + PostGIS (Drizzle ORM) |
 | Cache/Sessions | Redis 7 (ioredis) |
 | Auth | Auth.js (Credentials + bcrypt + JWT 24h) |
@@ -214,6 +220,24 @@ cd app && npm install && npm run docker:up && npm run db:push && npm run db:seed
 6. PWA offline-first
 
 **MVP = 4A + 4B + 4C** — producto operativo para Skypro360.
+
+## Design System
+
+SRS Nucleus v2.0 aplicado. Identity Sprint Skypro360 documentado:
+
+| Decision | Valor |
+|----------|-------|
+| Frase caracter | "Panel de control de misiones aereas — cockpit industrial" |
+| Referencia | Logo corporativo Skypro360 (negro + azul electrico + naranja seguridad aviacion) |
+| Fondo | #080D14 (negro azulado, siempre dark) |
+| Primario | #0C9FD8 (azul electrico logo) |
+| Acento | #F04E1C (naranja seguridad aviacion, wordmark) |
+| Display | Barlow Condensed (industrial, aeronautica) |
+| Body | Barlow |
+| Mono | JetBrains Mono (codigos SKY-XXX, coords, S/N) |
+| Signature motion | Spring lift en cards, pulse ring en status in_flight |
+
+Design System SRS Notion: https://www.notion.so/SRS-Design-System-3397981f08ef81d7bd6cf83da8dba729
 
 ## Documentacion SDD
 

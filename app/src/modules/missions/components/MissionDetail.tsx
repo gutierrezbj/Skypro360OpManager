@@ -60,36 +60,36 @@ export default function MissionDetail({
         )}
 
         {mission.description && (
-          <p style={{ color: "#4A7FA0" }} className="mb-4 text-sm">{mission.description}</p>
+          <p style={{ color: "#6BA3C0" }} className="mb-4 text-sm">{mission.description}</p>
         )}
 
         <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-          <dt style={{ color: "#4A7FA0" }}>Prioridad</dt>
+          <dt style={{ color: "#6BA3C0" }}>Prioridad</dt>
           <dd style={{ color: "#D6E8F5" }} className="font-medium">{PRIORITY_LABELS[mission.priority] ?? mission.priority}</dd>
 
-          <dt style={{ color: "#4A7FA0" }}>Piloto</dt>
+          <dt style={{ color: "#6BA3C0" }}>Piloto</dt>
           <dd style={{ color: "#D6E8F5" }} className="font-medium">{pilot?.userName ?? "Sin asignar"}</dd>
 
-          <dt style={{ color: "#4A7FA0" }}>Drone</dt>
+          <dt style={{ color: "#6BA3C0" }}>Drone</dt>
           <dd style={{ color: "#D6E8F5" }} className="font-medium">{drone?.model ?? "Sin asignar"}</dd>
 
           {mission.soraClass && (
             <>
-              <dt style={{ color: "#4A7FA0" }}>SORA</dt>
+              <dt style={{ color: "#6BA3C0" }}>SORA</dt>
               <dd style={{ color: "#D6E8F5" }} className="font-medium">{mission.soraClass}</dd>
             </>
           )}
 
           {mission.maxAltitude && (
             <>
-              <dt style={{ color: "#4A7FA0" }}>Alt. max</dt>
+              <dt style={{ color: "#6BA3C0" }}>Alt. max</dt>
               <dd style={{ color: "#D6E8F5" }} className="font-medium">{mission.maxAltitude}m</dd>
             </>
           )}
 
           {mission.scheduledStart && (
             <>
-              <dt style={{ color: "#4A7FA0" }}>Inicio</dt>
+              <dt style={{ color: "#6BA3C0" }}>Inicio</dt>
               <dd style={{ color: "#D6E8F5" }} className="font-medium">
                 {new Date(mission.scheduledStart).toLocaleString("es-ES", {
                   day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
@@ -100,7 +100,7 @@ export default function MissionDetail({
 
           {mission.actualStart && (
             <>
-              <dt style={{ color: "#4A7FA0" }}>Inicio real</dt>
+              <dt style={{ color: "#6BA3C0" }}>Inicio real</dt>
               <dd style={{ color: "#D6E8F5" }} className="font-medium">
                 {new Date(mission.actualStart).toLocaleString("es-ES", {
                   day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
@@ -111,7 +111,7 @@ export default function MissionDetail({
 
           {mission.actualEnd && (
             <>
-              <dt style={{ color: "#4A7FA0" }}>Fin real</dt>
+              <dt style={{ color: "#6BA3C0" }}>Fin real</dt>
               <dd style={{ color: "#D6E8F5" }} className="font-medium">
                 {new Date(mission.actualEnd).toLocaleString("es-ES", {
                   day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
@@ -124,7 +124,7 @@ export default function MissionDetail({
         {/* Transition buttons */}
         {nextStatuses.length > 0 && (
           <div className="mb-4 space-y-2">
-            <p style={{ color: "#4A7FA0" }} className="text-xs font-medium uppercase tracking-wider">
+            <p style={{ color: "#6BA3C0" }} className="text-xs font-medium uppercase tracking-wider">
               Cambiar estado
             </p>
             <div className="flex flex-wrap gap-2">
@@ -153,7 +153,7 @@ export default function MissionDetail({
         <div style={{ borderTop: "1px solid #162338" }} className="flex justify-end gap-3 pt-4">
           <button
             onClick={onClose}
-            style={{ border: "1px solid #1E3A5F", color: "#4A7FA0" }}
+            style={{ border: "1px solid #1E3A5F", color: "#6BA3C0" }}
             className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
           >
             Cerrar

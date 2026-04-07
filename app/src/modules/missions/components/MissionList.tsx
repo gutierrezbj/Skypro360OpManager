@@ -72,7 +72,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
       {/* Card grid */}
       {filtered.length === 0 ? (
         <div
-          style={{ border: "1px dashed #1E3A5F", color: "#4A7FA0" }}
+          style={{ border: "1px dashed #1E3A5F", color: "#6BA3C0" }}
           className="rounded-lg py-12 text-center"
         >
           <p className="text-sm">No hay misiones{filter !== "all" ? " en este estado" : ""}.</p>
@@ -112,27 +112,27 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
 
                   <h3 style={{ color: "#D6E8F5" }} className="mb-1 text-sm font-semibold line-clamp-2">{m.name}</h3>
                   {m.description && (
-                    <p style={{ color: "#4A7FA0" }} className="mb-3 text-xs line-clamp-2">{m.description}</p>
+                    <p style={{ color: "#6BA3C0" }} className="mb-3 text-xs line-clamp-2">{m.description}</p>
                   )}
 
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span style={{ color: "#4A7FA0" }}>Prioridad</span>
+                      <span style={{ color: "#6BA3C0" }}>Prioridad</span>
                       <span style={{ color: PRIORITY_HEX[m.priority] ?? "#D6E8F5" }} className="font-medium">
                         {PRIORITY_LABELS[m.priority] ?? m.priority}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span style={{ color: "#4A7FA0" }}>Drone</span>
+                      <span style={{ color: "#6BA3C0" }}>Drone</span>
                       <span style={{ color: "#D6E8F5" }} className="font-medium">{drone?.model ?? "—"}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span style={{ color: "#4A7FA0" }}>Piloto</span>
+                      <span style={{ color: "#6BA3C0" }}>Piloto</span>
                       <span style={{ color: "#D6E8F5" }} className="font-medium">{pilot?.userName ?? "—"}</span>
                     </div>
                     {m.scheduledStart && (
                       <div className="flex items-center justify-between">
-                        <span style={{ color: "#4A7FA0" }}>Fecha</span>
+                        <span style={{ color: "#6BA3C0" }}>Fecha</span>
                         <span style={{ color: "#D6E8F5" }} className="font-medium">
                           {new Date(m.scheduledStart).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
                         </span>
@@ -154,7 +154,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
                     </Link>
                     <button
                       onClick={() => openEdit(m)}
-                      style={{ background: "rgba(12,159,216,0.06)", color: "#4A7FA0", border: "1px solid #162338" }}
+                      style={{ background: "rgba(12,159,216,0.06)", color: "#6BA3C0", border: "1px solid #162338" }}
                       className="flex-1 rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
                     >
                       Editar
@@ -207,7 +207,7 @@ function FilterChip({
       style={
         isActive
           ? { background: "#0C9FD8", color: "#fff" }
-          : { background: "#111D2E", color: "#4A7FA0", border: "1px solid #162338" }
+          : { background: "#111D2E", color: "#6BA3C0", border: "1px solid #162338" }
       }
       className="rounded-full px-3 py-1 text-xs font-medium transition-all hover:opacity-80"
     >

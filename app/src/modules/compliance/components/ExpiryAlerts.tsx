@@ -83,7 +83,7 @@ const SEVERITY_META = {
   info: {
     bg:     "rgba(12,159,216,0.06)",
     border: "rgba(12,159,216,0.2)",
-    color:  "#4A7FA0",
+    color:  "#6BA3C0",
     badge:  { bg: "rgba(12,159,216,0.12)", color: "#0C9FD8" },
     dot:    "#0C9FD8",
   },
@@ -104,7 +104,7 @@ export default function ExpiryAlerts({
       <div className="mb-4 flex items-center gap-2">
         <span
           className="text-[10px] font-semibold uppercase tracking-widest"
-          style={{ color: "#4A7FA0" }}
+          style={{ color: "#6BA3C0" }}
         >
           Alertas AESA
         </span>
@@ -139,7 +139,7 @@ export default function ExpiryAlerts({
           <p className="text-xs font-semibold" style={{ color: "#00D97E" }}>
             Todo en regla
           </p>
-          <p className="mt-0.5 text-[10px]" style={{ color: "#4A7FA0" }}>
+          <p className="mt-0.5 text-[10px]" style={{ color: "#6BA3C0" }}>
             Sin certificaciones próximas a vencer
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function ExpiryAlerts({
                 </div>
                 <p
                   className="mt-1.5 text-[10px]"
-                  style={{ color: "#4A7FA0", paddingLeft: "18px" }}
+                  style={{ color: "#6BA3C0", paddingLeft: "18px" }}
                 >
                   Expira:{" "}
                   {alert.expiryDate.toLocaleDateString("es-ES", {

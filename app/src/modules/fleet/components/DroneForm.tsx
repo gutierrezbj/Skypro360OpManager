@@ -28,7 +28,7 @@ const labelStyle = {
   marginBottom: "4px",
   fontSize: "12px",
   fontWeight: 500,
-  color: "#4A7FA0",
+  color: "#6BA3C0",
 };
 
 export default function DroneForm({
@@ -117,7 +117,7 @@ export default function DroneForm({
             <button
               type="button"
               onClick={onClose}
-              style={{ border: "1px solid #1E3A5F", color: "#4A7FA0" }}
+              style={{ border: "1px solid #1E3A5F", color: "#6BA3C0" }}
               className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
               Cancelar
@@ -150,7 +150,7 @@ function Field({
   return (
     <div>
       <label
-        style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}
+        style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}
       >
         {label}
       </label>

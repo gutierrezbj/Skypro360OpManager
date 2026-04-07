@@ -27,7 +27,7 @@ export default function FleetTabs({
             style={
               tab === "drones"
                 ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
-                : { borderBottom: "2px solid transparent", color: "#4A7FA0" }
+                : { borderBottom: "2px solid transparent", color: "#6BA3C0" }
             }
             className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
           >
@@ -38,7 +38,7 @@ export default function FleetTabs({
             style={
               tab === "pilots"
                 ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
-                : { borderBottom: "2px solid transparent", color: "#4A7FA0" }
+                : { borderBottom: "2px solid transparent", color: "#6BA3C0" }
             }
             className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
           >

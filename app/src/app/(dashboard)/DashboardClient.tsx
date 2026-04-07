@@ -90,7 +90,7 @@ export default function DashboardClient({
           <div className="flex flex-wrap gap-2">
             <StatChip label="En vuelo"     value={stats.activeMissions}   color="#00D97E" />
             <StatChip label="Planificadas" value={stats.plannedMissions}  color="#4A8FD4" />
-            <StatChip label="Completadas"  value={stats.completedMissions} color="#4A7FA0" />
+            <StatChip label="Completadas"  value={stats.completedMissions} color="#6BA3C0" />
             <div style={{ width: "1px", background: "#162338", alignSelf: "stretch" }} className="hidden sm:block" />
             <StatChip label="Drones"  value={`${stats.activeDrones}/${stats.totalDrones}`}  color="#0C9FD8" />
             <StatChip label="Pilotos" value={`${stats.validPilots}/${stats.totalPilots}`}    color="#0C9FD8" />
@@ -214,7 +214,7 @@ function DroneCard({ drone }: { drone: Drone }) {
         (e.currentTarget as HTMLElement).style.background = "#111D2E";
       }}
     >
-      <DroneIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#4A7FA0" }} />
+      <DroneIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#6BA3C0" }} />
       <div className="min-w-0">
         <p
           className="text-[11px] font-semibold leading-tight truncate max-w-[90px]"
@@ -224,7 +224,7 @@ function DroneCard({ drone }: { drone: Drone }) {
         </p>
         <p
           className="text-[9px] leading-tight"
-          style={{ color: "#4A7FA0", fontFamily: "var(--font-jetbrains), monospace" }}
+          style={{ color: "#6BA3C0", fontFamily: "var(--font-jetbrains), monospace" }}
         >
           {drone.serialNumber}
         </p>
@@ -254,7 +254,7 @@ function PilotCard({ pilot }: { pilot: PilotWithUser }) {
         (e.currentTarget as HTMLElement).style.background = "#111D2E";
       }}
     >
-      <PilotIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#4A7FA0" }} />
+      <PilotIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#6BA3C0" }} />
       <div className="min-w-0">
         <p
           className="text-[11px] font-semibold leading-tight truncate max-w-[90px]"
@@ -262,7 +262,7 @@ function PilotCard({ pilot }: { pilot: PilotWithUser }) {
         >
           {pilot.userName ?? "Piloto"}
         </p>
-        <p className="text-[9px] leading-tight" style={{ color: "#4A7FA0" }}>
+        <p className="text-[9px] leading-tight" style={{ color: "#6BA3C0" }}>
           {pilot.flightHours ?? 0}h vuelo
         </p>
       </div>
@@ -299,7 +299,7 @@ function PanelContent({
         <div>
           <p
             className="text-[10px] font-medium tracking-widest"
-            style={{ color: "#4A7FA0", fontFamily: "var(--font-jetbrains), monospace" }}
+            style={{ color: "#6BA3C0", fontFamily: "var(--font-jetbrains), monospace" }}
           >
             {selected.code}
           </p>
@@ -310,9 +310,9 @@ function PanelContent({
         <button
           onClick={onClose}
           className="flex-shrink-0 rounded-md p-1 text-lg leading-none transition-colors"
-          style={{ color: "#4A7FA0" }}
+          style={{ color: "#6BA3C0" }}
           onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#D6E8F5")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#4A7FA0")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#6BA3C0")}
         >
           &times;
         </button>
@@ -327,7 +327,7 @@ function PanelContent({
       <MissionStatusBadge status={selected.status} />
 
       {selected.description && (
-        <p className="mt-3 text-xs" style={{ color: "#4A7FA0", lineHeight: "1.6" }}>
+        <p className="mt-3 text-xs" style={{ color: "#6BA3C0", lineHeight: "1.6" }}>
           {selected.description}
         </p>
       )}
@@ -344,7 +344,7 @@ function PanelContent({
               <p className="truncate text-xs font-semibold" style={{ color: "#D6E8F5" }}>{drone.model}</p>
               <p
                 className="text-[10px]"
-                style={{ color: "#4A7FA0", fontFamily: "var(--font-jetbrains), monospace" }}
+                style={{ color: "#6BA3C0", fontFamily: "var(--font-jetbrains), monospace" }}
               >
                 {drone.serialNumber}
               </p>
@@ -373,7 +373,7 @@ function PanelContent({
               <p className="truncate text-xs font-semibold" style={{ color: "#D6E8F5" }}>
                 {pilot.userName ?? "Piloto"}
               </p>
-              <p className="text-[10px]" style={{ color: "#4A7FA0" }}>
+              <p className="text-[10px]" style={{ color: "#6BA3C0" }}>
                 {pilot.licenseNumber} · {pilot.certificationStatus}
               </p>
             </div>
@@ -489,7 +489,7 @@ function StatChip({ label, value, color }: { label: string; value: number | stri
       >
         {value}
       </span>
-      <span className="text-[10px]" style={{ color: "#4A7FA0" }}>{label}</span>
+      <span className="text-[10px]" style={{ color: "#6BA3C0" }}>{label}</span>
     </div>
   );
 }
@@ -505,7 +505,7 @@ function Row({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <dt className="text-[10px] uppercase tracking-wider flex-shrink-0" style={{ color: "#4A7FA0" }}>
+      <dt className="text-[10px] uppercase tracking-wider flex-shrink-0" style={{ color: "#6BA3C0" }}>
         {label}
       </dt>
       <dd

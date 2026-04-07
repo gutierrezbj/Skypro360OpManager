@@ -61,7 +61,7 @@ export default function PilotForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 Usuario *
               </label>
               <select name="userId" defaultValue={pilot?.userId ?? ""} required style={inputStyle}>
@@ -73,14 +73,14 @@ export default function PilotForm({
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 N. Licencia
               </label>
               <input name="licenseNumber" defaultValue={pilot?.licenseNumber ?? ""} style={inputStyle} />
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 Estado certificacion
               </label>
               <select name="certificationStatus" defaultValue={pilot?.certificationStatus ?? "pending"} style={inputStyle}>
@@ -91,7 +91,7 @@ export default function PilotForm({
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 Exp. certificacion
               </label>
               <input
@@ -103,7 +103,7 @@ export default function PilotForm({
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 Exp. medico
               </label>
               <input
@@ -115,7 +115,7 @@ export default function PilotForm({
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 Horas vuelo
               </label>
               <input
@@ -129,7 +129,7 @@ export default function PilotForm({
             </div>
 
             <div className="col-span-2">
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#4A7FA0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
                 Notas
               </label>
               <textarea
@@ -145,7 +145,7 @@ export default function PilotForm({
             <button
               type="button"
               onClick={onClose}
-              style={{ border: "1px solid #1E3A5F", color: "#4A7FA0" }}
+              style={{ border: "1px solid #1E3A5F", color: "#6BA3C0" }}
               className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
               Cancelar

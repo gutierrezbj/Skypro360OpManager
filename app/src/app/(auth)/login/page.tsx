@@ -77,7 +77,7 @@ export default function LoginPage() {
           <img src="/logo-skypro360.png" alt="Skypro360" className="h-24 w-auto mb-1" />
           <div
             className="text-xs font-semibold uppercase tracking-[0.25em]"
-            style={{ color: "#4A7FA0" }}
+            style={{ color: "#6BA3C0" }}
           >
             Operations Console
           </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
               <label
                 htmlFor="email"
                 className="block text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: "#4A7FA0" }}
+                style={{ color: "#6BA3C0" }}
               >
                 Email
               </label>
@@ -136,7 +136,7 @@ export default function LoginPage() {
               <label
                 htmlFor="password"
                 className="block text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: "#4A7FA0" }}
+                style={{ color: "#6BA3C0" }}
               >
                 Contraseña
               </label>
@@ -227,14 +227,14 @@ export default function LoginPage() {
                   style={{
                     background: "rgba(12,159,216,0.06)",
                     border: "1px solid rgba(12,159,216,0.2)",
-                    color: "#4A7FA0",
+                    color: "#6BA3C0",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.color = "#0C9FD8";
                     (e.currentTarget as HTMLElement).style.borderColor = "rgba(12,159,216,0.5)";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "#4A7FA0";
+                    (e.currentTarget as HTMLElement).style.color = "#6BA3C0";
                     (e.currentTarget as HTMLElement).style.borderColor = "rgba(12,159,216,0.2)";
                   }}
                 >

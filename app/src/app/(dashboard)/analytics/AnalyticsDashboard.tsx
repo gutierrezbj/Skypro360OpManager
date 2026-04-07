@@ -74,7 +74,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
 
         <div>
           <h1 style={{ color: "#D6E8F5" }} className="text-2xl font-bold">Analytics</h1>
-          <p style={{ color: "#4A7FA0" }} className="mt-1 text-sm">
+          <p style={{ color: "#6BA3C0" }} className="mt-1 text-sm">
             Metricas operativas · datos en tiempo real
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         className="inline-block h-2 w-2 flex-shrink-0 rounded-full"
                         style={{ background: STATUS_COLORS[seg.status] ?? "#3A5570" }}
                       />
-                      <span style={{ color: "#4A7FA0" }} className="truncate">
+                      <span style={{ color: "#6BA3C0" }} className="truncate">
                         {STATUS_LABELS[seg.status] ?? seg.status}
                       </span>
                       <span style={{ color: "#D6E8F5" }} className="ml-auto font-semibold pl-2">
@@ -177,7 +177,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         background: "#0C9FD8",
                       }}
                     />
-                    <span style={{ color: "#4A7FA0" }} className="text-[10px]">{m.label}</span>
+                    <span style={{ color: "#6BA3C0" }} className="text-[10px]">{m.label}</span>
                   </div>
                 );
               })}
@@ -201,7 +201,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                   return (
                     <div key={p} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span style={{ color: "#4A7FA0" }}>{PRIORITY_LABELS[p]}</span>
+                        <span style={{ color: "#6BA3C0" }}>{PRIORITY_LABELS[p]}</span>
                         <span style={{ color: "#D6E8F5" }} className="font-semibold">{val}</span>
                       </div>
                       <div style={{ background: "#111D2E" }} className="h-2 w-full overflow-hidden rounded-full">
@@ -232,7 +232,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                     return (
                       <div key={row.status} className="space-y-1">
                         <div className="flex justify-between text-xs">
-                          <span style={{ color: "#4A7FA0" }}>
+                          <span style={{ color: "#6BA3C0" }}>
                             {DRONE_STATUS_LABELS[row.status] ?? row.status}
                           </span>
                           <span style={{ color: "#D6E8F5" }} className="font-semibold">{row.total}</span>
@@ -287,7 +287,7 @@ function KpiCard({
   return (
     <div style={{ background: "#0D1520", border: "1px solid #162338", borderRadius: "16px", padding: "20px" }}>
       <div className="flex items-center justify-between">
-        <p style={{ color: "#4A7FA0" }} className="text-xs">{label}</p>
+        <p style={{ color: "#6BA3C0" }} className="text-xs">{label}</p>
         {Icon && <Icon style={{ color: accent, opacity: 0.6 }} className="h-4 w-4" />}
       </div>
       <div className="mt-1 flex items-center gap-2">
@@ -296,7 +296,7 @@ function KpiCard({
         )}
         <p style={{ color: accent }} className="text-2xl font-bold">{value}</p>
       </div>
-      {sub && <p style={{ color: "#4A7FA0" }} className="mt-0.5 text-[11px]">{sub}</p>}
+      {sub && <p style={{ color: "#6BA3C0" }} className="mt-0.5 text-[11px]">{sub}</p>}
     </div>
   );
 }
@@ -313,10 +313,10 @@ function ComplianceStat({
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="space-y-2">
-      <p style={{ color: "#4A7FA0" }} className="text-xs">{label}</p>
+      <p style={{ color: "#6BA3C0" }} className="text-xs">{label}</p>
       <p style={{ color: "#D6E8F5" }} className="text-xl font-bold">
         {value}{unit}
-        {!unit && <span style={{ color: "#4A7FA0" }} className="text-sm font-normal"> / {total}</span>}
+        {!unit && <span style={{ color: "#6BA3C0" }} className="text-sm font-normal"> / {total}</span>}
       </p>
       <div style={{ background: "#111D2E" }} className="h-1.5 w-full overflow-hidden rounded-full">
         <div
@@ -324,7 +324,7 @@ function ComplianceStat({
           style={{ width: `${pct}%`, background: color }}
         />
       </div>
-      <p style={{ color: "#4A7FA0" }} className="text-[10px]">{pct}%</p>
+      <p style={{ color: "#6BA3C0" }} className="text-[10px]">{pct}%</p>
     </div>
   );
 }

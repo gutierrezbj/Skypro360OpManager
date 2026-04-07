@@ -28,7 +28,7 @@ export default function ComplianceOverview({
   return (
     <div className="p-6">
       <h1 style={{ color: "#D6E8F5" }} className="text-lg font-semibold">Compliance AESA</h1>
-      <p style={{ color: "#4A7FA0" }} className="mt-1 text-sm">
+      <p style={{ color: "#6BA3C0" }} className="mt-1 text-sm">
         Documentacion AESA, SORA, EAROs y certificaciones.
       </p>
 
@@ -87,7 +87,7 @@ export default function ComplianceOverview({
               className="rounded-lg p-4"
             >
               <h3 style={{ color: "#00D97E" }} className="text-sm font-semibold">Todo en regla</h3>
-              <p style={{ color: "#4A7FA0" }} className="mt-1 text-xs">
+              <p style={{ color: "#6BA3C0" }} className="mt-1 text-xs">
                 Sin alertas de expiracion ni registros pendientes.
               </p>
             </div>
@@ -103,7 +103,7 @@ export default function ComplianceOverview({
               </h3>
             </div>
             {activeMissions.length === 0 ? (
-              <div style={{ color: "#4A7FA0" }} className="px-4 py-8 text-center text-sm">
+              <div style={{ color: "#6BA3C0" }} className="px-4 py-8 text-center text-sm">
                 No hay misiones activas que requieran documentacion.
               </div>
             ) : (
@@ -129,7 +129,7 @@ export default function ComplianceOverview({
                           <MissionStatusBadge status={m.status} />
                         </div>
                         <p style={{ color: "#D6E8F5" }} className="mt-0.5 text-sm font-medium">{m.name}</p>
-                        <div style={{ color: "#4A7FA0" }} className="mt-0.5 flex gap-3 text-xs">
+                        <div style={{ color: "#6BA3C0" }} className="mt-0.5 flex gap-3 text-xs">
                           {pilot && <span>Piloto: {pilot.userName ?? pilot.licenseNumber}</span>}
                           {drone && <span>Drone: {drone.model}</span>}
                           {m.scheduledStart && (
@@ -161,7 +161,7 @@ function StatCard({ label, value, accent }: { label: string; value: number; acce
       className="rounded-xl p-4"
     >
       <p style={{ color: accent }} className="text-2xl font-bold">{value}</p>
-      <p style={{ color: "#4A7FA0" }} className="text-xs font-medium mt-0.5">{label}</p>
+      <p style={{ color: "#6BA3C0" }} className="text-xs font-medium mt-0.5">{label}</p>
     </div>
   );
 }

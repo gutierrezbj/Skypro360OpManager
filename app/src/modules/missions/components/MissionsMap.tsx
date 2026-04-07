@@ -126,22 +126,22 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         })
           .setLngLat(coords)
           .setHTML(`
-            <div style="font-family:system-ui,sans-serif;min-width:210px;">
+            <div style="font-family:system-ui,sans-serif;width:256px;box-sizing:border-box;overflow-wrap:break-word;word-break:break-word;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${NOTAM_LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${NOTAM_LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span style="font-size:10px;font-weight:700;color:${NOTAM_LINE};letter-spacing:0.05em;">NOTAM ACTIVO</span>
               </div>
-              <div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:4px;">${p.id ?? "—"}</div>
-              ${p.name && p.name !== p.id ? `<div style="font-size:11px;color:#374151;margin-bottom:6px;">${p.name}</div>` : ""}
+              <div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:4px;line-height:1.4;">${p.id ?? "—"}</div>
+              ${p.name && p.name !== p.id ? `<div style="font-size:11px;color:#374151;margin-bottom:6px;line-height:1.4;">${p.name}</div>` : ""}
               <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#6b7280;border-top:1px solid #f3f4f6;padding-top:6px;margin-top:4px;">
                 ${p.altitudeFloor || p.altitudeCeiling ? `
-                <div style="display:flex;justify-content:space-between;">
-                  <span>Altitud</span>
-                  <span style="color:#374151;font-weight:500;">${p.altitudeFloor ?? "SFC"} → ${p.altitudeCeiling ?? "??"}</span>
+                <div style="display:flex;justify-content:space-between;gap:8px;">
+                  <span style="flex-shrink:0;">Altitud</span>
+                  <span style="color:#374151;font-weight:500;text-align:right;">${p.altitudeFloor ?? "SFC"} → ${p.altitudeCeiling ?? "??"}</span>
                 </div>` : ""}
-                ${p.description ? `<div style="margin-top:4px;font-size:10px;color:#6b7280;line-height:1.4;max-height:60px;overflow:hidden;">${p.description.substring(0, 160)}${p.description.length > 160 ? "…" : ""}</div>` : ""}
+                ${p.description ? `<div style="margin-top:4px;font-size:10px;color:#6b7280;line-height:1.5;">${p.description.substring(0, 220)}${p.description.length > 220 ? "…" : ""}</div>` : ""}
               </div>
               <div style="margin-top:6px;font-size:9px;color:#9ca3af;">ENAIRE NOTAM_UAS_APP_V3</div>
             </div>
@@ -206,19 +206,19 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       <div style="font-size:12px;font-weight:600;color:#D6E8F5;margin-bottom:8px;line-height:1.3;">${mission.name}</div>
       <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;border-top:1px solid #162338;padding-top:8px;margin-top:4px;">
         <div style="display:flex;justify-content:space-between;">
-          <span style="color:#4A7FA0;">Prioridad</span>
+          <span style="color:#6BA3C0;">Prioridad</span>
           <span style="color:#D6E8F5;font-weight:500;">${priorityLabel}</span>
         </div>
         ${drone ? `<div style="display:flex;justify-content:space-between;">
-          <span style="color:#4A7FA0;">Drone</span>
+          <span style="color:#6BA3C0;">Drone</span>
           <span style="color:#D6E8F5;font-weight:500;">${drone.model}</span>
         </div>` : ""}
         ${pilot ? `<div style="display:flex;justify-content:space-between;">
-          <span style="color:#4A7FA0;">Piloto</span>
+          <span style="color:#6BA3C0;">Piloto</span>
           <span style="color:#D6E8F5;font-weight:500;">${pilot.userName ?? "—"}</span>
         </div>` : ""}
         ${mission.scheduledStart ? `<div style="display:flex;justify-content:space-between;">
-          <span style="color:#4A7FA0;">Programada</span>
+          <span style="color:#6BA3C0;">Programada</span>
           <span style="color:#D6E8F5;font-weight:500;">${new Date(mission.scheduledStart).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
         </div>` : ""}
       </div>
@@ -411,7 +411,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       >
         <svg
           className="h-4 w-4"
-          style={{ color: "#4A7FA0" }}
+          style={{ color: "#6BA3C0" }}
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
           <circle cx="12" cy="12" r="3" />
@@ -426,7 +426,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         style={{
           background: showNotams ? "rgba(12,159,216,0.18)" : "rgba(13,21,32,0.92)",
           border: showNotams ? "1px solid rgba(12,159,216,0.4)" : "1px solid #1E3A5F",
-          color: showNotams ? "#0C9FD8" : "#4A7FA0",
+          color: showNotams ? "#0C9FD8" : "#6BA3C0",
           backdropFilter: "blur(8px)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
         }}
@@ -472,13 +472,13 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
                 className="inline-block h-2 w-2 rounded-full"
                 style={{ background: MARKER_COLORS[s], boxShadow: `0 0 4px ${MARKER_COLORS[s]}60` }}
               />
-              <span className="text-[10px]" style={{ color: "#4A7FA0" }}>{STATUS_LABELS[s]}</span>
+              <span className="text-[10px]" style={{ color: "#6BA3C0" }}>{STATUS_LABELS[s]}</span>
             </div>
           ))}
           {showNotams && (
             <div className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-sm" style={{ background: NOTAM_LINE, opacity: 0.9 }} />
-              <span className="text-[10px]" style={{ color: "#4A7FA0" }}>NOTAM</span>
+              <span className="text-[10px]" style={{ color: "#6BA3C0" }}>NOTAM</span>
             </div>
           )}
         </div>
