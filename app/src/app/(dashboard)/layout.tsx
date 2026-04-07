@@ -20,7 +20,7 @@ export default async function DashboardLayout({
         userEmail={session.user.email}
         userRole={(session.user as { role?: string }).role}
       />
-      <main className="flex-1 overflow-auto bg-sky-bg">{children}</main>
+      <main className="flex-1 overflow-hidden flex flex-col" style={{ background: "var(--sky-bg)" }}>{children}</main>
     </div>
   );
 }

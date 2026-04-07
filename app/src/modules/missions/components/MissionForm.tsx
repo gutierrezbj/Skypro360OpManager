@@ -11,9 +11,9 @@ const PRIORITY_LABELS: Record<string, string> = {
 const SORA_CLASSES = ["SAIL I", "SAIL II", "SAIL III", "SAIL IV", "SAIL V", "SAIL VI"];
 
 const inputStyle = {
-  background: "#111D2E",
-  border: "1px solid #1E3A5F",
-  color: "#D6E8F5",
+  background: "var(--sky-surface-2)",
+  border: "1px solid var(--sky-border-2)",
+  color: "var(--sky-text)",
   borderRadius: "6px",
   padding: "8px 12px",
   fontSize: "14px",
@@ -26,7 +26,7 @@ const labelStyle = {
   marginBottom: "4px",
   fontSize: "12px",
   fontWeight: 500,
-  color: "#6BA3C0",
+  color: "var(--sky-muted)",
 };
 
 type PilotWithUser = Pilot & { userName?: string };
@@ -57,10 +57,10 @@ export default function MissionForm({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
       <div
-        style={{ background: "#0D1520", border: "1px solid #1E3A5F", maxHeight: "90vh" }}
+        style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border-2)", maxHeight: "90vh" }}
         className="w-full max-w-lg overflow-y-auto rounded-xl p-6 shadow-2xl"
       >
-        <h2 style={{ color: "#D6E8F5" }} className="mb-5 text-lg font-semibold">
+        <h2 style={{ color: "var(--sky-text)" }} className="mb-5 text-lg font-semibold">
           {mission ? "Editar Mision" : "Nueva Mision"}
         </h2>
 
@@ -96,7 +96,7 @@ export default function MissionForm({
               <label style={labelStyle}>Prioridad</label>
               <select name="priority" defaultValue={mission?.priority ?? "normal"} style={inputStyle}>
                 {PRIORITIES.map((p) => (
-                  <option key={p} value={p} style={{ background: "#0D1520" }}>{PRIORITY_LABELS[p]}</option>
+                  <option key={p} value={p} style={{ background: "var(--sky-surface)" }}>{PRIORITY_LABELS[p]}</option>
                 ))}
               </select>
             </div>
@@ -104,9 +104,9 @@ export default function MissionForm({
             <div>
               <label style={labelStyle}>Clase SORA</label>
               <select name="soraClass" defaultValue={mission?.soraClass ?? ""} style={inputStyle}>
-                <option value="" style={{ background: "#0D1520" }}>Sin especificar</option>
+                <option value="" style={{ background: "var(--sky-surface)" }}>Sin especificar</option>
                 {SORA_CLASSES.map((s) => (
-                  <option key={s} value={s} style={{ background: "#0D1520" }}>{s}</option>
+                  <option key={s} value={s} style={{ background: "var(--sky-surface)" }}>{s}</option>
                 ))}
               </select>
             </div>
@@ -114,9 +114,9 @@ export default function MissionForm({
             <div>
               <label style={labelStyle}>Piloto</label>
               <select name="pilotId" defaultValue={mission?.pilotId ?? ""} style={inputStyle}>
-                <option value="" style={{ background: "#0D1520" }}>Sin asignar</option>
+                <option value="" style={{ background: "var(--sky-surface)" }}>Sin asignar</option>
                 {validPilots.map((p) => (
-                  <option key={p.id} value={p.id} style={{ background: "#0D1520" }}>{p.userName ?? p.id}</option>
+                  <option key={p.id} value={p.id} style={{ background: "var(--sky-surface)" }}>{p.userName ?? p.id}</option>
                 ))}
               </select>
             </div>
@@ -124,9 +124,9 @@ export default function MissionForm({
             <div>
               <label style={labelStyle}>Drone</label>
               <select name="droneId" defaultValue={mission?.droneId ?? ""} style={inputStyle}>
-                <option value="" style={{ background: "#0D1520" }}>Sin asignar</option>
+                <option value="" style={{ background: "var(--sky-surface)" }}>Sin asignar</option>
                 {activeDrones.map((d) => (
-                  <option key={d.id} value={d.id} style={{ background: "#0D1520" }}>{d.model} ({d.serialNumber})</option>
+                  <option key={d.id} value={d.id} style={{ background: "var(--sky-surface)" }}>{d.model} ({d.serialNumber})</option>
                 ))}
               </select>
             </div>
@@ -168,11 +168,11 @@ export default function MissionForm({
             </div>
           </div>
 
-          <div style={{ borderTop: "1px solid #162338" }} className="flex justify-end gap-3 pt-4">
+          <div style={{ borderTop: "1px solid var(--sky-border)" }} className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              style={{ border: "1px solid #1E3A5F", color: "#6BA3C0" }}
+              style={{ border: "1px solid var(--sky-border-2)", color: "var(--sky-muted)" }}
               className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
               Cancelar

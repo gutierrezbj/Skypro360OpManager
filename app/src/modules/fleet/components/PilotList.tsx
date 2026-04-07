@@ -41,7 +41,7 @@ export default function PilotList({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p style={{ color: "#6BA3C0" }} className="text-sm">
+        <p style={{ color: "var(--sky-muted)" }} className="text-sm">
           {pilots.length} piloto{pilots.length !== 1 ? "s" : ""} registrado{pilots.length !== 1 ? "s" : ""}
         </p>
         <button
@@ -54,7 +54,7 @@ export default function PilotList({
       </div>
 
       {pilots.length === 0 ? (
-        <div style={{ border: "1px dashed #1E3A5F", color: "#6BA3C0" }} className="rounded-lg py-12 text-center">
+        <div style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }} className="rounded-lg py-12 text-center">
           <p className="text-sm">No hay pilotos registrados.</p>
           <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
             Registrar el primero
@@ -67,7 +67,7 @@ export default function PilotList({
             return (
               <div
                 key={pilot.id}
-                style={{ background: "#0D1520", border: "1px solid #162338" }}
+                style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
                 className="overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
               >
                 <div className="h-1" style={{ background: certColor }} />
@@ -85,13 +85,13 @@ export default function PilotList({
                       {CERT_LABELS[pilot.certificationStatus] ?? pilot.certificationStatus}
                     </span>
                   </div>
-                  <h3 style={{ color: "#D6E8F5" }} className="text-sm font-semibold">{pilot.userName ?? "—"}</h3>
+                  <h3 style={{ color: "var(--sky-text)" }} className="text-sm font-semibold">{pilot.userName ?? "—"}</h3>
                   {pilot.userEmail && (
-                    <p style={{ color: "#6BA3C0" }} className="mb-3 text-xs">{pilot.userEmail}</p>
+                    <p style={{ color: "var(--sky-muted)" }} className="mb-3 text-xs">{pilot.userEmail}</p>
                   )}
                   <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between">
-                      <span style={{ color: "#6BA3C0" }}>Licencia</span>
+                      <span style={{ color: "var(--sky-muted)" }}>Licencia</span>
                       <span
                         style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
                         className="font-medium"
@@ -100,12 +100,12 @@ export default function PilotList({
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: "#6BA3C0" }}>Horas vuelo</span>
-                      <span style={{ color: "#D6E8F5" }} className="font-medium">{pilot.flightHours ?? "0"}h</span>
+                      <span style={{ color: "var(--sky-muted)" }}>Horas vuelo</span>
+                      <span style={{ color: "var(--sky-text)" }} className="font-medium">{pilot.flightHours ?? "0"}h</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: "#6BA3C0" }}>Exp. medico</span>
-                      <span style={{ color: "#D6E8F5" }} className="font-medium">
+                      <span style={{ color: "var(--sky-muted)" }}>Exp. medico</span>
+                      <span style={{ color: "var(--sky-text)" }} className="font-medium">
                         {pilot.medicalExpiry
                           ? new Date(pilot.medicalExpiry).toLocaleDateString("es-ES")
                           : "—"}
@@ -113,17 +113,17 @@ export default function PilotList({
                     </div>
                     {pilot.certificationExpiry && (
                       <div className="flex justify-between">
-                        <span style={{ color: "#6BA3C0" }}>Exp. cert.</span>
-                        <span style={{ color: "#D6E8F5" }} className="font-medium">
+                        <span style={{ color: "var(--sky-muted)" }}>Exp. cert.</span>
+                        <span style={{ color: "var(--sky-text)" }} className="font-medium">
                           {new Date(pilot.certificationExpiry).toLocaleDateString("es-ES")}
                         </span>
                       </div>
                     )}
                   </div>
-                  <div style={{ borderTop: "1px solid #162338" }} className="mt-3 pt-3">
+                  <div style={{ borderTop: "1px solid var(--sky-border)" }} className="mt-3 pt-3">
                     <button
                       onClick={() => openEdit(pilot)}
-                      style={{ background: "rgba(12,159,216,0.06)", color: "#6BA3C0", border: "1px solid #162338" }}
+                      style={{ background: "rgba(12,159,216,0.06)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }}
                       className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
                     >
                       Editar

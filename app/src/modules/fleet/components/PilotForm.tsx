@@ -10,9 +10,9 @@ const CERT_LABELS: Record<string, string> = {
 };
 
 const inputStyle = {
-  background: "#111D2E",
-  border: "1px solid #1E3A5F",
-  color: "#D6E8F5",
+  background: "var(--sky-surface-2)",
+  border: "1px solid var(--sky-border-2)",
+  color: "var(--sky-text)",
   borderRadius: "6px",
   padding: "8px 12px",
   fontSize: "14px",
@@ -40,10 +40,10 @@ export default function PilotForm({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
       <div
-        style={{ background: "#0D1520", border: "1px solid #1E3A5F", maxHeight: "90vh" }}
+        style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border-2)", maxHeight: "90vh" }}
         className="w-full max-w-lg overflow-y-auto rounded-xl p-6 shadow-2xl"
       >
-        <h2 style={{ color: "#D6E8F5" }} className="mb-5 text-lg font-semibold">
+        <h2 style={{ color: "var(--sky-text)" }} className="mb-5 text-lg font-semibold">
           {pilot ? "Editar Piloto" : "Registrar Piloto"}
         </h2>
 
@@ -61,37 +61,37 @@ export default function PilotForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 Usuario *
               </label>
               <select name="userId" defaultValue={pilot?.userId ?? ""} required style={inputStyle}>
-                <option value="" style={{ background: "#0D1520" }}>Seleccionar usuario...</option>
+                <option value="" style={{ background: "var(--sky-surface)" }}>Seleccionar usuario...</option>
                 {users.map((u) => (
-                  <option key={u.id} value={u.id} style={{ background: "#0D1520" }}>{u.name} ({u.email})</option>
+                  <option key={u.id} value={u.id} style={{ background: "var(--sky-surface)" }}>{u.name} ({u.email})</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 N. Licencia
               </label>
               <input name="licenseNumber" defaultValue={pilot?.licenseNumber ?? ""} style={inputStyle} />
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 Estado certificacion
               </label>
               <select name="certificationStatus" defaultValue={pilot?.certificationStatus ?? "pending"} style={inputStyle}>
                 {CERT_STATUSES.map((s) => (
-                  <option key={s} value={s} style={{ background: "#0D1520" }}>{CERT_LABELS[s]}</option>
+                  <option key={s} value={s} style={{ background: "var(--sky-surface)" }}>{CERT_LABELS[s]}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 Exp. certificacion
               </label>
               <input
@@ -103,7 +103,7 @@ export default function PilotForm({
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 Exp. medico
               </label>
               <input
@@ -115,7 +115,7 @@ export default function PilotForm({
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 Horas vuelo
               </label>
               <input
@@ -129,7 +129,7 @@ export default function PilotForm({
             </div>
 
             <div className="col-span-2">
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "#6BA3C0" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--sky-muted)" }}>
                 Notas
               </label>
               <textarea
@@ -141,11 +141,11 @@ export default function PilotForm({
             </div>
           </div>
 
-          <div style={{ borderTop: "1px solid #162338" }} className="flex justify-end gap-3 pt-4">
+          <div style={{ borderTop: "1px solid var(--sky-border)" }} className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              style={{ border: "1px solid #1E3A5F", color: "#6BA3C0" }}
+              style={{ border: "1px solid var(--sky-border-2)", color: "var(--sky-muted)" }}
               className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
               Cancelar

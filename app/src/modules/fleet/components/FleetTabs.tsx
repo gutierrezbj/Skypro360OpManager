@@ -20,14 +20,14 @@ export default function FleetTabs({
 
   return (
     <div>
-      <div style={{ borderBottom: "1px solid #162338" }} className="mb-6">
+      <div style={{ borderBottom: "1px solid var(--sky-border)" }} className="mb-6">
         <div className="-mb-px flex gap-6">
           <button
             onClick={() => setTab("drones")}
             style={
               tab === "drones"
                 ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
-                : { borderBottom: "2px solid transparent", color: "#6BA3C0" }
+                : { borderBottom: "2px solid transparent", color: "var(--sky-muted)" }
             }
             className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
           >
@@ -38,7 +38,7 @@ export default function FleetTabs({
             style={
               tab === "pilots"
                 ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
-                : { borderBottom: "2px solid transparent", color: "#6BA3C0" }
+                : { borderBottom: "2px solid transparent", color: "var(--sky-muted)" }
             }
             className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
           >

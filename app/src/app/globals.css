@@ -23,22 +23,47 @@
   --duration-slow:   400ms;
 }
 
+/* ── Theme CSS custom properties (runtime, used in inline styles) ─────────── */
+:root {
+  --sky-bg:        #080D14;
+  --sky-surface:   #0D1520;
+  --sky-surface-2: #111D2E;
+  --sky-border:    #162338;
+  --sky-border-2:  #1E3A5F;
+  --sky-text:      #D6E8F5;
+  --sky-muted:     #6BA3C0;
+  --sky-dim:       #243A52;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --sky-bg:        #EFF4F9;
+  --sky-surface:   #FFFFFF;
+  --sky-surface-2: #F3F7FB;
+  --sky-border:    #DDE5EE;
+  --sky-border-2:  #B8CFE4;
+  --sky-text:      #0D1520;
+  --sky-muted:     #4A6B8A;
+  --sky-dim:       #8AAEC8;
+  color-scheme: light;
+}
+
 /* ── Base ─────────────────────────────────────────────────────────────────── */
 html {
   color-scheme: dark;
 }
 
 body {
-  background: #080D14;
-  color: #D6E8F5;
+  background: var(--sky-bg);
+  color: var(--sky-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── Cockpit scrollbar ────────────────────────────────────────────────────── */
 ::-webkit-scrollbar        { width: 4px; height: 4px; }
-::-webkit-scrollbar-track  { background: #0D1520; }
-::-webkit-scrollbar-thumb  { background: #1E3A5F; border-radius: 2px; }
+::-webkit-scrollbar-track  { background: var(--sky-surface); }
+::-webkit-scrollbar-thumb  { background: var(--sky-border-2); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #0C9FD8; }
 
 /* ── MapLibre popup overrides ─────────────────────────────────────────────── */
@@ -68,6 +93,19 @@ body {
 }
 .notam-popup .maplibregl-popup-tip {
   border-top-color: #0C9FD8 !important;
+}
+
+/* ── Light mode MapLibre popup overrides ──────────────────────────────────── */
+[data-theme="light"] .maplibregl-popup-content {
+  background: #FFFFFF !important;
+  border: 1px solid #B8CFE4 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12) !important;
+}
+[data-theme="light"] .maplibregl-popup-close-button {
+  color: #4A6B8A !important;
+}
+[data-theme="light"] .maplibregl-popup-tip {
+  border-top-color: #B8CFE4 !important;
 }
 
 /* ── Animations ───────────────────────────────────────────────────────────── */

@@ -27,8 +27,8 @@ export default function ComplianceOverview({
 
   return (
     <div className="p-6">
-      <h1 style={{ color: "#D6E8F5" }} className="text-lg font-semibold">Compliance AESA</h1>
-      <p style={{ color: "#6BA3C0" }} className="mt-1 text-sm">
+      <h1 style={{ color: "var(--sky-text)" }} className="text-lg font-semibold">Compliance AESA</h1>
+      <p style={{ color: "var(--sky-muted)" }} className="mt-1 text-sm">
         Documentacion AESA, SORA, EAROs y certificaciones.
       </p>
 
@@ -55,7 +55,7 @@ export default function ComplianceOverview({
               </h3>
               <ul className="mt-2 space-y-1">
                 {pendingDrones.map((d) => (
-                  <li key={d.id} style={{ color: "#D6E8F5" }} className="text-xs">
+                  <li key={d.id} style={{ color: "var(--sky-text)" }} className="text-xs">
                     {d.model} — {d.serialNumber}
                   </li>
                 ))}
@@ -73,7 +73,7 @@ export default function ComplianceOverview({
               </h3>
               <ul className="mt-2 space-y-1">
                 {problematicPilots.map((p) => (
-                  <li key={p.id} style={{ color: "#D6E8F5" }} className="text-xs">
+                  <li key={p.id} style={{ color: "var(--sky-text)" }} className="text-xs">
                     {p.userName ?? p.licenseNumber} — {p.certificationStatus}
                   </li>
                 ))}
@@ -87,7 +87,7 @@ export default function ComplianceOverview({
               className="rounded-lg p-4"
             >
               <h3 style={{ color: "#00D97E" }} className="text-sm font-semibold">Todo en regla</h3>
-              <p style={{ color: "#6BA3C0" }} className="mt-1 text-xs">
+              <p style={{ color: "var(--sky-muted)" }} className="mt-1 text-xs">
                 Sin alertas de expiracion ni registros pendientes.
               </p>
             </div>
@@ -96,14 +96,14 @@ export default function ComplianceOverview({
 
         {/* Right: missions list */}
         <div className="lg:col-span-2">
-          <div style={{ background: "#0D1520", border: "1px solid #162338" }} className="rounded-xl overflow-hidden">
-            <div style={{ borderBottom: "1px solid #162338" }} className="px-4 py-3">
-              <h3 style={{ color: "#D6E8F5" }} className="text-sm font-semibold">
+          <div style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }} className="rounded-xl overflow-hidden">
+            <div style={{ borderBottom: "1px solid var(--sky-border)" }} className="px-4 py-3">
+              <h3 style={{ color: "var(--sky-text)" }} className="text-sm font-semibold">
                 Misiones con documentacion pendiente
               </h3>
             </div>
             {activeMissions.length === 0 ? (
-              <div style={{ color: "#6BA3C0" }} className="px-4 py-8 text-center text-sm">
+              <div style={{ color: "var(--sky-muted)" }} className="px-4 py-8 text-center text-sm">
                 No hay misiones activas que requieran documentacion.
               </div>
             ) : (
@@ -115,7 +115,7 @@ export default function ComplianceOverview({
                     <Link
                       key={m.id}
                       href={`/missions/${m.id}/compliance`}
-                      style={{ borderBottom: "1px solid #162338", display: "flex" }}
+                      style={{ borderBottom: "1px solid var(--sky-border)", display: "flex" }}
                       className="items-center justify-between px-4 py-3 transition-colors hover:bg-[#111D2E]"
                     >
                       <div className="min-w-0 flex-1">
@@ -128,8 +128,8 @@ export default function ComplianceOverview({
                           </span>
                           <MissionStatusBadge status={m.status} />
                         </div>
-                        <p style={{ color: "#D6E8F5" }} className="mt-0.5 text-sm font-medium">{m.name}</p>
-                        <div style={{ color: "#6BA3C0" }} className="mt-0.5 flex gap-3 text-xs">
+                        <p style={{ color: "var(--sky-text)" }} className="mt-0.5 text-sm font-medium">{m.name}</p>
+                        <div style={{ color: "var(--sky-muted)" }} className="mt-0.5 flex gap-3 text-xs">
                           {pilot && <span>Piloto: {pilot.userName ?? pilot.licenseNumber}</span>}
                           {drone && <span>Drone: {drone.model}</span>}
                           {m.scheduledStart && (
@@ -161,7 +161,7 @@ function StatCard({ label, value, accent }: { label: string; value: number; acce
       className="rounded-xl p-4"
     >
       <p style={{ color: accent }} className="text-2xl font-bold">{value}</p>
-      <p style={{ color: "#6BA3C0" }} className="text-xs font-medium mt-0.5">{label}</p>
+      <p style={{ color: "var(--sky-muted)" }} className="text-xs font-medium mt-0.5">{label}</p>
     </div>
   );
 }
@@ -187,7 +187,7 @@ function ComplianceStage({ status }: { status: string }) {
               ? { background: "rgba(0,217,126,0.12)", color: "#00D97E", border: "1px solid rgba(0,217,126,0.3)" }
               : i === activeIdx
                 ? { background: "rgba(12,159,216,0.12)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.3)" }
-                : { background: "#111D2E", color: "#3A5570", border: "1px solid #162338" }
+                : { background: "var(--sky-surface-2)", color: "#3A5570", border: "1px solid var(--sky-border)" }
           }
           className="rounded px-1.5 py-0.5 text-[10px] font-medium"
         >

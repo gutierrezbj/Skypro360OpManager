@@ -23,7 +23,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: "#4A8FD4", normal: "#D6E8F5", high: "#F5C518", urgent: "#F04E1C",
+  low: "#4A8FD4", normal: "var(--sky-text)", high: "#F5C518", urgent: "#F04E1C",
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -41,8 +41,8 @@ const DRONE_STATUS_LABELS: Record<string, string> = {
 };
 
 const CARD_STYLE = {
-  background: "#0D1520",
-  border: "1px solid #162338",
+  background: "var(--sky-surface)",
+  border: "1px solid var(--sky-border)",
   borderRadius: "16px",
   padding: "20px",
 };
@@ -69,12 +69,12 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
   });
 
   return (
-    <div style={{ background: "#080D14" }} className="h-full overflow-y-auto p-6">
+    <div style={{ background: "var(--sky-bg)" }} className="h-full overflow-y-auto p-6">
       <div className="mx-auto max-w-7xl space-y-6">
 
         <div>
-          <h1 style={{ color: "#D6E8F5" }} className="text-2xl font-bold">Analytics</h1>
-          <p style={{ color: "#6BA3C0" }} className="mt-1 text-sm">
+          <h1 style={{ color: "var(--sky-text)" }} className="text-2xl font-bold">Analytics</h1>
+          <p style={{ color: "var(--sky-muted)" }} className="mt-1 text-sm">
             Metricas operativas · datos en tiempo real
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
           <div style={CARD_STYLE}>
-            <h2 style={{ color: "#D6E8F5" }} className="mb-4 text-sm font-semibold">
+            <h2 style={{ color: "var(--sky-text)" }} className="mb-4 text-sm font-semibold">
               Misiones por estado
             </h2>
             {donutTotal > 0 ? (
@@ -133,7 +133,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                       style={{ transform: `rotate(${seg.rotation}deg)`, transformOrigin: "50% 50%" }}
                     />
                   ))}
-                  <circle cx="50" cy="50" r="28" fill="#0D1520" />
+                  <circle cx="50" cy="50" r="28" fill="var(--sky-surface)" />
                 </svg>
                 <div className="flex flex-col gap-1.5 min-w-0">
                   {donutSegments.map((seg) => (
@@ -142,10 +142,10 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         className="inline-block h-2 w-2 flex-shrink-0 rounded-full"
                         style={{ background: STATUS_COLORS[seg.status] ?? "#3A5570" }}
                       />
-                      <span style={{ color: "#6BA3C0" }} className="truncate">
+                      <span style={{ color: "var(--sky-muted)" }} className="truncate">
                         {STATUS_LABELS[seg.status] ?? seg.status}
                       </span>
-                      <span style={{ color: "#D6E8F5" }} className="ml-auto font-semibold pl-2">
+                      <span style={{ color: "var(--sky-text)" }} className="ml-auto font-semibold pl-2">
                         {seg.total}
                       </span>
                     </div>
@@ -159,7 +159,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
 
           {/* Monthly bars */}
           <div style={{ ...CARD_STYLE, gridColumn: "span 2" }}>
-            <h2 style={{ color: "#D6E8F5" }} className="mb-4 text-sm font-semibold">
+            <h2 style={{ color: "var(--sky-text)" }} className="mb-4 text-sm font-semibold">
               Evolucion mensual (ultimos 6 meses)
             </h2>
             <div className="flex h-36 items-end gap-2">
@@ -167,7 +167,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                 const pct = maxMonthly > 0 ? (m.total / maxMonthly) * 100 : 0;
                 return (
                   <div key={m.month} className="flex flex-1 flex-col items-center gap-1">
-                    <span style={{ color: "#D6E8F5" }} className="text-[10px] font-semibold">
+                    <span style={{ color: "var(--sky-text)" }} className="text-[10px] font-semibold">
                       {m.total > 0 ? m.total : ""}
                     </span>
                     <div
@@ -177,7 +177,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         background: "#0C9FD8",
                       }}
                     />
-                    <span style={{ color: "#6BA3C0" }} className="text-[10px]">{m.label}</span>
+                    <span style={{ color: "var(--sky-muted)" }} className="text-[10px]">{m.label}</span>
                   </div>
                 );
               })}
@@ -189,7 +189,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
           <div style={CARD_STYLE}>
-            <h2 style={{ color: "#D6E8F5" }} className="mb-4 text-sm font-semibold">
+            <h2 style={{ color: "var(--sky-text)" }} className="mb-4 text-sm font-semibold">
               Misiones por prioridad
             </h2>
             {data.byPriority.length > 0 ? (
@@ -201,10 +201,10 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                   return (
                     <div key={p} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span style={{ color: "#6BA3C0" }}>{PRIORITY_LABELS[p]}</span>
-                        <span style={{ color: "#D6E8F5" }} className="font-semibold">{val}</span>
+                        <span style={{ color: "var(--sky-muted)" }}>{PRIORITY_LABELS[p]}</span>
+                        <span style={{ color: "var(--sky-text)" }} className="font-semibold">{val}</span>
                       </div>
-                      <div style={{ background: "#111D2E" }} className="h-2 w-full overflow-hidden rounded-full">
+                      <div style={{ background: "var(--sky-surface-2)" }} className="h-2 w-full overflow-hidden rounded-full">
                         <div
                           className="h-full rounded-full transition-all duration-700"
                           style={{ width: `${pct}%`, background: PRIORITY_COLORS[p] }}
@@ -220,7 +220,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           </div>
 
           <div style={CARD_STYLE}>
-            <h2 style={{ color: "#D6E8F5" }} className="mb-4 text-sm font-semibold">
+            <h2 style={{ color: "var(--sky-text)" }} className="mb-4 text-sm font-semibold">
               Flota por estado
             </h2>
             {data.byDroneStatus.length > 0 ? (
@@ -232,12 +232,12 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                     return (
                       <div key={row.status} className="space-y-1">
                         <div className="flex justify-between text-xs">
-                          <span style={{ color: "#6BA3C0" }}>
+                          <span style={{ color: "var(--sky-muted)" }}>
                             {DRONE_STATUS_LABELS[row.status] ?? row.status}
                           </span>
-                          <span style={{ color: "#D6E8F5" }} className="font-semibold">{row.total}</span>
+                          <span style={{ color: "var(--sky-text)" }} className="font-semibold">{row.total}</span>
                         </div>
-                        <div style={{ background: "#111D2E" }} className="h-2 w-full overflow-hidden rounded-full">
+                        <div style={{ background: "var(--sky-surface-2)" }} className="h-2 w-full overflow-hidden rounded-full">
                           <div
                             className="h-full rounded-full transition-all duration-700"
                             style={{
@@ -258,7 +258,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
 
         {/* Row 4: Compliance health */}
         <div style={CARD_STYLE}>
-          <h2 style={{ color: "#D6E8F5" }} className="mb-4 text-sm font-semibold">
+          <h2 style={{ color: "var(--sky-text)" }} className="mb-4 text-sm font-semibold">
             Estado compliance
           </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -275,7 +275,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
 }
 
 function KpiCard({
-  label, value, sub, accent = "#D6E8F5", pulse = false, icon: Icon,
+  label, value, sub, accent = "var(--sky-text)", pulse = false, icon: Icon,
 }: {
   label: string;
   value: string | number;
@@ -285,9 +285,9 @@ function KpiCard({
   icon?: React.ComponentType<LucideProps>;
 }) {
   return (
-    <div style={{ background: "#0D1520", border: "1px solid #162338", borderRadius: "16px", padding: "20px" }}>
+    <div style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)", borderRadius: "16px", padding: "20px" }}>
       <div className="flex items-center justify-between">
-        <p style={{ color: "#6BA3C0" }} className="text-xs">{label}</p>
+        <p style={{ color: "var(--sky-muted)" }} className="text-xs">{label}</p>
         {Icon && <Icon style={{ color: accent, opacity: 0.6 }} className="h-4 w-4" />}
       </div>
       <div className="mt-1 flex items-center gap-2">
@@ -296,7 +296,7 @@ function KpiCard({
         )}
         <p style={{ color: accent }} className="text-2xl font-bold">{value}</p>
       </div>
-      {sub && <p style={{ color: "#6BA3C0" }} className="mt-0.5 text-[11px]">{sub}</p>}
+      {sub && <p style={{ color: "var(--sky-muted)" }} className="mt-0.5 text-[11px]">{sub}</p>}
     </div>
   );
 }
@@ -313,18 +313,18 @@ function ComplianceStat({
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="space-y-2">
-      <p style={{ color: "#6BA3C0" }} className="text-xs">{label}</p>
-      <p style={{ color: "#D6E8F5" }} className="text-xl font-bold">
+      <p style={{ color: "var(--sky-muted)" }} className="text-xs">{label}</p>
+      <p style={{ color: "var(--sky-text)" }} className="text-xl font-bold">
         {value}{unit}
-        {!unit && <span style={{ color: "#6BA3C0" }} className="text-sm font-normal"> / {total}</span>}
+        {!unit && <span style={{ color: "var(--sky-muted)" }} className="text-sm font-normal"> / {total}</span>}
       </p>
-      <div style={{ background: "#111D2E" }} className="h-1.5 w-full overflow-hidden rounded-full">
+      <div style={{ background: "var(--sky-surface-2)" }} className="h-1.5 w-full overflow-hidden rounded-full">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${pct}%`, background: color }}
         />
       </div>
-      <p style={{ color: "#6BA3C0" }} className="text-[10px]">{pct}%</p>
+      <p style={{ color: "var(--sky-muted)" }} className="text-[10px]">{pct}%</p>
     </div>
   );
 }

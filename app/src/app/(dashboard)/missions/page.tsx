@@ -1,9 +1,8 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { missions, drones, pilots, users } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
-import MissionList from "@/modules/missions/components/MissionList";
+import MissionsPageClient from "./MissionsPageClient";
 
 export default async function MissionsPage() {
   const session = await requireAuth();
@@ -46,17 +45,11 @@ export default async function MissionsPage() {
   });
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-lg font-semibold text-gray-900">Misiones</h1>
-      <MissionList
-        missions={missionList}
-        drones={droneList}
-        pilots={pilotList.map((p) => ({
-          ...p,
-          userName: p.userName ?? undefined,
-        }))}
-        users={userList}
-      />
-    </div>
+    <MissionsPageClient
+      missions={missionList}
+      drones={droneList}
+      pilots={pilotList.map((p) => ({ ...p, userName: p.userName ?? undefined }))}
+      users={userList}
+    />
   );
 }

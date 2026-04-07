@@ -30,7 +30,7 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p style={{ color: "#6BA3C0" }} className="text-sm">
+        <p style={{ color: "var(--sky-muted)" }} className="text-sm">
           {drones.length} drone{drones.length !== 1 ? "s" : ""} registrado{drones.length !== 1 ? "s" : ""}
         </p>
         <button
@@ -43,7 +43,7 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
       </div>
 
       {drones.length === 0 ? (
-        <div style={{ border: "1px dashed #1E3A5F", color: "#6BA3C0" }} className="rounded-lg py-12 text-center">
+        <div style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }} className="rounded-lg py-12 text-center">
           <p className="text-sm">No hay drones registrados.</p>
           <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
             Registrar el primero
@@ -54,7 +54,7 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
           {drones.map((drone) => (
             <div
               key={drone.id}
-              style={{ background: "#0D1520", border: "1px solid #162338" }}
+              style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
               className="overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
             >
               <div className="h-1" style={{ background: DRONE_STATUS_HEX[drone.status] ?? "#3A5570" }} />
@@ -63,11 +63,11 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
                   <DroneIcon style={{ color: "#0C9FD8" }} className="h-6 w-6" />
                   <DroneStatusBadge status={drone.status} />
                 </div>
-                <h3 style={{ color: "#D6E8F5" }} className="text-sm font-semibold">{drone.model}</h3>
-                <p style={{ color: "#6BA3C0" }} className="mb-3 text-xs">{drone.manufacturer}</p>
+                <h3 style={{ color: "var(--sky-text)" }} className="text-sm font-semibold">{drone.model}</h3>
+                <p style={{ color: "var(--sky-muted)" }} className="mb-3 text-xs">{drone.manufacturer}</p>
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between">
-                    <span style={{ color: "#6BA3C0" }}>S/N</span>
+                    <span style={{ color: "var(--sky-muted)" }}>S/N</span>
                     <span
                       style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
                       className="font-medium"
@@ -76,14 +76,14 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: "#6BA3C0" }}>Registro</span>
-                    <span style={{ color: "#D6E8F5" }} className="font-medium">{drone.registrationNumber || "—"}</span>
+                    <span style={{ color: "var(--sky-muted)" }}>Registro</span>
+                    <span style={{ color: "var(--sky-text)" }} className="font-medium">{drone.registrationNumber || "—"}</span>
                   </div>
                   {drone.easaClass && (
                     <div className="flex justify-between">
-                      <span style={{ color: "#6BA3C0" }}>Clase EASA</span>
+                      <span style={{ color: "var(--sky-muted)" }}>Clase EASA</span>
                       <span
-                        style={{ background: "#111D2E", color: "#D6E8F5", border: "1px solid #162338" }}
+                        style={{ background: "var(--sky-surface-2)", color: "var(--sky-text)", border: "1px solid var(--sky-border)" }}
                         className="rounded px-2 py-0.5 font-medium text-xs"
                       >
                         {drone.easaClass}
@@ -92,23 +92,23 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
                   )}
                   {drone.maxFlightTime && (
                     <div className="flex justify-between">
-                      <span style={{ color: "#6BA3C0" }}>Vuelo max</span>
-                      <span style={{ color: "#D6E8F5" }} className="font-medium">{drone.maxFlightTime} min</span>
+                      <span style={{ color: "var(--sky-muted)" }}>Vuelo max</span>
+                      <span style={{ color: "var(--sky-text)" }} className="font-medium">{drone.maxFlightTime} min</span>
                     </div>
                   )}
                   {drone.insuranceExpiry && (
                     <div className="flex justify-between">
-                      <span style={{ color: "#6BA3C0" }}>Seguro exp.</span>
-                      <span style={{ color: "#D6E8F5" }} className="font-medium">
+                      <span style={{ color: "var(--sky-muted)" }}>Seguro exp.</span>
+                      <span style={{ color: "var(--sky-text)" }} className="font-medium">
                         {new Date(drone.insuranceExpiry).toLocaleDateString("es-ES")}
                       </span>
                     </div>
                   )}
                 </div>
-                <div style={{ borderTop: "1px solid #162338" }} className="mt-3 pt-3">
+                <div style={{ borderTop: "1px solid var(--sky-border)" }} className="mt-3 pt-3">
                   <button
                     onClick={() => openEdit(drone)}
-                    style={{ background: "rgba(12,159,216,0.06)", color: "#6BA3C0", border: "1px solid #162338" }}
+                    style={{ background: "rgba(12,159,216,0.06)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }}
                     className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
                   >
                     Editar
