@@ -483,6 +483,28 @@ const PRESET_CITIES = [
   { label: "Murcia",    lat: 37.9922, lng: -1.1307 },
 ];
 
+function LocationPill({
+  opt, active, onSelect,
+}: {
+  opt: { label: string; lat: number; lng: number };
+  active: boolean;
+  onSelect: (loc: { lat: number; lng: number; label: string }) => void;
+}) {
+  return (
+    <button
+      onClick={() => onSelect(opt)}
+      className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-all"
+      style={active
+        ? { background: "rgba(12,159,216,0.15)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.4)" }
+        : { background: "var(--sky-surface)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }
+      }
+    >
+      <MapPinIcon className="h-2.5 w-2.5 flex-shrink-0" />
+      {opt.label}
+    </button>
+  );
+}
+
 function WeatherLocationPicker({
   activeMissions,
   selected,
@@ -499,24 +521,26 @@ function WeatherLocationPicker({
   const allOptions = [...missionOptions, ...PRESET_CITIES];
 
   return (
-    <div className="flex flex-wrap gap-1">
-      {allOptions.map((opt) => {
-        const active = selected.label === opt.label;
-        return (
-          <button
-            key={opt.label}
-            onClick={() => onSelect(opt)}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-all"
-            style={active
-              ? { background: "rgba(12,159,216,0.15)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.4)" }
-              : { background: "var(--sky-surface-2)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }
-            }
-          >
-            <MapPinIcon className="h-2.5 w-2.5 flex-shrink-0" />
-            {opt.label}
-          </button>
-        );
-      })}
+    <div
+      className="rounded-xl p-2.5"
+      style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}
+    >
+      {missionOptions.length > 0 && (
+        <p className="text-[9px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--sky-dim)" }}>
+          Misiones activas
+        </p>
+      )}
+      {missionOptions.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2 pb-2" style={{ borderBottom: "1px solid var(--sky-border)" }}>
+          {missionOptions.map((opt) => <LocationPill key={opt.label} opt={opt} active={selected.label === opt.label} onSelect={onSelect} />)}
+        </div>
+      )}
+      <p className="text-[9px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--sky-dim)" }}>
+        Ciudades
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {PRESET_CITIES.map((opt) => <LocationPill key={opt.label} opt={opt} active={selected.label === opt.label} onSelect={onSelect} />)}
+      </div>
     </div>
   );
 }
