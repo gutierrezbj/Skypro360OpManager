@@ -37,6 +37,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerMapRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const popupRef = useRef<maplibregl.Popup | null>(null);
+  const notamPopupRef = useRef<maplibregl.Popup | null>(null);
 
   // NOTAM state
   const [notamData, setNotamData] = useState<{ type: string; features: unknown[] } | null>(null);
@@ -116,7 +117,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         const p = e.features[0].properties as Record<string, string>;
         const coords = e.lngLat;
 
-        popupRef.current?.remove();
+        notamPopupRef.current?.remove();
         const popup = new maplibregl.Popup({
           offset: [0, -4],
           closeButton: true,
@@ -147,11 +148,17 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
             </div>
           `)
           .addTo(map);
-        popupRef.current = popup;
+        notamPopupRef.current = popup;
+      });
 
-        // Close on next map click (not this same click — skip with setTimeout)
-        const closeOnNextClick = () => { popup.remove(); };
-        setTimeout(() => map.once("click", closeOnNextClick), 50);
+      // Close NOTAM popup when clicking anywhere outside a NOTAM zone
+      map.on("click", (e) => {
+        if (!notamPopupRef.current) return;
+        const hits = map.queryRenderedFeatures(e.point, { layers: ["notam-fill"] });
+        if (hits.length === 0) {
+          notamPopupRef.current.remove();
+          notamPopupRef.current = null;
+        }
       });
 
       map.on("mouseenter", "notam-fill", () => {
