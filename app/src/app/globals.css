@@ -66,6 +66,12 @@ body {
 ::-webkit-scrollbar-thumb  { background: var(--sky-border-2); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #0C9FD8; }
 
+/* ── MapLibre marker overflow fix (cards near edges) ─────────────────────── */
+.maplibregl-map,
+.maplibregl-canvas-container {
+  overflow: visible !important;
+}
+
 /* ── MapLibre popup overrides ─────────────────────────────────────────────── */
 .maplibregl-popup-content {
   background: #0D1520 !important;
