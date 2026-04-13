@@ -111,13 +111,19 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         },
       });
 
-      // NOTAM click → popup
+      // NOTAM click → toggle popup (click activa, click desactiva)
       map.on("click", "notam-fill", (e) => {
         if (!e.features?.length) return;
-        const p = e.features[0].properties as Record<string, string>;
-        const coords = e.lngLat;
 
-        notamPopupRef.current?.remove();
+        // Si ya hay popup abierto → cerrar (toggle off)
+        if (notamPopupRef.current) {
+          notamPopupRef.current.remove();
+          notamPopupRef.current = null;
+          return;
+        }
+
+        const p = e.features[0].properties as Record<string, string>;
+
         const popup = new maplibregl.Popup({
           offset: [0, -4],
           closeButton: true,
@@ -125,7 +131,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           maxWidth: "300px",
           className: "notam-popup",
         })
-          .setLngLat(coords)
+          .setLngLat(e.lngLat)
           .setHTML(`
             <div style="font-family:system-ui,sans-serif;padding:14px;max-width:268px;box-sizing:border-box;overflow-wrap:break-word;word-break:break-word;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
@@ -148,17 +154,10 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
             </div>
           `)
           .addTo(map);
-        notamPopupRef.current = popup;
-      });
 
-      // Close NOTAM popup when clicking anywhere outside a NOTAM zone
-      map.on("click", (e) => {
-        if (!notamPopupRef.current) return;
-        const hits = map.queryRenderedFeatures(e.point, { layers: ["notam-fill"] });
-        if (hits.length === 0) {
-          notamPopupRef.current.remove();
-          notamPopupRef.current = null;
-        }
+        notamPopupRef.current = popup;
+        // Limpiar ref cuando se cierra con el botón X
+        popup.on("close", () => { notamPopupRef.current = null; });
       });
 
       map.on("mouseenter", "notam-fill", () => {
@@ -358,6 +357,8 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
+        notamPopupRef.current?.remove();
+        notamPopupRef.current = null;
         popupRef.current?.remove();
 
         const popup = new maplibregl.Popup({
