@@ -38,6 +38,10 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
   const markerMapRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const popupRef = useRef<maplibregl.Popup | null>(null);
   const notamPopupRef = useRef<maplibregl.Popup | null>(null);
+  // Ref para onSelectMission — evita que el useEffect de misiones se dispare
+  // en cada re-render de telemetría (función nueva cada vez)
+  const onSelectMissionRef = useRef(onSelectMission);
+  useEffect(() => { onSelectMissionRef.current = onSelectMission; }, [onSelectMission]);
 
   // NOTAM state
   const [notamData, setNotamData] = useState<{ type: string; features: unknown[] } | null>(null);
@@ -377,7 +381,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
           const target = ev.target as HTMLElement;
           if (target.dataset.missionId) {
             popup.remove();
-            onSelectMission?.(mission);
+            onSelectMissionRef.current?.(mission);
           }
         });
 
@@ -390,7 +394,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
 
       markerMapRef.current.set(mission.id, marker);
     }
-  }, [missions, onSelectMission, selectedId, buildPopupHTML]);
+  }, [missions, selectedId, buildPopupHTML]);
 
   // Live telemetry: update marker positions without re-rendering
   useEffect(() => {
