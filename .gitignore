@@ -34,6 +34,8 @@ test_write.tmp
 *.PDF
 *.zip
 *.docx
+# Exception: user manuals are versioned with the code
+!docs/manuals/*.docx
 
 # Legacy code (V2.6 reference only)
 Skypro360_CodigoCompleto/
