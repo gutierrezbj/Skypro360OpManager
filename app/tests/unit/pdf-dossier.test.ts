@@ -4,6 +4,25 @@ import { generateMissionDossierPdf } from "@/modules/reports/pdf-dossier";
 import { PDFDocument } from "pdf-lib";
 
 // Minimal mock data matching the schema types
+function makeTenant(name = "Skypro360", overrides: Record<string, unknown> = {}) {
+  return {
+    id: "t1",
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    isActive: true,
+    legalName: null,
+    nif: null,
+    operatorRegistrationNumber: null,
+    aesaCsv: null,
+    contactEmail: null,
+    contactPhone: null,
+    address: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  } as any;
+}
+
 function makeMission(overrides: Record<string, unknown> = {}) {
   return {
     id: "550e8400-e29b-41d4-a716-446655440000",
@@ -125,7 +144,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission(),
       drone: null,
       pilot: null,
-      tenantName: "Skypro360",
+      tenant: makeTenant("Skypro360"),
       planning: null,
       preflights: [],
       postflights: [],
@@ -145,7 +164,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission(),
       drone: makeDrone(),
       pilot: makePilot(),
-      tenantName: "Skypro360 S.L.",
+      tenant: makeTenant("Skypro360 S.L.", { legalName: "Skypro360 Servicios Ltd", nif: "B12345678", operatorRegistrationNumber: "2024/LPAIO/000744", aesaCsv: "AESACSV001" }),
       planning: makePlanning(),
       preflights: [makePreflight()],
       postflights: [makePostflight()],
@@ -162,7 +181,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission({ code: "SKY-2026-099" }),
       drone: makeDrone(),
       pilot: makePilot(),
-      tenantName: "TestTenant",
+      tenant: makeTenant("TestTenant"),
       planning: makePlanning(),
       preflights: [makePreflight()],
       postflights: [makePostflight()],
@@ -179,7 +198,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission({ description: null }),
       drone: null,
       pilot: null,
-      tenantName: "Test",
+      tenant: makeTenant("Test"),
       planning: null,
       preflights: [],
       postflights: [],
@@ -195,7 +214,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission(),
       drone: makeDrone(),
       pilot: makePilot(),
-      tenantName: "Test",
+      tenant: makeTenant("Test"),
       planning: null,
       preflights: [makePreflight(), makePreflight()],
       postflights: [makePostflight(), makePostflight(), makePostflight()],
@@ -215,7 +234,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission(),
       drone: null,
       pilot: null,
-      tenantName: "Test",
+      tenant: makeTenant("Test"),
       planning: null,
       preflights: [],
       postflights: [],
@@ -230,7 +249,7 @@ describe("PDF Dossier Generation", () => {
       mission: makeMission(),
       drone: null,
       pilot: null,
-      tenantName: "Test",
+      tenant: makeTenant("Test"),
       planning: null,
       preflights: [],
       postflights: [],
