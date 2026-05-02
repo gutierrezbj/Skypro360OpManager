@@ -35,8 +35,10 @@ export default function ChangePasswordForm({ allowSkip }: { allowSkip: boolean }
     }
   }, [state, router, update]);
 
-  const fieldError = (field: string) =>
-    !state?.success && state?.fieldErrors?.[field]?.[0];
+  const fieldError = (field: string): string | undefined => {
+    if (state && !state.success) return state.fieldErrors?.[field]?.[0];
+    return undefined;
+  };
 
   return (
     <form action={formAction} className="space-y-4">
