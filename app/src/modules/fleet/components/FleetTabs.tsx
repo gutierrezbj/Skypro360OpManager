@@ -11,10 +11,12 @@ export default function FleetTabs({
   drones,
   pilots,
   users,
+  canEdit = true,
 }: {
   drones: Drone[];
   pilots: PilotWithUser[];
   users: Pick<User, "id" | "name" | "email">[];
+  canEdit?: boolean;
 }) {
   const [tab, setTab] = useState<"drones" | "pilots">("drones");
 
@@ -48,9 +50,9 @@ export default function FleetTabs({
       </div>
 
       {tab === "drones" ? (
-        <DroneList drones={drones} />
+        <DroneList drones={drones} canEdit={canEdit} />
       ) : (
-        <PilotList pilots={pilots} users={users} />
+        <PilotList pilots={pilots} users={users} canEdit={canEdit} />
       )}
     </div>
   );

@@ -19,7 +19,7 @@ export default function MissionDetail({
   drones: Drone[];
   pilots: PilotWithUser[];
   onClose: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
 }) {
   const [state, formAction, isPending] = useActionState<MissionActionResult | null, FormData>(
     transitionMission,
@@ -165,7 +165,7 @@ export default function MissionDetail({
           >
             Compliance
           </a>
-          {!isTerminal(mission.status) && (
+          {!isTerminal(mission.status) && onEdit && (
             <button
               onClick={onEdit}
               style={{ background: "#0C9FD8", color: "#fff" }}

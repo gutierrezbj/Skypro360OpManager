@@ -1,8 +1,9 @@
 import { eq, and } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { notFound, forbidden } from "next/navigation";
 import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { missions, drones, pilots, users } from "@/lib/db/schema";
+import { canUserAccessMission } from "@/lib/db/queries/missions.queries";
 import {
   getPlanningForMission,
   getPreflightsForMission,
@@ -19,6 +20,8 @@ export default async function MissionCompliancePage({
   const { id } = await params;
   const session = await requireAuth();
   const tenantId = session.user.tenantId;
+  const userId = session.user.id;
+  const role = (session.user as { role: string }).role;
 
   const [mission] = await withTenantContext(tenantId, async (tx) => {
     return tx
@@ -28,6 +31,16 @@ export default async function MissionCompliancePage({
   });
 
   if (!mission) notFound();
+
+  // RBAC: pilot solo accede a sus misiones
+  const allowed = await withTenantContext(tenantId, (tx) =>
+    canUserAccessMission({ missionId: id, tenantId, userId, role }, tx),
+  );
+  if (!allowed) {
+    // Next.js 16: forbidden() renders forbidden.tsx (403) instead of notFound (404)
+    if (typeof forbidden === "function") forbidden();
+    notFound();
+  }
 
   const [droneList, pilotList, userList, planning, preflights, postflights, incidents] =
     await Promise.all([

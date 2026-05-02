@@ -13,11 +13,13 @@ export default function MissionsPageClient({
   drones,
   pilots,
   users,
+  canEdit = true,
 }: {
   missions: Mission[];
   drones: Drone[];
   pilots: PilotWithUser[];
   users: Pick<User, "id" | "name" | "email">[];
+  canEdit?: boolean;
 }) {
   const [view, setView] = useState<"list" | "map">("list");
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
@@ -78,6 +80,7 @@ export default function MissionsPageClient({
               drones={drones}
               pilots={pilots}
               users={users}
+              canEdit={canEdit}
             />
           </div>
         ) : (

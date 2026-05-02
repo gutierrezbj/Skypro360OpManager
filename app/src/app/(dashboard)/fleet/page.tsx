@@ -2,11 +2,13 @@ import { eq } from "drizzle-orm";
 import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { drones, pilots, users } from "@/lib/db/schema";
+import { canManageFleet } from "@/lib/auth/rbac";
 import FleetTabs from "@/modules/fleet/components/FleetTabs";
 
 export default async function FleetPage() {
   const session = await requireAuth();
   const tenantId = session.user.tenantId;
+  const role = (session.user as { role: string }).role;
 
   const [droneList, pilotList, userList] = await withTenantContext(tenantId, async (tx) => {
     const d = await tx.select().from(drones).where(eq(drones.tenantId, tenantId));
@@ -50,6 +52,7 @@ export default async function FleetPage() {
           userEmail: p.userEmail ?? undefined,
         }))}
         users={userList}
+        canEdit={canManageFleet(role)}
       />
     </div>
   );

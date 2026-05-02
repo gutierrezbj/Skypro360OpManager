@@ -21,9 +21,11 @@ type Props = {
   drones: Drone[];
   pilots: PilotWithUser[];
   users: Pick<User, "id" | "name" | "email">[];
+  /** Si false, se ocultan los botones de crear/editar */
+  canEdit?: boolean;
 };
 
-export default function MissionList({ missions, drones, pilots, users }: Props) {
+export default function MissionList({ missions, drones, pilots, users, canEdit = true }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Mission | undefined>();
   const [viewing, setViewing] = useState<Mission | undefined>();
@@ -58,15 +60,17 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
         <FilterChip label="Aprobadas"   value="approved"  count={statusCounts.approved}  active={filter} onClick={setFilter} />
         <FilterChip label="En vuelo"    value="in_flight" count={statusCounts.in_flight} active={filter} onClick={setFilter} />
         <FilterChip label="Completadas" value="completed" count={statusCounts.completed} active={filter} onClick={setFilter} />
-        <div className="ml-auto">
-          <button
-            onClick={openCreate}
-            style={{ background: "#0C9FD8", color: "#fff" }}
-            className="rounded-md px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
-          >
-            + Nueva Mision
-          </button>
-        </div>
+        {canEdit && (
+          <div className="ml-auto">
+            <button
+              onClick={openCreate}
+              style={{ background: "#0C9FD8", color: "#fff" }}
+              className="rounded-md px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+            >
+              + Nueva Mision
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Card grid */}
@@ -76,7 +80,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
           className="rounded-lg py-12 text-center"
         >
           <p className="text-sm">No hay misiones{filter !== "all" ? " en este estado" : ""}.</p>
-          {filter === "all" && (
+          {filter === "all" && canEdit && (
             <button
               onClick={openCreate}
               style={{ color: "#0C9FD8" }}
@@ -183,7 +187,7 @@ export default function MissionList({ missions, drones, pilots, users }: Props) 
           drones={drones}
           pilots={pilots}
           onClose={() => setViewing(undefined)}
-          onEdit={() => openEdit(viewing)}
+          onEdit={canEdit ? () => openEdit(viewing) : undefined}
         />
       )}
     </div>

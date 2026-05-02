@@ -21,9 +21,11 @@ type PilotWithUser = Pilot & { userName?: string; userEmail?: string };
 export default function PilotList({
   pilots,
   users,
+  canEdit = true,
 }: {
   pilots: PilotWithUser[];
   users: Pick<User, "id" | "name" | "email">[];
+  canEdit?: boolean;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Pilot | undefined>();
@@ -44,21 +46,25 @@ export default function PilotList({
         <p style={{ color: "var(--sky-muted)" }} className="text-sm">
           {pilots.length} piloto{pilots.length !== 1 ? "s" : ""} registrado{pilots.length !== 1 ? "s" : ""}
         </p>
-        <button
-          onClick={openCreate}
-          style={{ background: "#0C9FD8", color: "#fff" }}
-          className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
-        >
-          + Nuevo Piloto
-        </button>
+        {canEdit && (
+          <button
+            onClick={openCreate}
+            style={{ background: "#0C9FD8", color: "#fff" }}
+            className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+          >
+            + Nuevo Piloto
+          </button>
+        )}
       </div>
 
       {pilots.length === 0 ? (
         <div style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }} className="rounded-lg py-12 text-center">
           <p className="text-sm">No hay pilotos registrados.</p>
-          <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
-            Registrar el primero
-          </button>
+          {canEdit && (
+            <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
+              Registrar el primero
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -120,15 +126,17 @@ export default function PilotList({
                       </div>
                     )}
                   </div>
-                  <div style={{ borderTop: "1px solid var(--sky-border)" }} className="mt-3 pt-3">
-                    <button
-                      onClick={() => openEdit(pilot)}
-                      style={{ background: "rgba(12,159,216,0.06)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }}
-                      className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
-                    >
-                      Editar
-                    </button>
-                  </div>
+                  {canEdit && (
+                    <div style={{ borderTop: "1px solid var(--sky-border)" }} className="mt-3 pt-3">
+                      <button
+                        onClick={() => openEdit(pilot)}
+                        style={{ background: "rgba(12,159,216,0.06)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }}
+                        className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

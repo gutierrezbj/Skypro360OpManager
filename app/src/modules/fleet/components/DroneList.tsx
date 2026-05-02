@@ -13,7 +13,7 @@ const DRONE_STATUS_HEX: Record<string, string> = {
   pending_registration: "#4A8FD4",
 };
 
-export default function DroneList({ drones }: { drones: Drone[] }) {
+export default function DroneList({ drones, canEdit = true }: { drones: Drone[]; canEdit?: boolean }) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Drone | undefined>();
 
@@ -33,21 +33,25 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
         <p style={{ color: "var(--sky-muted)" }} className="text-sm">
           {drones.length} drone{drones.length !== 1 ? "s" : ""} registrado{drones.length !== 1 ? "s" : ""}
         </p>
-        <button
-          onClick={openCreate}
-          style={{ background: "#0C9FD8", color: "#fff" }}
-          className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
-        >
-          + Nuevo Drone
-        </button>
+        {canEdit && (
+          <button
+            onClick={openCreate}
+            style={{ background: "#0C9FD8", color: "#fff" }}
+            className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+          >
+            + Nuevo Drone
+          </button>
+        )}
       </div>
 
       {drones.length === 0 ? (
         <div style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }} className="rounded-lg py-12 text-center">
           <p className="text-sm">No hay drones registrados.</p>
-          <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
-            Registrar el primero
-          </button>
+          {canEdit && (
+            <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
+              Registrar el primero
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -105,15 +109,17 @@ export default function DroneList({ drones }: { drones: Drone[] }) {
                     </div>
                   )}
                 </div>
-                <div style={{ borderTop: "1px solid var(--sky-border)" }} className="mt-3 pt-3">
-                  <button
-                    onClick={() => openEdit(drone)}
-                    style={{ background: "rgba(12,159,216,0.06)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }}
-                    className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
-                  >
-                    Editar
-                  </button>
-                </div>
+                {canEdit && (
+                  <div style={{ borderTop: "1px solid var(--sky-border)" }} className="mt-3 pt-3">
+                    <button
+                      onClick={() => openEdit(drone)}
+                      style={{ background: "rgba(12,159,216,0.06)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }}
+                      className="w-full rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

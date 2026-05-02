@@ -20,16 +20,20 @@ import {
 import type { LucideProps } from "@/lib/icons";
 import type React from "react";
 import { useTheme } from "@/lib/theme/ThemeContext";
+import { ROLE_LABELS } from "@/lib/auth/rbac";
 
 type NavIcon = React.ComponentType<LucideProps>;
 
-const NAV_ITEMS: { href: string; label: string; icon: NavIcon }[] = [
+type NavItem = { href: string; label: string; icon: NavIcon; rolesHidden?: string[] };
+
+const NAV_ITEMS: NavItem[] = [
   { href: "/",             label: "Operaciones",  icon: MapIcon },
   { href: "/espacio-ops",  label: "Espacio OPS",  icon: RadarIcon },
   { href: "/missions",     label: "Misiones",     icon: MissionIcon },
   { href: "/fleet",        label: "Flota",        icon: DroneIcon },
   { href: "/compliance",   label: "Compliance",   icon: ComplianceIcon },
-  { href: "/analytics",    label: "Analytics",    icon: AnalyticsIcon },
+  // Analytics: no visible para piloto ni viewer
+  { href: "/analytics",    label: "Analytics",    icon: AnalyticsIcon, rolesHidden: ["pilot", "viewer"] },
 ];
 
 export default function Sidebar({
@@ -80,7 +84,7 @@ export default function Sidebar({
 
       {/* ── Nav ───────────────────────────────────────────────────────────── */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.filter((item) => !item.rolesHidden?.includes(userRole ?? "viewer")).map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
             <Link
@@ -171,7 +175,7 @@ export default function Sidebar({
               className="text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-sm"
               style={{ background: "rgba(12,159,216,0.1)", color: "var(--sky-muted)", border: "1px solid rgba(12,159,216,0.15)" }}
             >
-              {userRole}
+              {ROLE_LABELS[userRole] ?? userRole}
             </span>
           </div>
         )}

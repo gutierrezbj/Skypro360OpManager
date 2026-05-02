@@ -1,19 +1,19 @@
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
-import { missions, drones, pilots, users } from "@/lib/db/schema";
+import { drones, pilots, users } from "@/lib/db/schema";
+import { getMissionsForUser } from "@/lib/db/queries/missions.queries";
+import { canEditMission } from "@/lib/auth/rbac";
 import MissionsPageClient from "./MissionsPageClient";
 
 export default async function MissionsPage() {
   const session = await requireAuth();
   const tenantId = session.user.tenantId;
+  const userId = session.user.id;
+  const role = (session.user as { role: string }).role;
 
   const [missionList, droneList, pilotList, userList] = await withTenantContext(tenantId, async (tx) => {
-    const m = await tx
-      .select()
-      .from(missions)
-      .where(eq(missions.tenantId, tenantId))
-      .orderBy(desc(missions.createdAt));
+    const m = await getMissionsForUser({ tenantId, userId, role }, tx);
 
     const d = await tx.select().from(drones).where(eq(drones.tenantId, tenantId));
 
@@ -50,6 +50,7 @@ export default async function MissionsPage() {
       drones={droneList}
       pilots={pilotList.map((p) => ({ ...p, userName: p.userName ?? undefined }))}
       users={userList}
+      canEdit={canEditMission(role)}
     />
   );
 }
