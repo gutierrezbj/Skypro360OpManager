@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const DEMO_ACCOUNTS = [
   { label: "Admin SRS",   email: "admin@skypro360.es",        password: "admin12345", role: "admin" },
@@ -207,6 +208,18 @@ export default function LoginPage() {
                 "ACCEDER"
               )}
             </button>
+
+            <div className="text-center">
+              <Link
+                href="/forgot-password"
+                className="text-xs transition-colors"
+                style={{ color: "#6BA3C0" }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#0C9FD8")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#6BA3C0")}
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </form>
 
           {/* Demo accounts */}
