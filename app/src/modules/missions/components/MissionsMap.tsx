@@ -6,6 +6,11 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import { STATUS_LABELS, PRIORITY_LABELS } from "../state-machine";
 import type { TelemetryPoint } from "@/modules/telemetry/hooks/useTelemetry";
+import { useTheme } from "@/lib/theme/ThemeContext";
+
+// CartoDB free basemaps — positron (light) y dark-matter (dark)
+const MAP_STYLE_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+const MAP_STYLE_DARK  = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
 const MARKER_COLORS: Record<string, string> = {
   draft:      "#3A5570",
@@ -33,6 +38,7 @@ type Props = {
 };
 
 export default function MissionsMap({ missions, drones, pilots, onSelectMission, selectedId, telemetry }: Props) {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerMapRef = useRef<Map<string, maplibregl.Marker>>(new Map());
@@ -42,12 +48,22 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
   // en cada re-render de telemetría (función nueva cada vez)
   const onSelectMissionRef = useRef(onSelectMission);
   useEffect(() => { onSelectMissionRef.current = onSelectMission; }, [onSelectMission]);
+  // Ref para el theme actual del mapa (evita que el effect init se dispare al cambiar tema)
+  const themeRef = useRef(theme);
 
   // NOTAM state
   const [notamData, setNotamData] = useState<{ type: string; features: unknown[] } | null>(null);
   const [showNotams, setShowNotams] = useState(true);
   const [notamLoading, setNotamLoading] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
+  // Refs para acceder al estado más reciente desde callbacks de MapLibre
+  // (evita closures viejos al re-aplicar layers tras setStyle)
+  const notamDataRef = useRef(notamData);
+  const showNotamsRef = useRef(showNotams);
+  const mapLoadedRef = useRef(mapLoaded);
+  useEffect(() => { notamDataRef.current = notamData; }, [notamData]);
+  useEffect(() => { showNotamsRef.current = showNotams; }, [showNotams]);
+  useEffect(() => { mapLoadedRef.current = mapLoaded; }, [mapLoaded]);
 
   const handleResize = useCallback(() => {
     const map = mapRef.current;
@@ -75,7 +91,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      style: themeRef.current === "dark" ? MAP_STYLE_DARK : MAP_STYLE_LIGHT,
       center: [-6.37, 39.15],
       zoom: 7.5,
       attributionControl: false,
@@ -87,27 +103,29 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       "bottom-right",
     );
 
-    map.on("load", () => {
-      // Add empty NOTAM GeoJSON source + layers
-      map.addSource("notams", {
-        type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
-      });
+    // Función reutilizable: añade NOTAM source/layers + handlers a un map.
+    // Se llama tras "load" inicial Y tras "style.load" cuando cambia el tema.
+    function setupNotamLayer() {
+      // Source con datos actuales (si ya están cargados)
+      const initialData = notamDataRef.current ?? { type: "FeatureCollection", features: [] };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map.addSource("notams", { type: "geojson", data: initialData as any });
+
+      const visibility = showNotamsRef.current ? "visible" : "none";
 
       map.addLayer({
         id: "notam-fill",
         type: "fill",
         source: "notams",
-        paint: {
-          "fill-color": NOTAM_FILL,
-          "fill-opacity": 1,
-        },
+        layout: { visibility },
+        paint: { "fill-color": NOTAM_FILL, "fill-opacity": 1 },
       });
 
       map.addLayer({
         id: "notam-line",
         type: "line",
         source: "notams",
+        layout: { visibility },
         paint: {
           "line-color": NOTAM_LINE,
           "line-width": 1.5,
@@ -170,8 +188,24 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       map.on("mouseleave", "notam-fill", () => {
         map.getCanvas().style.cursor = "";
       });
+    } // ── end setupNotamLayer ──
 
+    map.on("load", () => {
+      setupNotamLayer();
       setMapLoaded(true);
+    });
+
+    // Re-aplicar layers tras cambio de estilo (cuando cambia el tema)
+    map.on("style.load", () => {
+      // Solo si ya estaba cargado antes (no en la carga inicial — ese va por "load")
+      if (!mapRef.current?.getSource("notams")) {
+        // El primer "style.load" se dispara antes que "load" — en ese caso,
+        // notams aún no existe pero "load" lo añadirá enseguida. Solo
+        // re-añadimos si ya estaba inicializado y se ha perdido por setStyle.
+        if (mapLoadedRef.current) {
+          setupNotamLayer();
+        }
+      }
     });
 
     mapRef.current = map;
@@ -204,6 +238,16 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     if (map.getLayer("notam-fill")) map.setLayoutProperty("notam-fill", "visibility", visibility);
     if (map.getLayer("notam-line")) map.setLayoutProperty("notam-line", "visibility", visibility);
   }, [showNotams, mapLoaded]);
+
+  // Theme change → swap MapLibre style (positron ↔ dark-matter)
+  // setStyle wipes layers; el handler "style.load" del init los re-añade.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+    if (themeRef.current === theme) return; // sin cambio real
+    themeRef.current = theme;
+    map.setStyle(theme === "dark" ? MAP_STYLE_DARK : MAP_STYLE_LIGHT);
+  }, [theme, mapLoaded]);
 
   // Build popup HTML for a mission
   const buildPopupHTML = useCallback((mission: Mission) => {
@@ -419,18 +463,18 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         }}
         className="absolute top-3 left-3 rounded-lg p-2 transition-all"
         style={{
-          background: "rgba(13,21,32,0.92)",
-          border: "1px solid #1E3A5F",
+          background: "var(--sky-surface)",
+          border: "1px solid var(--sky-border-2)",
           backdropFilter: "blur(8px)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
         }}
         title="Centrar mapa"
         onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "#0C9FD8")}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "#1E3A5F")}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "var(--sky-border-2)")}
       >
         <svg
           className="h-4 w-4"
-          style={{ color: "#6BA3C0" }}
+          style={{ color: "var(--sky-muted)" }}
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
           <circle cx="12" cy="12" r="3" />
@@ -443,11 +487,11 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
         onClick={() => setShowNotams((v) => !v)}
         className="absolute top-14 left-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all"
         style={{
-          background: showNotams ? "rgba(12,159,216,0.18)" : "rgba(13,21,32,0.92)",
-          border: showNotams ? "1px solid rgba(12,159,216,0.4)" : "1px solid #1E3A5F",
-          color: showNotams ? "#0C9FD8" : "#6BA3C0",
+          background: showNotams ? "rgba(12,159,216,0.18)" : "var(--sky-surface)",
+          border: showNotams ? "1px solid rgba(12,159,216,0.4)" : "1px solid var(--sky-border-2)",
+          color: showNotams ? "#0C9FD8" : "var(--sky-muted)",
           backdropFilter: "blur(8px)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
         }}
         title={showNotams ? "Ocultar NOTAMs" : "Mostrar NOTAMs"}
       >
@@ -478,10 +522,10 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       <div
         className="absolute bottom-6 left-3 rounded-lg px-3 py-2"
         style={{
-          background: "rgba(13,21,32,0.92)",
-          border: "1px solid #162338",
+          background: "var(--sky-surface)",
+          border: "1px solid var(--sky-border)",
           backdropFilter: "blur(8px)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
         }}
       >
         <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -491,13 +535,13 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
                 className="inline-block h-2 w-2 rounded-full"
                 style={{ background: MARKER_COLORS[s], boxShadow: `0 0 4px ${MARKER_COLORS[s]}60` }}
               />
-              <span className="text-[10px]" style={{ color: "#6BA3C0" }}>{STATUS_LABELS[s]}</span>
+              <span className="text-[10px]" style={{ color: "var(--sky-muted)" }}>{STATUS_LABELS[s]}</span>
             </div>
           ))}
           {showNotams && (
             <div className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-sm" style={{ background: NOTAM_LINE, opacity: 0.9 }} />
-              <span className="text-[10px]" style={{ color: "#6BA3C0" }}>NOTAM</span>
+              <span className="text-[10px]" style={{ color: "var(--sky-muted)" }}>NOTAM</span>
             </div>
           )}
         </div>
