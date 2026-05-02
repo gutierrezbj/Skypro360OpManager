@@ -11,7 +11,7 @@
 
 import { sendEmail } from "./email.service";
 
-const APP_URL = process.env.NEXTAUTH_URL ?? "https://skp360mgr.systemrapid.io";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "https://skp360mgr.systemrapid.io";
 const LOGO_URL = `${APP_URL}/logo-skypro360.png`;
 
 type MissionStatus =

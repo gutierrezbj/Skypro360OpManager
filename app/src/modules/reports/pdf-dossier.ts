@@ -3,6 +3,7 @@ import type {
   Mission,
   Drone,
   Pilot,
+  Tenant,
   FormPlanning,
   FormPreflight,
   FormPostflight,
@@ -13,7 +14,7 @@ type DossierData = {
   mission: Mission;
   drone: Drone | null;
   pilot: { pilot: Pilot; userName: string } | null;
-  tenantName: string;
+  tenant: Tenant;
   planning: FormPlanning | null;
   preflights: FormPreflight[];
   postflights: FormPostflight[];
@@ -98,11 +99,28 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   }
 
   // === COVER ===
-  y -= 60;
+  y -= 50;
   drawText("DOSSIER DE MISION AESA", { size: 20, font: fontBold, color: blue });
-  y -= 10;
-  drawText(data.tenantName, { size: 14, font: fontBold });
-  y -= 20;
+  y -= 8;
+
+  // ── Cabecera operador (datos AESA) ──
+  page.drawLine({ start: { x: margin, y }, end: { x: pageWidth - margin, y }, thickness: 0.7, color: blue });
+  y -= 14;
+  drawText(data.tenant.name, { size: 14, font: fontBold });
+  if (data.tenant.legalName && data.tenant.legalName !== data.tenant.name) {
+    drawText(data.tenant.legalName, { size: 9, color: gray });
+  }
+  y -= 4;
+  if (data.tenant.nif) drawField("NIF", data.tenant.nif);
+  if (data.tenant.operatorRegistrationNumber) drawField("Reg. operador AESA", data.tenant.operatorRegistrationNumber);
+  if (data.tenant.aesaCsv) drawField("CSV verificacion", data.tenant.aesaCsv);
+  if (data.tenant.contactEmail) drawField("Contacto", data.tenant.contactEmail);
+  y -= 4;
+  page.drawLine({ start: { x: margin, y }, end: { x: pageWidth - margin, y }, thickness: 0.5, color: gray });
+  y -= 16;
+
+  drawText("DATOS DE LA MISION", { size: 11, font: fontBold, color: blue });
+  y -= 4;
 
   drawField("Codigo expediente", data.mission.code);
   drawField("Mision", data.mission.name);
@@ -231,7 +249,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   const pages = doc.getPages();
   for (let i = 0; i < pages.length; i++) {
     const p = pages[i];
-    const footerText = `${data.mission.code} — ${data.tenantName} — Pagina ${i + 1}/${pages.length}`;
+    const footerText = `${data.mission.code} — ${data.tenant.name}${data.tenant.operatorRegistrationNumber ? ` (${data.tenant.operatorRegistrationNumber})` : ""} — Pagina ${i + 1}/${pages.length}`;
     p.drawText(footerText, {
       x: margin,
       y: 25,

@@ -44,13 +44,17 @@ export async function GET(
   const drone = droneList.find((d) => d.id === mission.droneId) ?? null;
   const pilot = pilotList.find((p) => p.id === mission.pilotId);
   const pilotUser = pilot ? userList.find((u) => u.id === pilot.userId) : null;
-  const tenantName = tenantList[0]?.name ?? "OpsManager";
+  const tenant = tenantList[0];
+
+  if (!tenant) {
+    return NextResponse.json({ error: "Tenant no encontrado" }, { status: 500 });
+  }
 
   const pdfBytes = await generateMissionDossierPdf({
     mission,
     drone,
     pilot: pilot && pilotUser ? { pilot, userName: pilotUser.name } : null,
-    tenantName,
+    tenant,
     planning,
     preflights,
     postflights,
