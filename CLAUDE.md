@@ -4,7 +4,7 @@ Plataforma de gestion de operaciones drone para Skypro360. Multi-tenant SaaS rea
 
 ## Estado actual
 
-**Fase 4 — Desarrollo Local** | Sub-fases 4A+4B+4C+4D+4C.1+4E.1 completadas (2026-03-31)
+**Fase 4 — COMPLETADA** | Sprints 1+2+3 cierre v1.0 (2026-05-02)
 
 Fases 0-3 cerradas (paperwork, SDDs, infra reservada). Scaffold limpio en `app/`.
 Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: Opcion A — nuestro scaffold como base, extraer lo valioso de V2.6.
@@ -23,7 +23,11 @@ Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: O
 | 4G — Tests | COMPLETADA | 2026-04-06 | 153 tests Vitest: fleet schemas, NOTAM route (mock node:https), email notifications (mock nodemailer), state machine, compliance, PDF |
 | 4H — Fleet Strip + Panel | COMPLETADA | 2026-04-06 | Dashboard fleet strip (drones+pilotos scroll horizontal), panel derecho permanente, ExpiryAlerts "Todo en regla" |
 | 4I — Identity Sprint | COMPLETADA | 2026-04-06 | SRS Design System aplicado: paleta corporativa Skypro360, Barlow Condensed + JetBrains Mono, cockpit dark nativo, login/sidebar/markers/popups/badges |
-| 4E — Advanced resto | DIFERIDA | — | AESA API real, telemetria real-time Socket.IO, PWA offline-first |
+| 4J — Cockpit + Light Mode | COMPLETADA | 2026-04-30 | Light/dark toggle (CSS custom properties + ThemeProvider), Cockpit overview home (KPIs + recientes + flota), Espacio OPS pestana dedicada con mapa, BOE Alerts widget, Weather location picker, popups NOTAM y misiones estables, manuales .docx para Fer y Luis |
+| 4K — Sprint 1 Cierre | COMPLETADA | 2026-05-02 | RBAC roles+UI por perfil, cambio password obligatorio en primer login, reset password por email con token, backup automatico Postgres diario (cron 03:15 UTC), datos AESA del operador en tenant, drones reales en flota |
+| 4L — Sprint 2 Pulido | COMPLETADA | 2026-05-02 | Mapa cambia tile style segun tema (positron/dark-matter), header PDF dossier con datos completos del operador AESA, email notifications cambios estado mision (ya cableadas) |
+| 4M — Sprint 3 Cierre | EN CURSO | 2026-05-02 | Tests Vitest fix, CLAUDE.md actualizado, manuales v1.1, acta cierre fase 4. Notion SDDs diferido manual. |
+| 4E — Advanced (5+) | DIFERIDA | — | AESA API real (no existe), telemetria real-time Socket.IO (necesita SDK fabricante), PWA offline-first (sprint v1.1 segun feedback) |
 
 ## Decision arquitectonica: Merge Strategy
 
@@ -140,6 +144,23 @@ src/lib/db/transactions/     ← Escrituras cross-modulo atomicas
 
 5 roles: admin (SRS), org_admin (admin operador), pilot, coordinator, viewer
 
+Reglas implementadas en `src/lib/auth/rbac.ts` + filtrado server-side en queries:
+
+| Recurso | admin | org_admin | coordinator | pilot | viewer |
+|---------|-------|-----------|-------------|-------|--------|
+| Ver todas misiones del tenant | ✓ | ✓ | ✓ | solo suyas | ✓ |
+| Crear/editar mision | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Borrar mision | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Aprobar mision | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Transicionar estado mision propia | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Gestionar flota (drones+pilotos) | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Firmar compliance AESA | ✓ | ✓ | ✗ | ✓ | ✗ |
+| Generar dossier PDF | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Ver Analytics | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Gestionar usuarios | ✓ | ✓ | ✗ | ✗ | ✗ |
+
+Helpers exportados: `canSeeAllMissions`, `canCreateMission`, `canEditMission`, `canDeleteMission`, `canApproveMission`, `canTransitionMission`, `canManageFleet`, `canManagePilots`, `canSignCompliance`, `canGenerateDossier`, `canManageUsers`, `canSeeAnalytics`. Server actions usan `requireRole(...)` para reforzar.
+
 ## Multi-tenant
 
 tenant_id en todas las tablas de negocio. RLS via SET app.current_tenant_id.
@@ -151,6 +172,14 @@ Helper: setTenantContext() — MANDATORY, no opcional como en V2.6.
 cd app && npm install && npm run docker:up && npm run db:push && npm run db:seed && npm run dev
 # http://localhost:3100 — admin@skypro360.es / admin12345
 ```
+
+## Operaciones (VPS produccion)
+
+- **URL**: https://skp360mgr.systemrapid.io
+- **Deploy**: `ssh root@skp360mgr.systemrapid.io "cd /opt/apps/opsmanager && git pull origin main && cd app && docker compose -f docker-compose.prod.yml up -d --build"`
+- **Backup BD**: cron `15 3 * * *` UTC, ejecuta `/opt/apps/opsmanager/ops/backup-postgres.sh`. Rotacion 14d/4w/6m en `/opt/apps/opsmanager/backups/`
+- **Restore BD**: `/opt/apps/opsmanager/ops/restore-postgres.sh <ruta-backup>` (con safety backup pre-operacion automatico)
+- **Health check**: `curl -sf http://localhost:3100/api/health`
 
 ## ADRs vigentes
 
@@ -170,7 +199,7 @@ cd app && npm install && npm run docker:up && npm run db:push && npm run db:seed
 
 | Stage | Cuando | Que |
 |-------|--------|-----|
-| 1 (ahora) | Fase 4A | Tipar roles como union literal, validar tenant activo en login, rate limiting Redis |
+| 1 (ahora) | Sprint 1 cierre 2026-05-02 | Credentials + bcrypt + JWT 24h, **mustChangePassword en primer login**, **reset password por email con token single-use 1h**, RBAC enforced en queries y UI |
 | 2 | 2do tenant | Resolucion tenant por login (ya funciona), subdominios cuando 3+ |
 | 3 | Enterprise | Providers OAuth (Google, Azure AD) coexisten con Credentials |
 | 4 | Integraciones | Tabla api_keys + middleware propio, separado de Auth.js |
