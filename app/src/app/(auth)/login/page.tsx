@@ -5,10 +5,10 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 const DEMO_ACCOUNTS = [
-  { label: "Admin",       email: "admin@skypro360.es",        password: "admin12345", role: "admin" },
+  { label: "Admin SRS",   email: "admin@skypro360.es",        password: "admin12345", role: "admin" },
+  { label: "Luis (admin)", email: "luis@skypro360.es",        password: "pilot12345", role: "org_admin" },
   { label: "Coordinador", email: "coordinador@skypro360.es",  password: "coord12345", role: "coordinator" },
-  { label: "Piloto 1",    email: "luis@skypro360.es",         password: "pilot12345", role: "pilot" },
-  { label: "Piloto 2",    email: "ferenz@skypro360.es",       password: "pilot12345", role: "pilot" },
+  { label: "Fer (piloto)", email: "ferenz@skypro360.es",      password: "pilot12345", role: "pilot" },
 ] as const;
 
 export default function LoginPage() {

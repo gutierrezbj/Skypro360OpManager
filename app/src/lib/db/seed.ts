@@ -69,25 +69,25 @@ async function seed() {
 
   console.log(`Created coordinator: ${coord.email}`);
 
-  // 4. Pilot users
-  const pilotHash = await bcrypt.hash("pilot12345", 12);
+  // 4. Operational users — Luis es org_admin (no piloto), Ferenz es piloto senior
+  const opHash = await bcrypt.hash("pilot12345", 12);
   const pilotUsers: { id: string; name: string; email: string }[] = [];
   for (const p of [
-    { name: "Luis Duran", email: "luis@skypro360.es" },
-    { name: "Ferenz Stefan", email: "ferenz@skypro360.es" },
+    { name: "Luis Duran",   email: "luis@skypro360.es",   role: "org_admin" as const },
+    { name: "Ferenz Stefan", email: "ferenz@skypro360.es", role: "pilot"     as const },
   ]) {
-    const [pilot] = await db
+    const [user] = await db
       .insert(users)
       .values({
         tenantId,
         email: p.email,
         name: p.name,
-        passwordHash: pilotHash,
-        role: "pilot",
+        passwordHash: opHash,
+        role: p.role,
       })
       .returning();
-    pilotUsers.push({ id: pilot.id, name: pilot.name, email: pilot.email });
-    console.log(`Created pilot: ${pilot.email}`);
+    pilotUsers.push({ id: user.id, name: user.name, email: user.email });
+    console.log(`Created ${p.role}: ${user.email}`);
   }
 
   // 5. Drones — flota real Skypro360
@@ -164,19 +164,10 @@ async function seed() {
     console.log(`Created drone: ${d.model} (${d.serialNumber})`);
   }
 
-  // 6. Pilotos — vinculados a users con certificaciones reales
+  // 6. Pilotos — solo Ferenz (Luis es admin, no piloto)
   const pilotRecords = [
     {
-      userId: pilotUsers[0].id, // Luis
-      licenseNumber: "ESP-UAS-PIL-2024-0891",
-      certificationStatus: "valid" as const,
-      certificationExpiry: new Date("2027-06-15"),
-      medicalExpiry: new Date("2027-01-10"),
-      flightHours: "342.5",
-      notes: "A2 CCA aprobado. Habilitado BVLOS pendiente.",
-    },
-    {
-      userId: pilotUsers[1].id, // Ferenz
+      userId: pilotUsers[1].id, // Ferenz (pilotUsers[0] es Luis = org_admin, no se registra como piloto)
       licenseNumber: "ESP-UAS-PIL-2024-1204",
       certificationStatus: "valid" as const,
       certificationExpiry: new Date("2027-09-20"),
