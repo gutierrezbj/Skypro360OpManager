@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, timestamp, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 
 /**
@@ -19,6 +19,8 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  /** Si true → en el siguiente login se fuerza /change-password */
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   role: userRoleEnum("role").notNull().default("viewer"),
   avatarUrl: varchar("avatar_url", { length: 500 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

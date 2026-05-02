@@ -13,6 +13,11 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // Forzar cambio de password en primer login
+  if ((session.user as { mustChangePassword?: boolean }).mustChangePassword) {
+    redirect("/change-password");
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-sky-bg">
       <Sidebar

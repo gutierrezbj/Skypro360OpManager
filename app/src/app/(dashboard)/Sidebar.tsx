@@ -16,6 +16,7 @@ import {
   CloseIcon,
   SunIcon,
   MoonIcon,
+  SettingsIcon,
 } from "@/lib/icons";
 import type { LucideProps } from "@/lib/icons";
 import type React from "react";
@@ -147,6 +148,17 @@ export default function Sidebar({
             <p className="truncate text-xs font-semibold" style={{ color: "var(--sky-text)" }}>{userName}</p>
             <p className="truncate text-[10px]" style={{ color: "var(--sky-muted)" }}>{userEmail}</p>
           </div>
+          {/* Cambiar contraseña */}
+          <Link
+            href="/change-password"
+            title="Cambiar contraseña"
+            className="flex-shrink-0 rounded-md p-1.5 transition-colors"
+            style={{ color: "var(--sky-muted)" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#0C9FD8")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-muted)")}
+          >
+            <SettingsIcon className="h-4 w-4" />
+          </Link>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}

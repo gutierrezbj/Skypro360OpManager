@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme/ThemeContext";
+import SessionProviderClient from "@/lib/auth/SessionProviderClient";
 
 const barlow = Barlow({
   subsets: ["latin"],
@@ -59,7 +60,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <SessionProviderClient>
+          <ThemeProvider>{children}</ThemeProvider>
+        </SessionProviderClient>
       </body>
     </html>
   );
