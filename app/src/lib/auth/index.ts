@@ -53,7 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.role = (user as { role: string }).role;
         token.tenantId = (user as { tenantId: string }).tenantId;
-        token.mustChangePassword = (user as { mustChangePassword?: boolean }).mustChangePassword ?? false;
+        token.mustChangePassword = (user as unknown as { mustChangePassword?: boolean }).mustChangePassword ?? false;
       }
       // Cuando el cliente llama update() tras cambiar contrasena, refrescamos el flag
       if (trigger === "update" && updateSession?.mustChangePassword === false) {
