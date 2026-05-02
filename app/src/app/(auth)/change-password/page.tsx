@@ -6,7 +6,7 @@ export default async function ChangePasswordPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const isFirstLogin = !!(session.user as { mustChangePassword?: boolean }).mustChangePassword;
+  const isFirstLogin = !!session.user.mustChangePassword;
   const userName = session.user.name ?? "";
   const userEmail = session.user.email ?? "";
 

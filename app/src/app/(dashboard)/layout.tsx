@@ -14,7 +14,7 @@ export default async function DashboardLayout({
   }
 
   // Forzar cambio de password en primer login
-  if ((session.user as { mustChangePassword?: boolean }).mustChangePassword) {
+  if (session.user.mustChangePassword) {
     redirect("/change-password");
   }
 

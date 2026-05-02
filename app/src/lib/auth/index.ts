@@ -50,24 +50,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user, trigger, session: updateSession }) {
       if (user) {
-        token.id = user.id;
-        token.role = (user as { role: string }).role;
-        token.tenantId = (user as { tenantId: string }).tenantId;
-        token.mustChangePassword = (user as unknown as { mustChangePassword?: boolean }).mustChangePassword ?? false;
+        token.id = user.id ?? token.id;
+        token.role = user.role;
+        token.tenantId = user.tenantId;
+        token.mustChangePassword = user.mustChangePassword ?? false;
       }
       // Cuando el cliente llama update() tras cambiar contrasena, refrescamos el flag
-      if (trigger === "update" && updateSession?.mustChangePassword === false) {
+      const updated = updateSession as { mustChangePassword?: boolean } | undefined;
+      if (trigger === "update" && updated?.mustChangePassword === false) {
         token.mustChangePassword = false;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as { role: string }).role = token.role as string;
-        (session.user as { tenantId: string }).tenantId = token.tenantId as string;
-        (session.user as { mustChangePassword: boolean }).mustChangePassword =
-          (token.mustChangePassword as boolean) ?? false;
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.tenantId = token.tenantId;
+        session.user.mustChangePassword = token.mustChangePassword ?? false;
       }
       return session;
     },
