@@ -64,10 +64,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.tenantId = token.tenantId;
-        session.user.mustChangePassword = token.mustChangePassword ?? false;
+        session.user.id = (token.id as string) ?? "";
+        session.user.role = (token.role as string) ?? "viewer";
+        session.user.tenantId = (token.tenantId as string) ?? "";
+        session.user.mustChangePassword = (token.mustChangePassword as boolean) ?? false;
       }
       return session;
     },
