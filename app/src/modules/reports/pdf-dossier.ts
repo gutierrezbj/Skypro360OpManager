@@ -11,6 +11,7 @@ import type {
   FormPostflight,
   FormIncident,
 } from "@/lib/db/schema";
+import { getChecklistLabel } from "@/modules/compliance/checklist-labels";
 
 type DossierData = {
   mission: Mission;
@@ -195,7 +196,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
         page.drawLine({ start: { x: cx - 2, y: cy }, end: { x: cx - 0.5, y: cy - 1.5 }, thickness: 1, color: rgb(1, 1, 1) });
         page.drawLine({ start: { x: cx - 0.5, y: cy - 1.5 }, end: { x: cx + 2, y: cy + 2 }, thickness: 1, color: rgb(1, 1, 1) });
       }
-      page.drawText(key.replace(/_/g, " "), {
+      page.drawText(getChecklistLabel(key), {
         x: x + 14, y: itemY - 6,
         size: 8, font, color: checked ? TEXT : MUTED,
       });
