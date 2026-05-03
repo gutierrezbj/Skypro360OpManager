@@ -168,6 +168,36 @@ export default function MissionForm({
               <label style={labelStyle}>Ref. EARO</label>
               <input name="earoReference" defaultValue={mission?.earoReference ?? ""} style={inputStyle} />
             </div>
+
+            <div className="col-span-2">
+              <label style={labelStyle} className="mb-1 block text-xs font-medium uppercase tracking-wider">
+                Coordenadas de operación
+                <span style={{ color: "var(--sky-accent-blue)", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}>
+                  {" "}(necesarias para verla en el mapa)
+                </span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  name="latitude"
+                  type="number"
+                  step="any"
+                  placeholder="Latitud (ej: 39.4699)"
+                  defaultValue={mission?.latitude ?? ""}
+                  style={inputStyle}
+                />
+                <input
+                  name="longitude"
+                  type="number"
+                  step="any"
+                  placeholder="Longitud (ej: -6.3724)"
+                  defaultValue={mission?.longitude ?? ""}
+                  style={inputStyle}
+                />
+              </div>
+              <p className="mt-1.5 text-[10px] leading-relaxed" style={{ color: "var(--sky-muted)" }}>
+                Tip: en Google Maps haz click derecho sobre el punto exacto del vuelo y copia las coordenadas (formato: lat, lng).
+              </p>
+            </div>
           </div>
 
           <div style={{ borderTop: "1px solid var(--sky-border)" }} className="flex justify-end gap-3 pt-4">

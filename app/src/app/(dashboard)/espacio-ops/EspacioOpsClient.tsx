@@ -123,6 +123,7 @@ export default function EspacioOpsClient({
           ) : (
             <>
               <ExpiryAlerts pilots={pilots} drones={drones} />
+              <UngeoreferencedMissions missions={missions} />
               <div
                 className="rounded-xl p-3 text-center text-xs"
                 style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }}
@@ -312,6 +313,60 @@ function StatChip({ label, value, color }: { label: string; value: number | stri
         {value}
       </span>
       <span className="text-[10px]" style={{ color: "var(--sky-muted)" }}>{label}</span>
+    </div>
+  );
+}
+
+function UngeoreferencedMissions({ missions }: { missions: Mission[] }) {
+  // Misiones sin coordenadas (no aparecen en el mapa)
+  const ungeo = missions.filter(
+    (m) => !m.latitude || !m.longitude
+  ).filter(
+    // No mostrar las terminales — ya completadas/canceladas no necesitan acción
+    (m) => !["completed", "aborted", "cancelled"].includes(m.status)
+  );
+
+  if (ungeo.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-xl p-3"
+      style={{
+        background: "rgba(245,197,24,0.08)",
+        border: "1px solid rgba(245,197,24,0.35)",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[14px]" style={{ color: "var(--sky-accent-yellow)" }}>⚠</span>
+        <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--sky-accent-yellow)" }}>
+          Sin georreferencia ({ungeo.length})
+        </p>
+      </div>
+      <p className="text-[10px] mb-2 leading-relaxed" style={{ color: "var(--sky-muted)" }}>
+        Estas misiones no tienen coordenadas, por eso no aparecen en el mapa. Edítalas y añade lat/lng.
+      </p>
+      <div className="space-y-1.5">
+        {ungeo.map((m) => (
+          <Link
+            key={m.id}
+            href={`/missions`}
+            className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors"
+            style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium truncate" style={{ color: "var(--sky-text)" }}>
+                {m.name}
+              </p>
+              <p className="text-[9px]" style={{ color: "var(--sky-muted)", fontFamily: "var(--font-jetbrains), monospace" }}>
+                {m.code} · {m.status}
+              </p>
+            </div>
+            <span className="text-[10px] flex-shrink-0" style={{ color: "var(--sky-accent-blue)" }}>
+              Editar →
+            </span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
