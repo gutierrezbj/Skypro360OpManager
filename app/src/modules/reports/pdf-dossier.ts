@@ -189,8 +189,11 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
         color: checked ? SUCCESS : undefined,
       });
       if (checked) {
-        // tick mark
-        page.drawText("✓", { x: x + 3, y: itemY - 7, size: 7, font: fontBold, color: rgb(1, 1, 1) });
+        // tick mark dibujado con dos líneas (WinAnsi no soporta Unicode ✓)
+        const cx = x + 6;   // centro caja
+        const cy = itemY - 4;
+        page.drawLine({ start: { x: cx - 2, y: cy }, end: { x: cx - 0.5, y: cy - 1.5 }, thickness: 1, color: rgb(1, 1, 1) });
+        page.drawLine({ start: { x: cx - 0.5, y: cy - 1.5 }, end: { x: cx + 2, y: cy + 2 }, thickness: 1, color: rgb(1, 1, 1) });
       }
       page.drawText(key.replace(/_/g, " "), {
         x: x + 14, y: itemY - 6,
