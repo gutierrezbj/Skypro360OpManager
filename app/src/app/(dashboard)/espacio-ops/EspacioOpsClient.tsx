@@ -318,13 +318,9 @@ function StatChip({ label, value, color }: { label: string; value: number | stri
 }
 
 function UngeoreferencedMissions({ missions }: { missions: Mission[] }) {
-  // Misiones sin coordenadas (no aparecen en el mapa)
-  const ungeo = missions.filter(
-    (m) => !m.latitude || !m.longitude
-  ).filter(
-    // No mostrar las terminales — ya completadas/canceladas no necesitan acción
-    (m) => !["completed", "aborted", "cancelled"].includes(m.status)
-  );
+  // Misiones sin coordenadas (no aparecen en el mapa) — TODAS, incluso terminales
+  // así Luis puede georreferenciarlas retroactivamente
+  const ungeo = missions.filter((m) => !m.latitude || !m.longitude);
 
   if (ungeo.length === 0) return null;
 
@@ -333,7 +329,7 @@ function UngeoreferencedMissions({ missions }: { missions: Mission[] }) {
       className="rounded-xl p-3"
       style={{
         background: "rgba(245,197,24,0.08)",
-        border: "1px solid rgba(245,197,24,0.35)",
+        border: "1px solid rgba(245,197,24,0.40)",
       }}
     >
       <div className="flex items-center gap-2 mb-2">
@@ -343,7 +339,7 @@ function UngeoreferencedMissions({ missions }: { missions: Mission[] }) {
         </p>
       </div>
       <p className="text-[10px] mb-2 leading-relaxed" style={{ color: "var(--sky-muted)" }}>
-        Estas misiones no tienen coordenadas, por eso no aparecen en el mapa. Edítalas y añade lat/lng.
+        Estas misiones no aparecen en el mapa porque no tienen coordenadas. Edítalas y añade lat/lng.
       </p>
       <div className="space-y-1.5">
         {ungeo.map((m) => (
@@ -354,16 +350,19 @@ function UngeoreferencedMissions({ missions }: { missions: Mission[] }) {
             style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
           >
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium truncate" style={{ color: "var(--sky-text)" }}>
+              <p className="text-[11px] font-semibold truncate" style={{ color: "var(--sky-text)" }}>
                 {m.name}
               </p>
               <p className="text-[9px]" style={{ color: "var(--sky-muted)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                {m.code} · {m.status}
+                {m.code}
               </p>
             </div>
-            <span className="text-[10px] flex-shrink-0" style={{ color: "var(--sky-accent-blue)" }}>
-              Editar →
-            </span>
+            <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+              <MissionStatusBadge status={m.status} />
+              <span className="text-[9px]" style={{ color: "var(--sky-accent-blue)" }}>
+                Editar →
+              </span>
+            </div>
           </Link>
         ))}
       </div>
