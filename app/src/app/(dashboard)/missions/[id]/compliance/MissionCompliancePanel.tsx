@@ -293,29 +293,53 @@ export default function MissionCompliancePanel({
           onAdd={() => setShowForm("incident")}
           buttonLabel="Reportar incidente"
         >
-          {incidents.map((inc) => (
-            <div key={inc.id} className="mb-3 rounded-md border border-red-100 bg-red-50 p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-red-800 capitalize">
-                  {inc.incidentType.replace(/_/g, " ")}
-                </span>
-                <span className="text-xs text-red-400">
-                  {new Date(inc.createdAt).toLocaleString("es-ES", {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+          {incidents.map((inc) => {
+            const isNoIncident = inc.incidentType === "none";
+            const styles = isNoIncident
+              ? {
+                  border: "1px solid rgba(0,135,74,0.3)",
+                  background: "rgba(0,135,74,0.06)",
+                  titleColor: "var(--sky-accent-green)",
+                }
+              : {
+                  border: "1px solid rgba(229,62,62,0.3)",
+                  background: "rgba(229,62,62,0.06)",
+                  titleColor: "var(--sky-accent-red)",
+                };
+            return (
+              <div key={inc.id} className="mb-3 rounded-md p-3" style={{ border: styles.border, background: styles.background }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold capitalize" style={{ color: styles.titleColor }}>
+                    {isNoIncident ? "✓ Sin incidentes (declaracion formal)" : inc.incidentType.replace(/_/g, " ")}
+                  </span>
+                  <span className="text-xs" style={{ color: "var(--sky-muted)" }}>
+                    {new Date(inc.createdAt).toLocaleString("es-ES", {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm" style={{ color: "var(--sky-text)" }}>{inc.description}</p>
+                {inc.aesaNotified && (
+                  <span
+                    className="mt-2 inline-block rounded px-2 py-0.5 text-xs font-medium"
+                    style={{ background: "rgba(229,62,62,0.15)", color: "var(--sky-accent-red)", border: "1px solid rgba(229,62,62,0.4)" }}
+                  >
+                    AESA notificada
+                  </span>
+                )}
+                {inc.signatureData && (
+                  <div className="mt-2">
+                    <p className="text-[10px]" style={{ color: "var(--sky-muted)" }}>Firma del informante</p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={inc.signatureData} alt="Firma" className="mt-1 h-10 rounded p-1" style={{ border: "1px solid var(--sky-border)", background: "var(--sky-surface-2)" }} />
+                  </div>
+                )}
               </div>
-              <p className="mt-1 text-sm text-gray-700">{inc.description}</p>
-              {inc.aesaNotified && (
-                <span className="mt-2 inline-block rounded bg-red-200 px-2 py-0.5 text-xs font-medium text-red-800">
-                  AESA notificada
-                </span>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </ComplianceSection>
       </div>
 

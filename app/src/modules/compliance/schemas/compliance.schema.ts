@@ -59,6 +59,7 @@ export type PostflightFormInput = z.infer<typeof postflightFormSchema>;
 export const incidentFormSchema = z.object({
   missionId: z.string().uuid(),
   incidentType: z.enum([
+    "none",                  // Declaracion formal "sin incidentes"
     "flyaway",
     "collision",
     "injury",

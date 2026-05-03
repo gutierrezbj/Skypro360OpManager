@@ -221,7 +221,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
     drawTitle("INCIDENTES (Anexo I)");
     for (const inc of data.incidents) {
       checkSpace(80);
-      drawField("Tipo", inc.incidentType.replace(/_/g, " "));
+      drawField("Tipo", inc.incidentType === "none" ? "Sin incidentes (declaracion formal)" : inc.incidentType.replace(/_/g, " "));
       drawField("Fecha", inc.createdAt.toLocaleString("es-ES"));
       drawField("AESA notificada", inc.aesaNotified ? "SI" : "NO");
       drawField("Descripcion", null);
