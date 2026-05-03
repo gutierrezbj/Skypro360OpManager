@@ -68,24 +68,24 @@ function computeAlerts(pilots: PilotWithUser[], drones: Drone[]): Alert[] {
 const SEVERITY_META = {
   critical: {
     bg:     "rgba(229,62,62,0.08)",
-    border: "rgba(229,62,62,0.25)",
-    color:  "#FC8181",
-    badge:  { bg: "rgba(229,62,62,0.15)", color: "#FC8181" },
-    dot:    "#E53E3E",
+    border: "rgba(229,62,62,0.30)",
+    color:  "var(--sky-accent-red)",
+    badge:  { bg: "rgba(229,62,62,0.18)", color: "var(--sky-accent-red)" },
+    dot:    "var(--sky-accent-red)",
   },
   warning: {
     bg:     "rgba(245,197,24,0.08)",
-    border: "rgba(245,197,24,0.25)",
-    color:  "#F5C518",
-    badge:  { bg: "rgba(245,197,24,0.15)", color: "#F5C518" },
-    dot:    "#F5C518",
+    border: "rgba(245,197,24,0.35)",
+    color:  "var(--sky-accent-yellow)",
+    badge:  { bg: "rgba(245,197,24,0.20)", color: "var(--sky-accent-yellow)" },
+    dot:    "var(--sky-accent-yellow)",
   },
   info: {
     bg:     "rgba(12,159,216,0.06)",
-    border: "rgba(12,159,216,0.2)",
-    color:  "#6BA3C0",
-    badge:  { bg: "rgba(12,159,216,0.12)", color: "#0C9FD8" },
-    dot:    "#0C9FD8",
+    border: "rgba(12,159,216,0.25)",
+    color:  "var(--sky-accent-blue)",
+    badge:  { bg: "rgba(12,159,216,0.15)", color: "var(--sky-accent-blue)" },
+    dot:    "var(--sky-accent-blue)",
   },
 };
 
@@ -104,7 +104,7 @@ export default function ExpiryAlerts({
       <div className="mb-4 flex items-center gap-2">
         <span
           className="text-[10px] font-semibold uppercase tracking-widest"
-          style={{ color: "#6BA3C0" }}
+          style={{ color: "var(--sky-muted)" }}
         >
           Alertas AESA
         </span>
@@ -112,9 +112,9 @@ export default function ExpiryAlerts({
           <span
             className="rounded-full px-2 py-0.5 text-[9px] font-bold"
             style={{
-              background: "rgba(229,62,62,0.15)",
-              color: "#FC8181",
-              border: "1px solid rgba(229,62,62,0.3)",
+              background: "rgba(229,62,62,0.18)",
+              color: "var(--sky-accent-red)",
+              border: "1px solid rgba(229,62,62,0.4)",
             }}
           >
             {alerts.length}
@@ -126,20 +126,20 @@ export default function ExpiryAlerts({
         <div
           className="rounded-lg px-4 py-5 text-center"
           style={{
-            background: "rgba(0,217,126,0.05)",
-            border: "1px solid rgba(0,217,126,0.15)",
+            background: "rgba(0,217,126,0.06)",
+            border: "1px solid rgba(0,217,126,0.25)",
           }}
         >
           <div
             className="mb-1 text-xl"
-            style={{ color: "#00D97E" }}
+            style={{ color: "var(--sky-accent-green)" }}
           >
             ✓
           </div>
-          <p className="text-xs font-semibold" style={{ color: "#00D97E" }}>
+          <p className="text-xs font-semibold" style={{ color: "var(--sky-accent-green)" }}>
             Todo en regla
           </p>
-          <p className="mt-0.5 text-[10px]" style={{ color: "#6BA3C0" }}>
+          <p className="mt-0.5 text-[10px]" style={{ color: "var(--sky-muted)" }}>
             Sin certificaciones próximas a vencer
           </p>
         </div>
@@ -164,14 +164,14 @@ export default function ExpiryAlerts({
                     />
                     <div className="min-w-0">
                       <p
-                        className="text-[10px] font-medium uppercase tracking-wider"
-                        style={{ color: meta.color, opacity: 0.75 }}
+                        className="text-[10px] font-semibold uppercase tracking-wider"
+                        style={{ color: meta.color }}
                       >
                         {alert.label}
                       </p>
                       <p
                         className="text-xs font-semibold truncate"
-                        style={{ color: "#D6E8F5" }}
+                        style={{ color: "var(--sky-text)" }}
                       >
                         {alert.entity}
                       </p>
@@ -186,7 +186,7 @@ export default function ExpiryAlerts({
                 </div>
                 <p
                   className="mt-1.5 text-[10px]"
-                  style={{ color: "#6BA3C0", paddingLeft: "18px" }}
+                  style={{ color: "var(--sky-muted)", paddingLeft: "18px" }}
                 >
                   Expira:{" "}
                   {alert.expiryDate.toLocaleDateString("es-ES", {
