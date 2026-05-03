@@ -29,6 +29,13 @@
       "when": 1809622000000,
       "tag": "0003_tenant_operator_data",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1809720000000,
+      "tag": "0004_incident_none",
+      "breakpoints": true
     }
   ]
 }

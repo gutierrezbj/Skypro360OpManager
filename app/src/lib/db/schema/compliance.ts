@@ -100,6 +100,7 @@ export const formPostflight = pgTable("form_postflight", {
 // --- Form Incidents (Anexo I — Informe Incidente/Accidente) ---
 
 export const incidentTypeEnum = pgEnum("incident_type", [
+  "none",                  // Declaracion formal "sin incidentes"
   "flyaway",
   "collision",
   "injury",
