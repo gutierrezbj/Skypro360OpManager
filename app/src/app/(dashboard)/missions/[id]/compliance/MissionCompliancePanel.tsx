@@ -16,6 +16,7 @@ import PlanningForm from "@/modules/compliance/components/PlanningForm";
 import PreFlightForm from "@/modules/compliance/components/PreFlightForm";
 import PostFlightForm from "@/modules/compliance/components/PostFlightForm";
 import IncidentForm from "@/modules/compliance/components/IncidentForm";
+import StateTransitionBar from "./StateTransitionBar";
 
 type User = { id: string; name: string; email: string };
 
@@ -100,31 +101,14 @@ export default function MissionCompliancePanel({
         </div>
       </div>
 
-      {/* Workflow hint — qué hace cambiar el estado de la misión */}
-      <div
-        className="mb-6 rounded-lg px-4 py-3 text-xs"
-        style={{
-          background: "rgba(12,159,216,0.06)",
-          border: "1px solid rgba(12,159,216,0.2)",
-          color: "var(--sky-muted)",
-          lineHeight: "1.6",
-        }}
-      >
-        <p style={{ color: "var(--sky-text)", fontWeight: 600, marginBottom: "4px" }}>
-          ¿Cómo avanza el estado de la misión?
-        </p>
-        <p>
-          El estado se cambia desde la <Link href="/missions" style={{ color: "#0C9FD8", fontWeight: 500 }}>lista de misiones</Link> (icono ojo → botón de transición).
-          Cada paso requiere completar formularios aquí:
-        </p>
-        <ul className="mt-2 ml-1 space-y-1">
-          <li>• <strong style={{ color: "var(--sky-text)" }}>Borrador → Planificada</strong>: abrir misión y pulsar “Planificar”.</li>
-          <li>• <strong style={{ color: "var(--sky-text)" }}>Planificada → Aprobada</strong>: requiere drone + piloto asignados y A.4 firmada.</li>
-          <li>• <strong style={{ color: "var(--sky-text)" }}>Aprobada → Pre-vuelo</strong>: cuando el piloto se prepara en campo.</li>
-          <li>• <strong style={{ color: "var(--sky-text)" }}>Pre-vuelo → En vuelo</strong>: A.5/A.6 firmados.</li>
-          <li>• <strong style={{ color: "var(--sky-text)" }}>En vuelo → Completada</strong>: A.7/A.8 firmados al aterrizar.</li>
-        </ul>
-      </div>
+      {/* State transition bar — siguiente paso en contexto */}
+      <StateTransitionBar
+        mission={mission}
+        hasPlanning={!!planning}
+        preflightCount={preflights.length}
+        postflightCount={postflights.length}
+        incidentCount={incidents.length}
+      />
 
       {/* Mission info + completion */}
       <div className="mb-6 grid grid-cols-3 gap-4">
