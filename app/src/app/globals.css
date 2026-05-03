@@ -72,6 +72,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Datetime/date inputs — icono visible en ambos temas ─────────────────── */
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"],
+.datetime-input {
+  color-scheme: dark;
+}
+
+[data-theme="light"] input[type="datetime-local"],
+[data-theme="light"] input[type="date"],
+[data-theme="light"] input[type="time"],
+[data-theme="light"] .datetime-input {
+  color-scheme: light;
+}
+
+/* Hace el icono del calendario visible (mejora legibilidad sobre el fondo) */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+  filter: invert(0.6);
+}
+[data-theme="light"] input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.4);
+  opacity: 0.85;
+}
+
 /* ── Cockpit scrollbar ────────────────────────────────────────────────────── */
 ::-webkit-scrollbar        { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track  { background: var(--sky-surface); }

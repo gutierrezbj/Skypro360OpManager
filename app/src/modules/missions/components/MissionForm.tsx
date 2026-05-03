@@ -137,7 +137,8 @@ export default function MissionForm({
                 name="scheduledStart"
                 type="datetime-local"
                 defaultValue={mission?.scheduledStart ? new Date(mission.scheduledStart).toISOString().slice(0, 16) : ""}
-                style={{ ...inputStyle, colorScheme: "dark" }}
+                style={{ ...inputStyle }}
+                className="datetime-input"
               />
             </div>
 
@@ -147,7 +148,8 @@ export default function MissionForm({
                 name="scheduledEnd"
                 type="datetime-local"
                 defaultValue={mission?.scheduledEnd ? new Date(mission.scheduledEnd).toISOString().slice(0, 16) : ""}
-                style={{ ...inputStyle, colorScheme: "dark" }}
+                style={{ ...inputStyle }}
+                className="datetime-input"
               />
             </div>
 
