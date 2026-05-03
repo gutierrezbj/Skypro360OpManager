@@ -34,7 +34,39 @@ export default function EspacioOpsClient({
 }) {
   const [selected, setSelected] = useState<Mission | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  // Filtros de estado activos en el mapa. Si vacío → mostrar todas.
+  const [statusFilters, setStatusFilters] = useState<Set<string>>(new Set());
   const telemetry = useTelemetry();
+
+  function toggleFilter(group: "active" | "planned" | "completed") {
+    setStatusFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group); else next.add(group);
+      return next;
+    });
+  }
+
+  function clearFilters() {
+    setStatusFilters(new Set());
+    setSelected(null);
+  }
+
+  // Estados que cubre cada grupo de filtro
+  const FILTER_GROUPS: Record<string, string[]> = {
+    active:    ["in_flight", "preflight"],
+    planned:   ["draft", "planned", "approved"],
+    completed: ["completed"],
+  };
+
+  // Misiones filtradas — si no hay filtros activos, todas pasan
+  const filteredMissions = statusFilters.size === 0
+    ? missions
+    : missions.filter((m) => {
+        for (const f of statusFilters) {
+          if (FILTER_GROUPS[f]?.includes(m.status)) return true;
+        }
+        return false;
+      });
 
   function handleSelectMission(m: Mission) {
     setSelected(m);
@@ -68,10 +100,41 @@ export default function EspacioOpsClient({
             Espacio <span style={{ color: "var(--sky-accent-blue)" }}>OPS</span>
           </h1>
 
-          <div className="flex flex-wrap gap-2">
-            <StatChip label="En vuelo"     value={stats.activeMissions}   color="#00D97E" />
-            <StatChip label="Planificadas" value={stats.plannedMissions}  color="#4A8FD4" />
-            <StatChip label="Completadas"  value={stats.completedMissions} color="var(--sky-muted)" />
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterChip
+              label="En vuelo"
+              value={stats.activeMissions}
+              color="#00D97E"
+              active={statusFilters.has("active")}
+              onClick={() => toggleFilter("active")}
+            />
+            <FilterChip
+              label="Planificadas"
+              value={stats.plannedMissions}
+              color="#4A8FD4"
+              active={statusFilters.has("planned")}
+              onClick={() => toggleFilter("planned")}
+            />
+            <FilterChip
+              label="Completadas"
+              value={stats.completedMissions}
+              color="var(--sky-muted)"
+              active={statusFilters.has("completed")}
+              onClick={() => toggleFilter("completed")}
+            />
+            {statusFilters.size > 0 && (
+              <button
+                onClick={clearFilters}
+                className="rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors"
+                style={{
+                  background: "rgba(240,78,28,0.08)",
+                  color: "var(--sky-accent-orange)",
+                  border: "1px solid rgba(240,78,28,0.3)",
+                }}
+              >
+                ✕ Limpiar
+              </button>
+            )}
             <div style={{ width: "1px", background: "var(--sky-border)", alignSelf: "stretch" }} className="hidden sm:block" />
             <StatChip label="Drones"  value={`${stats.activeDrones}/${stats.totalDrones}`}  color="#0C9FD8" />
             <StatChip label="Pilotos" value={`${stats.validPilots}/${stats.totalPilots}`}    color="#0C9FD8" />
@@ -99,7 +162,7 @@ export default function EspacioOpsClient({
         {/* Map */}
         <div className="flex-1 min-w-0 min-h-0">
           <MissionsMap
-            missions={missions}
+            missions={filteredMissions}
             drones={drones}
             pilots={pilots}
             onSelectMission={handleSelectMission}
@@ -314,6 +377,62 @@ function StatChip({ label, value, color }: { label: string; value: number | stri
       </span>
       <span className="text-[10px]" style={{ color: "var(--sky-muted)" }}>{label}</span>
     </div>
+  );
+}
+
+function FilterChip({
+  label, value, color, active, onClick,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  // Cuando hay 0 resultados Y filtro inactivo, igual lo dejamos clickable
+  // (Luis puede querer activar el filtro vacío para confirmar que no hay nada)
+  return (
+    <button
+      onClick={onClick}
+      title={active ? `Quitar filtro: ${label}` : `Filtrar mapa: solo ${label.toLowerCase()}`}
+      className="flex items-center gap-1.5 rounded-md px-2.5 py-1 transition-all cursor-pointer"
+      style={
+        active
+          ? {
+              background: `${color}28`,
+              border: `1.5px solid ${color}`,
+              boxShadow: `0 0 8px ${color}40`,
+            }
+          : {
+              background: `${color}10`,
+              border: `1px solid ${color}22`,
+            }
+      }
+      onMouseEnter={(e) => {
+        if (!active) {
+          (e.currentTarget as HTMLElement).style.background = `${color}18`;
+          (e.currentTarget as HTMLElement).style.borderColor = `${color}44`;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          (e.currentTarget as HTMLElement).style.background = `${color}10`;
+          (e.currentTarget as HTMLElement).style.borderColor = `${color}22`;
+        }
+      }}
+    >
+      {active && (
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      )}
+      <span className="text-xs font-bold" style={{ color, fontFamily: "var(--font-jetbrains), monospace" }}>
+        {value}
+      </span>
+      <span className="text-[10px] font-medium" style={{ color: active ? color : "var(--sky-muted)" }}>
+        {label}
+      </span>
+    </button>
   );
 }
 
