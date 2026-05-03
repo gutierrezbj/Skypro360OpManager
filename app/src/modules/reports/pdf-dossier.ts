@@ -41,6 +41,27 @@ const PAGE_H = 842;
 const MARGIN = 48;
 const CONTENT_W = PAGE_W - MARGIN * 2;
 
+// El servidor corre en UTC. Forzamos zona horaria Madrid para todo formateo.
+const TZ_MADRID = "Europe/Madrid";
+
+function fmtDateTime(d: Date | null | undefined): string {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("es-ES", {
+    timeZone: TZ_MADRID,
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function fmtDateTimeShort(d: Date | null | undefined): string {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("es-ES", {
+    timeZone: TZ_MADRID,
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
 export async function generateMissionDossierPdf(data: DossierData): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -188,7 +209,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
     // Caption
     page.drawText(label.toUpperCase(), { x: MARGIN, y, size: 7, font: fontBold, color: MUTED });
     if (signedAt) {
-      const dateStr = signedAt.toLocaleString("es-ES", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      const dateStr = fmtDateTimeShort(signedAt);
       const dateW = font.widthOfTextAtSize(dateStr, 7);
       page.drawText(dateStr, { x: MARGIN + CONTENT_W - dateW, y, size: 7, font, color: MUTED });
     }
@@ -339,11 +360,11 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
     ? `${parseFloat(data.mission.latitude).toFixed(5)}, ${parseFloat(data.mission.longitude).toFixed(5)}`
     : null, { col: 1 });
 
-  drawField("Inicio programado", data.mission.scheduledStart?.toLocaleString("es-ES") ?? null, { col: 0 });
-  drawField("Fin programado", data.mission.scheduledEnd?.toLocaleString("es-ES") ?? null, { col: 1 });
+  drawField("Inicio programado", fmtDateTime(data.mission.scheduledStart), { col: 0 });
+  drawField("Fin programado", fmtDateTime(data.mission.scheduledEnd), { col: 1 });
 
-  drawField("Inicio real", data.mission.actualStart?.toLocaleString("es-ES") ?? null, { col: 0 });
-  drawField("Fin real", data.mission.actualEnd?.toLocaleString("es-ES") ?? null, { col: 1 });
+  drawField("Inicio real", fmtDateTime(data.mission.actualStart), { col: 0 });
+  drawField("Fin real", fmtDateTime(data.mission.actualEnd), { col: 1 });
 
   // Subseccion: equipo
   y -= 4;
@@ -410,7 +431,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   for (let i = 0; i < data.preflights.length; i++) {
     const pf = data.preflights[i];
     drawSectionHeader(`CHECKLIST PRE-VUELO #${i + 1} — Apéndice A.5 / A.6`);
-    drawField("Fecha", pf.createdAt.toLocaleString("es-ES"), { col: 0 });
+    drawField("Fecha", fmtDateTime(pf.createdAt), { col: 0 });
     drawField("Espacio aéreo", pf.airspaceStatus, { col: 1 });
 
     const wc = pf.weatherConditions as Record<string, unknown> | null;
@@ -434,7 +455,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   for (let i = 0; i < data.postflights.length; i++) {
     const pf = data.postflights[i];
     drawSectionHeader(`CHECKLIST POST-VUELO #${i + 1} — Apéndice A.7 / A.8`);
-    drawField("Fecha", pf.createdAt.toLocaleString("es-ES"), { col: 0 });
+    drawField("Fecha", fmtDateTime(pf.createdAt), { col: 0 });
     drawField("Batería restante", pf.batteryRemaining, { col: 1 });
 
     y -= 6;
@@ -466,7 +487,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
       page.drawText(typeLabel, {
         x: MARGIN + 10, y: y - 12, size: 10, font: fontBold, color: badgeColor,
       });
-      const dateStr = inc.createdAt.toLocaleString("es-ES");
+      const dateStr = fmtDateTime(inc.createdAt);
       const dateW = font.widthOfTextAtSize(dateStr, 8);
       page.drawText(dateStr, { x: MARGIN + CONTENT_W - dateW - 8, y: y - 12, size: 8, font, color: MUTED });
       y -= 28;
@@ -488,9 +509,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   // FOOTER en cada pagina
   // ═══════════════════════════════════════════════════════════════════════════
   const pages = doc.getPages();
-  const generatedAt = new Date().toLocaleString("es-ES", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
-  });
+  const generatedAt = fmtDateTimeShort(new Date());
 
   for (let i = 0; i < pages.length; i++) {
     const p = pages[i];
