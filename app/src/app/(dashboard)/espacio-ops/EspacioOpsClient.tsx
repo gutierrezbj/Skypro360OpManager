@@ -65,7 +65,7 @@ export default function EspacioOpsClient({
               textTransform: "uppercase",
             }}
           >
-            Espacio <span style={{ color: "#0C9FD8" }}>OPS</span>
+            Espacio <span style={{ color: "var(--sky-accent-blue)" }}>OPS</span>
           </h1>
 
           <div className="flex flex-wrap gap-2">
@@ -84,7 +84,7 @@ export default function EspacioOpsClient({
                   className="h-1.5 w-1.5 rounded-full"
                   style={{ background: "#00D97E", boxShadow: "0 0 6px #00D97E", animation: "sky-pulse 2s infinite" }}
                 />
-                <span className="text-xs font-semibold" style={{ color: "#00D97E" }}>
+                <span className="text-xs font-semibold" style={{ color: "var(--sky-accent-green)" }}>
                   {telemetry.size} live
                 </span>
               </div>
@@ -173,7 +173,7 @@ function PanelContent({
         <div>
           <p
             className="text-[10px] font-medium tracking-widest"
-            style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains), monospace" }}
+            style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains), monospace" }}
           >
             {selected.code}
           </p>
@@ -211,7 +211,7 @@ function PanelContent({
             className="flex items-center gap-2 rounded-lg px-3 py-2.5"
             style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}
           >
-            <DroneIcon className="h-4 w-4 flex-shrink-0" style={{ color: "#0C9FD8" }} />
+            <DroneIcon className="h-4 w-4 flex-shrink-0" style={{ color: "var(--sky-accent-blue)" }} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold" style={{ color: "var(--sky-text)" }}>{drone.model}</p>
               <p className="text-[10px]" style={{ color: "var(--sky-muted)", fontFamily: "var(--font-jetbrains), monospace" }}>
@@ -221,7 +221,7 @@ function PanelContent({
           </div>
         ) : (
           <div className="rounded-lg px-3 py-2.5 text-xs"
-            style={{ background: "rgba(245,197,24,0.06)", border: "1px solid rgba(245,197,24,0.2)", color: "#F5C518" }}>
+            style={{ background: "rgba(245,197,24,0.06)", border: "1px solid rgba(245,197,24,0.2)", color: "var(--sky-accent-yellow)" }}>
             Sin drone asignado
           </div>
         )}
@@ -231,7 +231,7 @@ function PanelContent({
             className="flex items-center gap-2 rounded-lg px-3 py-2.5"
             style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}
           >
-            <PilotIcon className="h-4 w-4 flex-shrink-0" style={{ color: "#0C9FD8" }} />
+            <PilotIcon className="h-4 w-4 flex-shrink-0" style={{ color: "var(--sky-accent-blue)" }} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold" style={{ color: "var(--sky-text)" }}>
                 {pilot.userName ?? "Piloto"}
@@ -243,7 +243,7 @@ function PanelContent({
           </div>
         ) : (
           <div className="rounded-lg px-3 py-2.5 text-xs"
-            style={{ background: "rgba(245,197,24,0.06)", border: "1px solid rgba(245,197,24,0.2)", color: "#F5C518" }}>
+            style={{ background: "rgba(245,197,24,0.06)", border: "1px solid rgba(245,197,24,0.2)", color: "var(--sky-accent-yellow)" }}>
             Sin piloto asignado
           </div>
         )}
@@ -284,14 +284,14 @@ function PanelContent({
         <Link
           href="/missions"
           className="flex-1 rounded-lg py-2 text-center text-xs font-semibold"
-          style={{ background: "rgba(12,159,216,0.08)", border: "1px solid rgba(12,159,216,0.2)", color: "#0C9FD8" }}
+          style={{ background: "rgba(12,159,216,0.08)", border: "1px solid rgba(12,159,216,0.2)", color: "var(--sky-accent-blue)" }}
         >
           Misiones
         </Link>
         <Link
           href={`/missions/${selected.id}/compliance`}
           className="flex-1 rounded-lg py-2 text-center text-xs font-semibold"
-          style={{ background: "rgba(240,78,28,0.08)", border: "1px solid rgba(240,78,28,0.2)", color: "#F04E1C" }}
+          style={{ background: "rgba(240,78,28,0.08)", border: "1px solid rgba(240,78,28,0.2)", color: "var(--sky-accent-orange)" }}
         >
           Compliance
         </Link>

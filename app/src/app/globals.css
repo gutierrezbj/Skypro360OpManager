@@ -25,26 +25,38 @@
 
 /* ── Theme CSS custom properties (runtime, used in inline styles) ─────────── */
 :root {
-  --sky-bg:        #080D14;
-  --sky-surface:   #0D1520;
-  --sky-surface-2: #111D2E;
-  --sky-border:    #162338;
-  --sky-border-2:  #1E3A5F;
-  --sky-text:      #D6E8F5;
-  --sky-muted:     #6BA3C0;
-  --sky-dim:       #243A52;
+  --sky-bg:           #080D14;
+  --sky-surface:      #0D1520;
+  --sky-surface-2:    #111D2E;
+  --sky-border:       #162338;
+  --sky-border-2:     #1E3A5F;
+  --sky-text:         #D6E8F5;
+  --sky-muted:        #6BA3C0;
+  --sky-dim:          #243A52;
+  /* Accent colors adaptables — en dark son la versión brand original */
+  --sky-accent-blue:   #0C9FD8;
+  --sky-accent-orange: #F04E1C;
+  --sky-accent-green:  #00D97E;
+  --sky-accent-yellow: #F5C518;
+  --sky-accent-red:    #FC8181;
   color-scheme: dark;
 }
 
 [data-theme="light"] {
-  --sky-bg:        #EFF4F9;
+  --sky-bg:        #E8EFF6;
   --sky-surface:   #FFFFFF;
-  --sky-surface-2: #F3F7FB;
-  --sky-border:    #DDE5EE;
-  --sky-border-2:  #B8CFE4;
-  --sky-text:      #0D1520;
-  --sky-muted:     #4A6B8A;
-  --sky-dim:       #8AAEC8;
+  --sky-surface-2: #F1F5FA;
+  --sky-border:    #C2D1E0;
+  --sky-border-2:  #94B0CB;
+  --sky-text:      #0A1220;
+  --sky-muted:     #2F4860;
+  --sky-dim:       #5B7894;
+  /* Accent colors oscurecidos para contraste sobre blanco (WCAG AA en cuerpo y bold) */
+  --sky-accent-blue:   #006FA0;
+  --sky-accent-orange: #C0380F;
+  --sky-accent-green:  #00874A;
+  --sky-accent-yellow: #B58500;
+  --sky-accent-red:    #C53030;
   color-scheme: light;
 }
 

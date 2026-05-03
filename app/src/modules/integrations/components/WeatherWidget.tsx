@@ -98,8 +98,8 @@ export default function WeatherWidget({ lat, lng, date }: Props) {
         <div
           className="mt-2 rounded px-2 py-1 text-[10px]"
           style={weather.aptoVuelo
-            ? { background: "rgba(245,197,24,0.08)", color: "#F5C518" }
-            : { background: "rgba(229,62,62,0.08)", color: "#FC8181" }
+            ? { background: "rgba(245,197,24,0.08)", color: "var(--sky-accent-yellow)" }
+            : { background: "rgba(229,62,62,0.08)", color: "var(--sky-accent-red)" }
           }
         >
           {weather.razon}
@@ -131,8 +131,8 @@ function FlightBadge({ apto }: { apto: boolean }) {
     <span
       className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
       style={apto
-        ? { background: "rgba(0,217,126,0.1)", color: "#00D97E", border: "1px solid rgba(0,217,126,0.3)" }
-        : { background: "rgba(229,62,62,0.1)", color: "#FC8181", border: "1px solid rgba(229,62,62,0.3)" }
+        ? { background: "rgba(0,217,126,0.1)", color: "var(--sky-accent-green)", border: "1px solid rgba(0,217,126,0.3)" }
+        : { background: "rgba(229,62,62,0.1)", color: "var(--sky-accent-red)", border: "1px solid rgba(229,62,62,0.3)" }
       }
     >
       {apto ? "Apto vuelo" : "No apto"}
@@ -159,7 +159,7 @@ function WeatherIcon({ estado }: { estado: string }) {
     );
   }
   return (
-    <svg className="h-5 w-5" style={{ color: "#F5C518" }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <svg className="h-5 w-5" style={{ color: "var(--sky-accent-yellow)" }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
     </svg>
   );

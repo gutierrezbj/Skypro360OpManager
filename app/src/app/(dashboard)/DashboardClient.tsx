@@ -93,7 +93,7 @@ export default function DashboardClient({
             textTransform: "uppercase",
           }}
         >
-          Cockpit de <span style={{ color: "#0C9FD8" }}>Operaciones</span>
+          Cockpit de <span style={{ color: "var(--sky-accent-blue)" }}>Operaciones</span>
         </h1>
         <div className="flex items-center gap-4">
           <span
@@ -113,7 +113,7 @@ export default function DashboardClient({
                 className="h-1.5 w-1.5 rounded-full flex-shrink-0"
                 style={{ background: "#00D97E", boxShadow: "0 0 6px #00D97E", animation: "sky-pulse 2s infinite" }}
               />
-              <span className="text-xs font-semibold" style={{ color: "#00D97E" }}>
+              <span className="text-xs font-semibold" style={{ color: "var(--sky-accent-green)" }}>
                 {activeMissions.length} en vuelo
               </span>
             </div>
@@ -130,28 +130,28 @@ export default function DashboardClient({
           label="En vuelo"
           value={stats.activeMissions}
           sub={`de ${stats.totalMissions} misiones`}
-          color="#00D97E"
+          color="var(--sky-accent-green)"
           icon={<MissionIcon className="h-4 w-4" />}
         />
         <KpiCard
           label="Planificadas"
           value={stats.plannedMissions}
           sub="pendientes de inicio"
-          color="#4A8FD4"
+          color="var(--sky-accent-blue)"
           icon={<ClockIcon className="h-4 w-4" />}
         />
         <KpiCard
           label="Drones activos"
           value={stats.activeDrones}
           sub={`de ${stats.totalDrones} registrados`}
-          color="#0C9FD8"
+          color="var(--sky-accent-blue)"
           icon={<DroneIcon className="h-4 w-4" />}
         />
         <KpiCard
           label="Pilotos validos"
           value={stats.validPilots}
           sub={`de ${stats.totalPilots} registrados`}
-          color="#0C9FD8"
+          color="var(--sky-accent-blue)"
           icon={<PilotIcon className="h-4 w-4" />}
         />
       </div>
@@ -328,7 +328,7 @@ function ActiveMissionCard({
           <div>
             <p
               className="text-[10px] font-medium"
-              style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains), monospace" }}
+              style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains), monospace" }}
             >
               {mission.code}
             </p>
@@ -356,14 +356,14 @@ function ActiveMissionCard({
           <Link
             href={`/missions`}
             className="flex-1 text-center text-[10px] font-medium rounded py-1 transition-all"
-            style={{ background: "rgba(12,159,216,0.08)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.2)" }}
+            style={{ background: "rgba(12,159,216,0.08)", color: "var(--sky-accent-blue)", border: "1px solid rgba(12,159,216,0.2)" }}
           >
             Detalle
           </Link>
           <Link
             href={`/missions/${mission.id}/compliance`}
             className="flex-1 text-center text-[10px] font-medium rounded py-1 transition-all"
-            style={{ background: "rgba(240,78,28,0.06)", color: "#F04E1C", border: "1px solid rgba(240,78,28,0.2)" }}
+            style={{ background: "rgba(240,78,28,0.06)", color: "var(--sky-accent-orange)", border: "1px solid rgba(240,78,28,0.2)" }}
           >
             Compliance
           </Link>
@@ -386,7 +386,7 @@ function MiniMissionCard({ mission }: { mission: Mission }) {
       <div className="p-3">
         <p
           className="text-[10px] font-medium mb-1"
-          style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains), monospace" }}
+          style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains), monospace" }}
         >
           {mission.code}
         </p>
@@ -495,7 +495,7 @@ function LocationPill({
       onClick={() => onSelect(opt)}
       className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-all"
       style={active
-        ? { background: "rgba(12,159,216,0.15)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.4)" }
+        ? { background: "rgba(12,159,216,0.15)", color: "var(--sky-accent-blue)", border: "1px solid rgba(12,159,216,0.4)" }
         : { background: "var(--sky-surface)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }
       }
     >
@@ -577,7 +577,7 @@ function SectionHeader({
         <Link
           href={href}
           className="text-[11px] font-medium transition-colors"
-          style={{ color: "#0C9FD8" }}
+          style={{ color: "var(--sky-accent-blue)" }}
         >
           {linkLabel} →
         </Link>

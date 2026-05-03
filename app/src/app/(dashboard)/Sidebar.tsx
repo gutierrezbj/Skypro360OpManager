@@ -72,7 +72,7 @@ export default function Sidebar({
             className="text-sm font-semibold tracking-wide"
             style={{ color: "var(--sky-text)", fontFamily: "var(--font-barlow-condensed), sans-serif", fontSize: "15px", letterSpacing: "0.06em" }}
           >
-            OPS<span style={{ color: "#0C9FD8" }}>MANAGER</span>
+            OPS<span style={{ color: "var(--sky-accent-blue)" }}>MANAGER</span>
           </span>
           <span
             className="text-[9px] font-medium uppercase tracking-widest"
@@ -128,7 +128,7 @@ export default function Sidebar({
       <div className="px-4 py-3" style={{ borderTop: "1px solid var(--sky-border)" }}>
         <div className="flex items-center gap-2 px-3 py-2 rounded-md" style={{ background: "rgba(0,217,126,0.06)", border: "1px solid rgba(0,217,126,0.15)" }}>
           <span className="h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: "#00D97E", boxShadow: "0 0 6px #00D97E" }} />
-          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#00D97E" }}>
+          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--sky-accent-green)" }}>
             Sistema operativo
           </span>
         </div>
@@ -140,7 +140,7 @@ export default function Sidebar({
           {/* Avatar placeholder */}
           <div
             className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
-            style={{ background: "rgba(12,159,216,0.15)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.3)" }}
+            style={{ background: "rgba(12,159,216,0.15)", color: "var(--sky-accent-blue)", border: "1px solid rgba(12,159,216,0.3)" }}
           >
             {(userName ?? "?")[0]?.toUpperCase()}
           </div>

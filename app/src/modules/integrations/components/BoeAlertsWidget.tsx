@@ -5,8 +5,8 @@ import type { BoeSearchResult, BoeDocument } from "../services/boe.service";
 import { RefreshIcon, ExternalLinkIcon } from "@/lib/icons";
 
 const RELEVANCE_STYLE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  high:   { label: "Relevante",  color: "#F04E1C", bg: "rgba(240,78,28,0.08)",   border: "rgba(240,78,28,0.3)"   },
-  medium: { label: "Relacionado", color: "#F5C518", bg: "rgba(245,197,24,0.08)",  border: "rgba(245,197,24,0.3)"  },
+  high:   { label: "Relevante",  color: "var(--sky-accent-orange)", bg: "rgba(240,78,28,0.08)",   border: "rgba(240,78,28,0.3)"   },
+  medium: { label: "Relacionado", color: "var(--sky-accent-yellow)", bg: "rgba(245,197,24,0.08)",  border: "rgba(245,197,24,0.3)"  },
   low:    { label: "General",    color: "var(--sky-muted)", bg: "transparent",    border: "var(--sky-border)"     },
 };
 

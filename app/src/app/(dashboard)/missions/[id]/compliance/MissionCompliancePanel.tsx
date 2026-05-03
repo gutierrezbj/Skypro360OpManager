@@ -56,6 +56,7 @@ export default function MissionCompliancePanel({
   );
 
   return (
+    <div className="h-full overflow-y-auto">
     <div className="mx-auto max-w-4xl px-6 py-6">
       {/* Back button */}
       <Link
@@ -186,10 +187,32 @@ export default function MissionCompliancePanel({
               <Field label="RP aprobado" value={planning.rpApproved ? "Si" : "No"} />
               <Field label="Prevision meteo" value={planning.weatherForecast} span2 />
               {planning.signatureData && (
-                <div className="col-span-2">
-                  <p className="text-xs text-gray-400">Firma planificador</p>
+                <div className="col-span-1">
+                  <p className="text-xs" style={{ color: "var(--sky-muted)" }}>Firma planificador</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={planning.signatureData} alt="Firma" className="mt-1 h-12 rounded border border-gray-200 bg-gray-50 p-1" />
+                  <img src={planning.signatureData} alt="Firma planificador" className="mt-1 h-12 rounded p-1" style={{ border: "1px solid var(--sky-border)", background: "var(--sky-surface-2)" }} />
+                </div>
+              )}
+              {planning.rpSignature && (
+                <div className="col-span-1">
+                  <p className="text-xs" style={{ color: "var(--sky-muted)" }}>Firma RP (Responsable Operaciones)</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={planning.rpSignature} alt="Firma RP" className="mt-1 h-12 rounded p-1" style={{ border: "1px solid var(--sky-border)", background: "var(--sky-surface-2)" }} />
+                </div>
+              )}
+              {planning.rpApproved && !planning.rpSignature && (
+                <div className="col-span-1">
+                  <p className="text-xs" style={{ color: "var(--sky-muted)" }}>Firma RP</p>
+                  <div
+                    className="mt-1 h-12 rounded flex items-center justify-center text-[10px]"
+                    style={{
+                      border: "1px dashed var(--sky-border-2)",
+                      background: "rgba(245,197,24,0.06)",
+                      color: "var(--sky-accent-yellow)",
+                    }}
+                  >
+                    Pendiente de firma del RP
+                  </div>
                 </div>
               )}
             </div>
@@ -324,6 +347,7 @@ export default function MissionCompliancePanel({
           onClose={() => setShowForm(null)}
         />
       )}
+    </div>
     </div>
   );
 }
