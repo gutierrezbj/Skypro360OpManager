@@ -57,30 +57,72 @@ export default function MissionCompliancePanel({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-6">
+      {/* Back button */}
+      <Link
+        href="/missions"
+        className="mb-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+        style={{
+          background: "var(--sky-surface-2)",
+          border: "1px solid var(--sky-border)",
+          color: "var(--sky-muted)",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.color = "#0C9FD8";
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(12,159,216,0.4)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.color = "var(--sky-muted)";
+          (e.currentTarget as HTMLElement).style.borderColor = "var(--sky-border)";
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Volver a misiones
+      </Link>
+
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/missions"
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
-              Misiones
-            </Link>
-            <span className="text-gray-300">/</span>
-            <span className="text-sm font-mono text-gray-400">{mission.code}</span>
-          </div>
-          <h1 className="mt-1 text-xl font-semibold text-gray-900">{mission.name}</h1>
+          <span className="text-sm font-mono" style={{ color: "var(--sky-muted)" }}>{mission.code}</span>
+          <h1 className="mt-1 text-xl font-semibold" style={{ color: "var(--sky-text)" }}>{mission.name}</h1>
         </div>
         <div className="flex items-center gap-3">
           <MissionStatusBadge status={mission.status} />
           <Link
             href={`/missions/${mission.id}/compliance/pdf`}
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded-md px-3 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+            style={{ background: "#0C9FD8", color: "#fff" }}
           >
             Generar PDF
           </Link>
         </div>
+      </div>
+
+      {/* Workflow hint — qué hace cambiar el estado de la misión */}
+      <div
+        className="mb-6 rounded-lg px-4 py-3 text-xs"
+        style={{
+          background: "rgba(12,159,216,0.06)",
+          border: "1px solid rgba(12,159,216,0.2)",
+          color: "var(--sky-muted)",
+          lineHeight: "1.6",
+        }}
+      >
+        <p style={{ color: "var(--sky-text)", fontWeight: 600, marginBottom: "4px" }}>
+          ¿Cómo avanza el estado de la misión?
+        </p>
+        <p>
+          El estado se cambia desde la <Link href="/missions" style={{ color: "#0C9FD8", fontWeight: 500 }}>lista de misiones</Link> (icono ojo → botón de transición).
+          Cada paso requiere completar formularios aquí:
+        </p>
+        <ul className="mt-2 ml-1 space-y-1">
+          <li>• <strong style={{ color: "var(--sky-text)" }}>Borrador → Planificada</strong>: abrir misión y pulsar “Planificar”.</li>
+          <li>• <strong style={{ color: "var(--sky-text)" }}>Planificada → Aprobada</strong>: requiere drone + piloto asignados y A.4 firmada.</li>
+          <li>• <strong style={{ color: "var(--sky-text)" }}>Aprobada → Pre-vuelo</strong>: cuando el piloto se prepara en campo.</li>
+          <li>• <strong style={{ color: "var(--sky-text)" }}>Pre-vuelo → En vuelo</strong>: A.5/A.6 firmados.</li>
+          <li>• <strong style={{ color: "var(--sky-text)" }}>En vuelo → Completada</strong>: A.7/A.8 firmados al aterrizar.</li>
+        </ul>
       </div>
 
       {/* Mission info + completion */}
