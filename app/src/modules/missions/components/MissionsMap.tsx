@@ -92,8 +92,9 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: themeRef.current === "dark" ? MAP_STYLE_DARK : MAP_STYLE_LIGHT,
-      center: [-6.37, 39.15],
-      zoom: 7.5,
+      // Centrado en la Península Ibérica — vista completa España
+      center: [-3.74, 40.30],
+      zoom: 5.6,
       attributionControl: false,
     });
 
@@ -459,7 +460,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
       {/* Center button */}
       <button
         onClick={() => {
-          mapRef.current?.flyTo({ center: [-6.37, 39.15], zoom: 7.5, duration: 800 });
+          mapRef.current?.flyTo({ center: [-3.74, 40.30], zoom: 5.6, duration: 800 });
         }}
         className="absolute top-3 left-3 rounded-lg p-2 transition-all"
         style={{
