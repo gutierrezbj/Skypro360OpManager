@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createMission, updateMission, type MissionActionResult } from "../actions/mission.actions";
 import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 
@@ -46,6 +46,29 @@ export default function MissionForm({
 }) {
   const action = mission ? updateMission : createMission;
   const [state, formAction, isPending] = useActionState<MissionActionResult | null, FormData>(action, null);
+
+  // Coordinates controlled — para soportar paste "lat, lng" desde Google Maps
+  const [latitude, setLatitude] = useState<string>(mission?.latitude ?? "");
+  const [longitude, setLongitude] = useState<string>(mission?.longitude ?? "");
+  const [coordHint, setCoordHint] = useState<string>("");
+
+  /**
+   * Detecta si el clipboard tiene "lat, lng" (con coma o punto y coma)
+   * y rellena ambos campos. Si no, deja el comportamiento normal del input.
+   */
+  function handleCoordPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const text = e.clipboardData.getData("text").trim();
+    // Acepta: "36.4929323, -4.7715616" / "36.4929 -4.7715" / "36.4929; -4.7715"
+    const match = text.match(/^(-?\d+(?:\.\d+)?)\s*[,;]?\s+(-?\d+(?:\.\d+)?)$/) ||
+                  text.match(/^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/);
+    if (match) {
+      e.preventDefault();
+      setLatitude(match[1]);
+      setLongitude(match[2]);
+      setCoordHint("✓ Coordenadas detectadas y rellenadas automáticamente");
+      setTimeout(() => setCoordHint(""), 3000);
+    }
+  }
 
   if (state?.success) {
     onClose();
@@ -179,24 +202,34 @@ export default function MissionForm({
               <div className="grid grid-cols-2 gap-3">
                 <input
                   name="latitude"
-                  type="number"
-                  step="any"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="Latitud (ej: 39.4699)"
-                  defaultValue={mission?.latitude ?? ""}
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  onPaste={handleCoordPaste}
                   style={inputStyle}
                 />
                 <input
                   name="longitude"
-                  type="number"
-                  step="any"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="Longitud (ej: -6.3724)"
-                  defaultValue={mission?.longitude ?? ""}
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  onPaste={handleCoordPaste}
                   style={inputStyle}
                 />
               </div>
-              <p className="mt-1.5 text-[10px] leading-relaxed" style={{ color: "var(--sky-muted)" }}>
-                Tip: en Google Maps haz click derecho sobre el punto exacto del vuelo y copia las coordenadas (formato: lat, lng).
-              </p>
+              {coordHint ? (
+                <p className="mt-1.5 text-[10px] font-semibold leading-relaxed" style={{ color: "var(--sky-accent-green)" }}>
+                  {coordHint}
+                </p>
+              ) : (
+                <p className="mt-1.5 text-[10px] leading-relaxed" style={{ color: "var(--sky-muted)" }}>
+                  💡 Pega <strong style={{ color: "var(--sky-text)" }}>directamente desde Google Maps</strong> (formato &quot;36.4929, -4.7715&quot;) en cualquiera de los dos campos — se rellenan automáticamente.
+                </p>
+              )}
             </div>
           </div>
 
