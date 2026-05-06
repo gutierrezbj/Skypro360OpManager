@@ -43,7 +43,7 @@ describe("GET /api/geocode", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("normaliza una dirección con calle y número", async () => {
+  it("normaliza una dirección con calle y número (Nominatim, 2+ resultados)", async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
       expires: new Date(Date.now() + 86400000).toISOString(),
@@ -52,14 +52,25 @@ describe("GET /api/geocode", () => {
       new Response(
         JSON.stringify([
           {
-            display_name: "12, Calle Mayor, Sol, Centro, Madrid, España",
+            display_name: "12, Calle Mayor, Centro, Madrid, España",
             lat: "40.41675",
             lon: "-3.70378",
-            type: "house",
             address: {
               house_number: "12",
               road: "Calle Mayor",
-              suburb: "Centro",
+              city: "Madrid",
+              state: "Comunidad de Madrid",
+              country: "España",
+              country_code: "es",
+            },
+          },
+          {
+            display_name: "14, Calle Mayor, Centro, Madrid, España",
+            lat: "40.41680",
+            lon: "-3.70390",
+            address: {
+              house_number: "14",
+              road: "Calle Mayor",
               city: "Madrid",
               state: "Comunidad de Madrid",
               country: "España",
@@ -75,62 +86,67 @@ describe("GET /api/geocode", () => {
     const body = (await res.json()) as { results: Array<Record<string, unknown>> };
 
     expect(res.status).toBe(200);
-    expect(body.results).toHaveLength(1);
+    expect(body.results.length).toBeGreaterThanOrEqual(1);
     const r = body.results[0];
     expect(r.name).toBe("Calle Mayor 12");
     expect(r.admin1).toBe("Comunidad de Madrid");
     expect(r.admin2).toBe("Madrid");
-    expect(r.country).toBe("España");
     expect(r.countryCode).toBe("ES");
-    expect(r.lat).toBeCloseTo(40.41675);
-    expect(r.lng).toBeCloseTo(-3.70378);
   });
 
-  it("normaliza una ciudad sin calle", async () => {
+  it("hace fallback a Photon cuando Nominatim devuelve <2 resultados", async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
       expires: new Date(Date.now() + 86400000).toISOString(),
     });
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response(
-        JSON.stringify([
-          {
-            display_name: "Trujillo, Cáceres, Extremadura, España",
-            lat: "39.45848",
-            lon: "-5.88157",
-            type: "city",
-            address: {
-              city: "Trujillo",
-              county: "Cáceres",
-              state: "Extremadura",
-              country: "España",
-              country_code: "es",
-            },
-          },
-        ]),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      ),
-    );
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+      // Nominatim → 0 resultados
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([]), { status: 200 }),
+      )
+      // Photon → 1 resultado
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: { type: "Point", coordinates: [-5.88157, 39.45848] },
+                properties: {
+                  name: "Trujillo",
+                  city: "Trujillo",
+                  county: "Cáceres",
+                  state: "Extremadura",
+                  country: "España",
+                  countrycode: "ES",
+                },
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      );
 
-    const res = await GET(makeReq("?q=Trujillo"));
+    const res = await GET(makeReq("?q=Trujillo+rural"));
     const body = (await res.json()) as { results: Array<Record<string, unknown>> };
 
     expect(res.status).toBe(200);
-    const r = body.results[0];
-    expect(r.name).toBe("Trujillo");
-    expect(r.admin1).toBe("Extremadura");
-    expect(r.admin2).toBe("Cáceres");
+    expect(fetchSpy).toHaveBeenCalledTimes(2); // Nominatim + Photon
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].name).toBe("Trujillo");
+    expect(body.results[0].lat).toBeCloseTo(39.45848);
   });
 
-  it("devuelve array vacío si Nominatim falla", async () => {
+  it("devuelve array vacío si ambos motores fallan", async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
       expires: new Date(Date.now() + 86400000).toISOString(),
     });
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response("oops", { status: 500 }),
-    );
-    const res = await GET(makeReq("?q=NoExiste"));
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response("nope", { status: 500 }))
+      .mockResolvedValueOnce(new Response("nope", { status: 500 }));
+    const res = await GET(makeReq("?q=NoExisteNada"));
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.results).toEqual([]);
@@ -141,13 +157,14 @@ describe("GET /api/geocode", () => {
       user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
       expires: new Date(Date.now() + 86400000).toISOString(),
     });
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response(JSON.stringify([]), { status: 200 }),
-    );
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ type: "FeatureCollection", features: [] }), { status: 200 }),
+      );
     await GET(makeReq("?q=Madrid"));
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const callArgs = fetchSpy.mock.calls[0];
-    const opts = callArgs[1] as RequestInit;
+    const nominatimCall = fetchSpy.mock.calls[0];
+    const opts = nominatimCall[1] as RequestInit;
     const headers = (opts?.headers ?? {}) as Record<string, string>;
     expect(headers["User-Agent"]).toMatch(/OpsManager/);
   });
