@@ -1,5 +1,5 @@
 /**
- * Tests del proxy /api/geocode (Open-Meteo geocoding).
+ * Tests del proxy /api/geocode (Nominatim / OpenStreetMap).
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
@@ -26,7 +26,7 @@ beforeEach(() => {
 describe("GET /api/geocode", () => {
   it("retorna 401 si no hay sesión", async () => {
     mockAuth.mockResolvedValueOnce(null);
-    const res = await GET(makeReq("?q=Trujillo"));
+    const res = await GET(makeReq("?q=Madrid"));
     expect(res.status).toBe(401);
   });
 
@@ -43,28 +43,71 @@ describe("GET /api/geocode", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("filtra IDs y population de la respuesta de Open-Meteo", async () => {
+  it("normaliza una dirección con calle y número", async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
       expires: new Date(Date.now() + 86400000).toISOString(),
     });
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(
-        JSON.stringify({
-          results: [
-            {
-              id: 2510409,
-              name: "Trujillo",
-              latitude: 39.45848,
-              longitude: -5.88157,
+        JSON.stringify([
+          {
+            display_name: "12, Calle Mayor, Sol, Centro, Madrid, España",
+            lat: "40.41675",
+            lon: "-3.70378",
+            type: "house",
+            address: {
+              house_number: "12",
+              road: "Calle Mayor",
+              suburb: "Centro",
+              city: "Madrid",
+              state: "Comunidad de Madrid",
               country: "España",
-              country_code: "ES",
-              admin1: "Extremadura",
-              admin2: "Cáceres",
-              population: 9650,
+              country_code: "es",
             },
-          ],
-        }),
+          },
+        ]),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    const res = await GET(makeReq("?q=Calle+Mayor+12+Madrid"));
+    const body = (await res.json()) as { results: Array<Record<string, unknown>> };
+
+    expect(res.status).toBe(200);
+    expect(body.results).toHaveLength(1);
+    const r = body.results[0];
+    expect(r.name).toBe("Calle Mayor 12");
+    expect(r.admin1).toBe("Comunidad de Madrid");
+    expect(r.admin2).toBe("Madrid");
+    expect(r.country).toBe("España");
+    expect(r.countryCode).toBe("ES");
+    expect(r.lat).toBeCloseTo(40.41675);
+    expect(r.lng).toBeCloseTo(-3.70378);
+  });
+
+  it("normaliza una ciudad sin calle", async () => {
+    mockAuth.mockResolvedValueOnce({
+      user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
+      expires: new Date(Date.now() + 86400000).toISOString(),
+    });
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify([
+          {
+            display_name: "Trujillo, Cáceres, Extremadura, España",
+            lat: "39.45848",
+            lon: "-5.88157",
+            type: "city",
+            address: {
+              city: "Trujillo",
+              county: "Cáceres",
+              state: "Extremadura",
+              country: "España",
+              country_code: "es",
+            },
+          },
+        ]),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
     );
@@ -73,19 +116,13 @@ describe("GET /api/geocode", () => {
     const body = (await res.json()) as { results: Array<Record<string, unknown>> };
 
     expect(res.status).toBe(200);
-    expect(body.results).toHaveLength(1);
     const r = body.results[0];
     expect(r.name).toBe("Trujillo");
-    expect(r.lat).toBe(39.45848);
-    expect(r.lng).toBe(-5.88157);
     expect(r.admin1).toBe("Extremadura");
     expect(r.admin2).toBe("Cáceres");
-    // No exponemos id ni population
-    expect(r.id).toBeUndefined();
-    expect(r.population).toBeUndefined();
   });
 
-  it("devuelve array vacío si Open-Meteo falla", async () => {
+  it("devuelve array vacío si Nominatim falla", async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
       expires: new Date(Date.now() + 86400000).toISOString(),
@@ -97,5 +134,21 @@ describe("GET /api/geocode", () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.results).toEqual([]);
+  });
+
+  it("envía User-Agent obligatorio a Nominatim", async () => {
+    mockAuth.mockResolvedValueOnce({
+      user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
+      expires: new Date(Date.now() + 86400000).toISOString(),
+    });
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify([]), { status: 200 }),
+    );
+    await GET(makeReq("?q=Madrid"));
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const callArgs = fetchSpy.mock.calls[0];
+    const opts = callArgs[1] as RequestInit;
+    const headers = (opts?.headers ?? {}) as Record<string, string>;
+    expect(headers["User-Agent"]).toMatch(/OpsManager/);
   });
 });
