@@ -21,6 +21,16 @@ export type WeatherForecast = {
   estadoCieloDesc: string;
   aptoVuelo: boolean;
   razon?: string;
+  // ── Datos extendidos (Open-Meteo supplement + NOAA) ─────────────────────
+  humedad?: number | null;        // % HR
+  rafagas?: number | null;        // km/h gust max
+  visibilidad?: number | null;    // km
+  nubosidad?: number | null;      // % cobertura nubosa numérica
+  uvIndex?: number | null;        // 0-11+ índice UV solar
+  amanecer?: string | null;       // HH:MM hora local
+  ocaso?: string | null;          // HH:MM hora local
+  kpIndex?: number | null;        // 0-9 actividad geomagnética (GPS)
+  kpStatus?: "optimo" | "degradado" | "inestable" | null;
 };
 
 // AEMET municipality codes for Extremadura provinces (nearest to coordinates)
@@ -70,8 +80,10 @@ function findNearestMunicipio(lat: number, lng: number): { code: string; name: s
 }
 
 /**
- * Fetch daily weather forecast from AEMET for given coordinates.
- * AEMET API uses a two-step fetch: first gets a data URL, then fetches the actual data.
+ * Fetch daily weather forecast from AEMET + Open-Meteo supplement + NOAA KP.
+ * AEMET: temperatura, viento, precipitación, estado cielo (España oficial).
+ * Open-Meteo: humedad, ráfagas, UV, visibilidad, nubosidad %, amanecer, ocaso.
+ * NOAA SWPC: KP index (actividad geomagnética → GPS/RTK).
  */
 export async function getWeatherForLocation(
   lat: number,
@@ -82,42 +94,138 @@ export async function getWeatherForLocation(
   const targetDate = date ?? new Date().toISOString().slice(0, 10);
   const municipio = findNearestMunicipio(lat, lng);
 
+  // Open-Meteo + KP en paralelo (independientes de AEMET, no bloquean si AEMET no está)
+  const supplementPromise = fetchOpenMeteoSupplement(lat, lng);
+
+  let baseForecast: WeatherForecast;
+
   if (!apiKey) {
-    return generateFallbackForecast(municipio.name, targetDate);
+    baseForecast = generateFallbackForecast(municipio.name, targetDate);
+  } else {
+    try {
+      // Step 1: Get data URL
+      const indexRes = await fetch(
+        `${AEMET_BASE}/prediccion/especifica/municipio/diaria/${municipio.code}`,
+        {
+          headers: { api_key: apiKey },
+          next: { revalidate: 3600 },
+        },
+      );
+
+      if (!indexRes.ok) {
+        console.error(`AEMET index failed: ${indexRes.status}`);
+        baseForecast = generateFallbackForecast(municipio.name, targetDate);
+      } else {
+        const index = await indexRes.json() as { estado: number; datos: string };
+        if (index.estado !== 200 || !index.datos) {
+          baseForecast = generateFallbackForecast(municipio.name, targetDate);
+        } else {
+          const dataRes = await fetch(index.datos, { next: { revalidate: 3600 } });
+          if (!dataRes.ok) {
+            baseForecast = generateFallbackForecast(municipio.name, targetDate);
+          } else {
+            const data = await dataRes.json() as AemetPrediccion[];
+            baseForecast = parseAemetForecast(data, municipio.name, targetDate);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("AEMET fetch error:", err);
+      baseForecast = generateFallbackForecast(municipio.name, targetDate);
+    }
   }
+
+  // Mergea con supplement (best-effort, no bloquea si falla)
+  const supplement = await supplementPromise;
+  return { ...baseForecast, ...supplement };
+}
+
+// ── Open-Meteo + NOAA supplement ────────────────────────────────────────────
+
+type WeatherSupplement = Pick<WeatherForecast,
+  "humedad" | "rafagas" | "visibilidad" | "nubosidad" | "uvIndex" |
+  "amanecer" | "ocaso" | "kpIndex" | "kpStatus"
+>;
+
+async function fetchOpenMeteoSupplement(lat: number, lng: number): Promise<WeatherSupplement> {
+  const empty: WeatherSupplement = {
+    humedad: null, rafagas: null, visibilidad: null, nubosidad: null,
+    uvIndex: null, amanecer: null, ocaso: null, kpIndex: null, kpStatus: null,
+  };
 
   try {
-    // Step 1: Get data URL
-    const indexRes = await fetch(
-      `${AEMET_BASE}/prediccion/especifica/municipio/diaria/${municipio.code}`,
-      {
-        headers: { api_key: apiKey },
-        next: { revalidate: 3600 }, // Cache 1 hour
-      },
-    );
+    const url =
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+      `&current=relative_humidity_2m,wind_gusts_10m,uv_index,visibility,cloud_cover` +
+      `&daily=sunrise,sunset` +
+      `&wind_speed_unit=kmh&timezone=auto`;
 
-    if (!indexRes.ok) {
-      console.error(`AEMET index failed: ${indexRes.status}`);
-      return generateFallbackForecast(municipio.name, targetDate);
-    }
+    const [omRes, kpRes] = await Promise.all([
+      fetch(url, { signal: AbortSignal.timeout(6000), next: { revalidate: 1800 } }),
+      fetchKPIndex(),
+    ]);
 
-    const index = await indexRes.json() as { estado: number; datos: string };
-    if (index.estado !== 200 || !index.datos) {
-      return generateFallbackForecast(municipio.name, targetDate);
-    }
+    if (!omRes.ok) return { ...empty, kpIndex: kpRes.kpIndex, kpStatus: kpRes.kpStatus };
 
-    // Step 2: Fetch actual forecast data
-    const dataRes = await fetch(index.datos, { next: { revalidate: 3600 } });
-    if (!dataRes.ok) {
-      return generateFallbackForecast(municipio.name, targetDate);
-    }
+    type OpenMeteoCurrent = {
+      relative_humidity_2m?: number;
+      wind_gusts_10m?: number;
+      uv_index?: number;
+      visibility?: number;
+      cloud_cover?: number;
+    };
+    const om = await omRes.json() as {
+      current?: OpenMeteoCurrent;
+      daily?: { sunrise?: string[]; sunset?: string[] };
+    };
+    const c = om.current ?? {};
 
-    const data = await dataRes.json() as AemetPrediccion[];
-    return parseAemetForecast(data, municipio.name, targetDate);
-  } catch (err) {
-    console.error("AEMET fetch error:", err);
-    return generateFallbackForecast(municipio.name, targetDate);
+    return {
+      humedad: c.relative_humidity_2m ?? null,
+      rafagas: c.wind_gusts_10m != null ? Math.round(c.wind_gusts_10m) : null,
+      visibilidad: c.visibility != null ? Math.round(c.visibility / 100) / 10 : null, // metros → km (1 decimal)
+      nubosidad: c.cloud_cover ?? null,
+      uvIndex: c.uv_index != null ? Math.round(c.uv_index * 10) / 10 : null,
+      amanecer: fmtIsoTime(om.daily?.sunrise?.[0]),
+      ocaso: fmtIsoTime(om.daily?.sunset?.[0]),
+      kpIndex: kpRes.kpIndex,
+      kpStatus: kpRes.kpStatus,
+    };
+  } catch {
+    return empty;
   }
+}
+
+/** NOAA Planetary KP Index — afecta a GPS/RTK. */
+async function fetchKPIndex(): Promise<{ kpIndex: number | null; kpStatus: "optimo" | "degradado" | "inestable" | null }> {
+  try {
+    const r = await fetch(
+      "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+      { signal: AbortSignal.timeout(5000), next: { revalidate: 1800 } },
+    );
+    if (!r.ok) return { kpIndex: null, kpStatus: null };
+    const data = await r.json() as Array<unknown>;
+    if (!Array.isArray(data) || data.length < 2) return { kpIndex: null, kpStatus: null };
+    // NOAA legacy format: first row = headers, rest = arrays [time_tag, Kp, ...]
+    const latest = data[data.length - 1];
+    const kp = Array.isArray(latest)
+      ? parseFloat(String(latest[1]))
+      : parseFloat(String((latest as { Kp?: string }).Kp));
+    if (isNaN(kp)) return { kpIndex: null, kpStatus: null };
+    const status: "optimo" | "degradado" | "inestable" =
+      kp < 4 ? "optimo" : kp < 6 ? "degradado" : "inestable";
+    return { kpIndex: Math.round(kp * 10) / 10, kpStatus: status };
+  } catch {
+    return { kpIndex: null, kpStatus: null };
+  }
+}
+
+/** ISO datetime → HH:MM en hora local (Open-Meteo ya devuelve en TZ del lugar). */
+function fmtIsoTime(iso: string | undefined): string | null {
+  if (!iso) return null;
+  // formato Open-Meteo: "2026-05-04T07:07"
+  const m = iso.match(/T(\d{2}:\d{2})/);
+  return m?.[1] ?? null;
 }
 
 // --- AEMET response parsing ---

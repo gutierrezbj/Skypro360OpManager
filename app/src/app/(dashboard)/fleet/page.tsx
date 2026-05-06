@@ -42,8 +42,9 @@ export default async function FleetPage() {
   });
 
   return (
+    <div className="h-full overflow-y-auto">
     <div className="p-6">
-      <h1 className="mb-6 text-lg font-semibold text-gray-900">Flota</h1>
+      <h1 className="mb-6 text-lg font-semibold" style={{ color: "var(--sky-text)" }}>Flota</h1>
       <FleetTabs
         drones={droneList}
         pilots={pilotList.map((p) => ({
@@ -54,6 +55,7 @@ export default async function FleetPage() {
         users={userList}
         canEdit={canManageFleet(role)}
       />
+    </div>
     </div>
   );
 }

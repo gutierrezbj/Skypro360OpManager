@@ -18,5 +18,9 @@ export default async function AnalyticsPage() {
 
   const data = await withTenantContext(tenantId, () => getAnalyticsData(tenantId));
 
-  return <AnalyticsDashboard data={data} />;
+  return (
+    <div className="h-full overflow-y-auto">
+      <AnalyticsDashboard data={data} />
+    </div>
+  );
 }

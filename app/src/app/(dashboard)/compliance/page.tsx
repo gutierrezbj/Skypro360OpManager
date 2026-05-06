@@ -36,10 +36,12 @@ export default async function CompliancePage() {
   );
 
   return (
-    <ComplianceOverview
-      missions={missionList}
-      drones={droneList}
-      pilots={pilotList.map((p) => ({ ...p, userName: p.userName ?? undefined }))}
-    />
+    <div className="h-full overflow-y-auto">
+      <ComplianceOverview
+        missions={missionList}
+        drones={droneList}
+        pilots={pilotList.map((p) => ({ ...p, userName: p.userName ?? undefined }))}
+      />
+    </div>
   );
 }
