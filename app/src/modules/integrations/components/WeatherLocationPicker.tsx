@@ -202,6 +202,25 @@ function GeoButton({
   );
 }
 
+/**
+ * Detecta input tipo "lat, lng" en varios formatos:
+ *   "39.4699, -6.3722"   (coma)
+ *   "39.4699; -6.3722"   (punto y coma)
+ *   "39.4699 -6.3722"    (espacio)
+ * Devuelve null si no matchea o si los valores están fuera de rango terrestre.
+ */
+function parseCoordsInput(text: string): { lat: number; lng: number } | null {
+  const match =
+    text.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/) ||
+    text.match(/^\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*$/);
+  if (!match) return null;
+  const lat = parseFloat(match[1]);
+  const lng = parseFloat(match[2]);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
 function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
@@ -209,8 +228,17 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Si el input es un par de coordenadas, no llamamos a /api/geocode
+  const coordCandidate = useMemo(() => parseCoordsInput(q), [q]);
+
   // Debounced search
   useEffect(() => {
+    if (coordCandidate) {
+      setResults([]);
+      setLoading(false);
+      setOpen(true);
+      return;
+    }
     if (q.trim().length < 2) {
       setResults([]);
       setLoading(false);
@@ -232,7 +260,7 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [q]);
+  }, [q, coordCandidate]);
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -253,6 +281,14 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
     setOpen(false);
   }
 
+  function handleSelectCoords(coords: { lat: number; lng: number }) {
+    const label = `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
+    onPick({ lat: coords.lat, lng: coords.lng, label });
+    setQ("");
+    setResults([]);
+    setOpen(false);
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
@@ -265,7 +301,7 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
-          placeholder="Buscar ciudad..."
+          placeholder="Ciudad o coordenadas (lat, lng)..."
           className="w-full rounded-md pl-7 pr-7 py-1.5 text-[11px] outline-none"
           style={{
             background: "var(--sky-surface)",
@@ -286,7 +322,7 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
         )}
       </div>
 
-      {open && (results.length > 0 || loading) && (
+      {open && (coordCandidate || results.length > 0 || loading) && (
         <div
           className="absolute z-20 mt-1 w-full rounded-md overflow-hidden shadow-lg"
           style={{
@@ -294,7 +330,27 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
             border: "1px solid var(--sky-border-2)",
           }}
         >
-          {loading && results.length === 0 ? (
+          {coordCandidate ? (
+            <button
+              type="button"
+              onClick={() => handleSelectCoords(coordCandidate)}
+              className="block w-full text-left px-3 py-2 text-[11px] transition-colors"
+              style={{ color: "var(--sky-text)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(12,159,216,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+              }}
+            >
+              <span className="font-semibold" style={{ color: "var(--sky-accent-blue)" }}>
+                Usar coordenadas
+              </span>
+              <span className="ml-1.5 text-[10px]" style={{ color: "var(--sky-muted)", fontFamily: "var(--font-jetbrains), monospace" }}>
+                {coordCandidate.lat.toFixed(4)}, {coordCandidate.lng.toFixed(4)}
+              </span>
+            </button>
+          ) : loading && results.length === 0 ? (
             <div className="px-3 py-2 text-[10px]" style={{ color: "var(--sky-muted)" }}>
               Buscando...
             </div>
