@@ -6,9 +6,12 @@ import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
+import WeatherLocationPicker from "@/modules/integrations/components/WeatherLocationPicker";
+import WeatherEmptyState from "@/modules/integrations/components/WeatherEmptyState";
 import BoeAlertsWidget from "@/modules/integrations/components/BoeAlertsWidget";
+import type { WeatherLoc } from "@/lib/hooks/useRecentWeatherLocations";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
-import { DroneIcon, PilotIcon, MissionIcon, ClockIcon, MapPinIcon } from "@/lib/icons";
+import { DroneIcon, PilotIcon, MissionIcon, ClockIcon } from "@/lib/icons";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -51,7 +54,7 @@ export default function DashboardClient({
   drones: Drone[];
 }) {
   const [now, setNow] = useState(() => new Date());
-  const [weatherLoc, setWeatherLoc] = useState<{ lat: number; lng: number; label: string } | null>(null);
+  const [weatherLoc, setWeatherLoc] = useState<WeatherLoc | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -65,14 +68,16 @@ export default function DashboardClient({
     .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
     .slice(0, 8);
 
-  // Weather location: default to first active mission or Madrid
-  const defaultWeatherLoc = activeMissions.find((m) => m.latitude && m.longitude)
+  // Default inicial: si hay misión activa con coords, usar esa.
+  // Si no, queda null y se muestra el empty state hasta que el usuario elija.
+  const firstGeoActive = activeMissions.find((m) => m.latitude && m.longitude);
+  const defaultWeatherLoc: WeatherLoc | null = firstGeoActive
     ? {
-        lat: parseFloat(activeMissions.find((m) => m.latitude)!.latitude!),
-        lng: parseFloat(activeMissions.find((m) => m.longitude)!.longitude!),
-        label: activeMissions.find((m) => m.latitude)!.code,
+        lat: parseFloat(firstGeoActive.latitude!),
+        lng: parseFloat(firstGeoActive.longitude!),
+        label: firstGeoActive.code,
       }
-    : { lat: 40.4168, lng: -3.7038, label: "Madrid" };
+    : null;
   const currentWeatherLoc = weatherLoc ?? defaultWeatherLoc;
 
   return (
@@ -237,10 +242,14 @@ export default function DashboardClient({
               onSelect={setWeatherLoc}
             />
             <div className="mt-2">
-              <WeatherWidget
-                lat={currentWeatherLoc.lat}
-                lng={currentWeatherLoc.lng}
-              />
+              {currentWeatherLoc ? (
+                <WeatherWidget
+                  lat={currentWeatherLoc.lat}
+                  lng={currentWeatherLoc.lng}
+                />
+              ) : (
+                <WeatherEmptyState />
+              )}
             </div>
           </div>
 
@@ -467,81 +476,6 @@ function PilotChip({ pilot }: { pilot: PilotWithUser }) {
       </div>
       <span className="flex-shrink-0 h-1.5 w-1.5 rounded-full" style={{ background: dot }} title={pilot.certificationStatus ?? "pending"} />
     </Link>
-  );
-}
-
-// ── Weather location picker ───────────────────────────────────────────────────
-
-const PRESET_CITIES = [
-  { label: "Madrid",    lat: 40.4168, lng: -3.7038 },
-  { label: "Sevilla",   lat: 37.3886, lng: -5.9823 },
-  { label: "Barcelona", lat: 41.3851, lng:  2.1734 },
-  { label: "Valencia",  lat: 39.4699, lng: -0.3763 },
-  { label: "Badajoz",   lat: 38.8794, lng: -6.9706 },
-  { label: "Bilbao",    lat: 43.2630, lng: -2.9350 },
-  { label: "Zaragoza",  lat: 41.6488, lng: -0.8891 },
-  { label: "Murcia",    lat: 37.9922, lng: -1.1307 },
-];
-
-function LocationPill({
-  opt, active, onSelect,
-}: {
-  opt: { label: string; lat: number; lng: number };
-  active: boolean;
-  onSelect: (loc: { lat: number; lng: number; label: string }) => void;
-}) {
-  return (
-    <button
-      onClick={() => onSelect(opt)}
-      className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-all"
-      style={active
-        ? { background: "rgba(12,159,216,0.15)", color: "var(--sky-accent-blue)", border: "1px solid rgba(12,159,216,0.4)" }
-        : { background: "var(--sky-surface)", color: "var(--sky-muted)", border: "1px solid var(--sky-border)" }
-      }
-    >
-      <MapPinIcon className="h-2.5 w-2.5 flex-shrink-0" />
-      {opt.label}
-    </button>
-  );
-}
-
-function WeatherLocationPicker({
-  activeMissions,
-  selected,
-  onSelect,
-}: {
-  activeMissions: Mission[];
-  selected: { lat: number; lng: number; label: string };
-  onSelect: (loc: { lat: number; lng: number; label: string }) => void;
-}) {
-  const missionOptions = activeMissions
-    .filter((m) => m.latitude && m.longitude)
-    .map((m) => ({ label: m.code, lat: parseFloat(m.latitude!), lng: parseFloat(m.longitude!) }));
-
-  const allOptions = [...missionOptions, ...PRESET_CITIES];
-
-  return (
-    <div
-      className="rounded-xl p-2.5"
-      style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}
-    >
-      {missionOptions.length > 0 && (
-        <p className="text-[9px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--sky-dim)" }}>
-          Misiones activas
-        </p>
-      )}
-      {missionOptions.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2 pb-2" style={{ borderBottom: "1px solid var(--sky-border)" }}>
-          {missionOptions.map((opt) => <LocationPill key={opt.label} opt={opt} active={selected.label === opt.label} onSelect={onSelect} />)}
-        </div>
-      )}
-      <p className="text-[9px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--sky-dim)" }}>
-        Ciudades
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {PRESET_CITIES.map((opt) => <LocationPill key={opt.label} opt={opt} active={selected.label === opt.label} onSelect={onSelect} />)}
-      </div>
-    </div>
   );
 }
 

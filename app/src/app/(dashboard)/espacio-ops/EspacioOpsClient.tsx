@@ -6,6 +6,9 @@ import MissionsMap from "@/modules/missions/components/MissionsMap";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
 import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
+import WeatherLocationPicker from "@/modules/integrations/components/WeatherLocationPicker";
+import WeatherEmptyState from "@/modules/integrations/components/WeatherEmptyState";
+import type { WeatherLoc } from "@/lib/hooks/useRecentWeatherLocations";
 import { useTelemetry } from "@/modules/telemetry/hooks/useTelemetry";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
 import { DroneIcon, PilotIcon, AlertTriangleIcon, CloseIcon } from "@/lib/icons";
@@ -36,6 +39,8 @@ export default function EspacioOpsClient({
   const [panelOpen, setPanelOpen] = useState(false);
   // Filtros de estado activos en el mapa. Si vacío → mostrar todas.
   const [statusFilters, setStatusFilters] = useState<Set<string>>(new Set());
+  // Ubicación meteo en el panel derecho (cuando no hay misión seleccionada)
+  const [weatherLoc, setWeatherLoc] = useState<WeatherLoc | null>(null);
   const telemetry = useTelemetry();
 
   function toggleFilter(group: "active" | "planned" | "completed") {
@@ -188,6 +193,26 @@ export default function EspacioOpsClient({
             <>
               <ExpiryAlerts pilots={pilots} drones={drones} />
               <UngeoreferencedMissions missions={missions} />
+              <div>
+                <p
+                  className="mb-2 text-xs font-semibold uppercase tracking-widest"
+                  style={{ color: "var(--sky-muted)" }}
+                >
+                  Meteorología
+                </p>
+                <WeatherLocationPicker
+                  activeMissions={missions.filter((m) => ["in_flight", "preflight"].includes(m.status))}
+                  selected={weatherLoc}
+                  onSelect={setWeatherLoc}
+                />
+                <div className="mt-2">
+                  {weatherLoc ? (
+                    <WeatherWidget lat={weatherLoc.lat} lng={weatherLoc.lng} />
+                  ) : (
+                    <WeatherEmptyState />
+                  )}
+                </div>
+              </div>
               <div
                 className="rounded-xl p-3 text-center text-xs"
                 style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }}
