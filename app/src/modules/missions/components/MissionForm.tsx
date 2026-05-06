@@ -65,7 +65,7 @@ export default function MissionForm({
       e.preventDefault();
       setLatitude(match[1]);
       setLongitude(match[2]);
-      setCoordHint("✓ Coordenadas detectadas y rellenadas automáticamente");
+      setCoordHint("Coordenadas detectadas y rellenadas automáticamente");
       setTimeout(() => setCoordHint(""), 3000);
     }
   }
@@ -227,7 +227,7 @@ export default function MissionForm({
                 </p>
               ) : (
                 <p className="mt-1.5 text-[10px] leading-relaxed" style={{ color: "var(--sky-muted)" }}>
-                  💡 Pega <strong style={{ color: "var(--sky-text)" }}>directamente desde Google Maps</strong> (formato &quot;36.4929, -4.7715&quot;) en cualquiera de los dos campos — se rellenan automáticamente.
+                  Pega <strong style={{ color: "var(--sky-text)" }}>directamente desde Google Maps</strong> (formato &quot;36.4929, -4.7715&quot;) en cualquiera de los dos campos — se rellenan automáticamente.
                 </p>
               )}
             </div>

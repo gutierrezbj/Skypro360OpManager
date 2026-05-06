@@ -8,7 +8,7 @@ import ExpiryAlerts from "@/modules/compliance/components/ExpiryAlerts";
 import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
 import { useTelemetry } from "@/modules/telemetry/hooks/useTelemetry";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
-import { DroneIcon, PilotIcon } from "@/lib/icons";
+import { DroneIcon, PilotIcon, AlertTriangleIcon, CloseIcon } from "@/lib/icons";
 import Link from "next/link";
 
 type PilotWithUser = Pilot & { userName?: string };
@@ -125,14 +125,15 @@ export default function EspacioOpsClient({
             {statusFilters.size > 0 && (
               <button
                 onClick={clearFilters}
-                className="rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors"
+                className="flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors"
                 style={{
                   background: "rgba(240,78,28,0.08)",
                   color: "var(--sky-accent-orange)",
                   border: "1px solid rgba(240,78,28,0.3)",
                 }}
               >
-                ✕ Limpiar
+                <CloseIcon className="h-3 w-3" />
+                Limpiar
               </button>
             )}
             <div style={{ width: "1px", background: "var(--sky-border)", alignSelf: "stretch" }} className="hidden sm:block" />
@@ -452,7 +453,7 @@ function UngeoreferencedMissions({ missions }: { missions: Mission[] }) {
       }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-[14px]" style={{ color: "var(--sky-accent-yellow)" }}>⚠</span>
+        <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "var(--sky-accent-yellow)" }} />
         <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--sky-accent-yellow)" }}>
           Sin georreferencia ({ungeo.length})
         </p>

@@ -294,7 +294,7 @@ export default function MissionCompliancePanel({
               <div key={inc.id} className="mb-3 rounded-md p-3" style={{ border: styles.border, background: styles.background }}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold capitalize" style={{ color: styles.titleColor }}>
-                    {isNoIncident ? "✓ Sin incidentes (declaracion formal)" : inc.incidentType.replace(/_/g, " ")}
+                    {isNoIncident ? "Sin incidentes (declaracion formal)" : inc.incidentType.replace(/_/g, " ")}
                   </span>
                   <span className="text-xs" style={{ color: "var(--sky-muted)" }}>
                     {new Date(inc.createdAt).toLocaleString("es-ES", {

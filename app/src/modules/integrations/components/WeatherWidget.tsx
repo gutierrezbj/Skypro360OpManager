@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { WeatherForecast } from "../services/aemet.service";
+import { SunriseIcon, SunsetIcon } from "@/lib/icons";
 
 type Props = {
   lat: number;
@@ -127,8 +128,16 @@ export default function WeatherWidget({ lat, lng, date }: Props) {
 
       {/* Sun + UV + KP row */}
       <div className="grid grid-cols-2 gap-px" style={{ background: "var(--sky-border)" }}>
-        <SmallMetric label="Amanecer" value={weather.amanecer ?? "—"} icon="🌅" />
-        <SmallMetric label="Ocaso" value={weather.ocaso ?? "—"} icon="🌇" />
+        <SmallMetric
+          label="Amanecer"
+          value={weather.amanecer ?? "—"}
+          icon={<SunriseIcon className="h-3 w-3" style={{ color: "var(--sky-accent-orange)" }} />}
+        />
+        <SmallMetric
+          label="Ocaso"
+          value={weather.ocaso ?? "—"}
+          icon={<SunsetIcon className="h-3 w-3" style={{ color: "var(--sky-accent-blue)" }} />}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-px" style={{ background: "var(--sky-border)" }}>
@@ -155,7 +164,7 @@ export default function WeatherWidget({ lat, lng, date }: Props) {
             : { background: "rgba(229,62,62,0.08)", color: "var(--sky-accent-red)", borderTop: "1px solid var(--sky-border)" }
           }
         >
-          ⚠ {weather.razon}
+          {weather.razon}
         </div>
       )}
 
@@ -182,11 +191,12 @@ function BigMetric({ label, value, sub }: { label: string; value: string; sub?: 
   );
 }
 
-function SmallMetric({ label, value, icon }: { label: string; value: string; icon?: string }) {
+function SmallMetric({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
     <div className="px-3 py-1.5" style={{ background: "var(--sky-surface)" }}>
-      <p className="text-[9px] uppercase tracking-wider" style={{ color: "var(--sky-muted)" }}>
-        {icon ? `${icon} ` : ""}{label}
+      <p className="text-[9px] uppercase tracking-wider flex items-center gap-1" style={{ color: "var(--sky-muted)" }}>
+        {icon}
+        {label}
       </p>
       <p className="text-[11px] font-semibold" style={{ color: "var(--sky-text)" }}>{value}</p>
     </div>

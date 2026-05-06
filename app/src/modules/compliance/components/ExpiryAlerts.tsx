@@ -1,6 +1,7 @@
 "use client";
 
 import type { Pilot, Drone } from "@/lib/db/schema";
+import { CheckCircleIcon } from "@/lib/icons";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -130,11 +131,8 @@ export default function ExpiryAlerts({
             border: "1px solid rgba(0,217,126,0.25)",
           }}
         >
-          <div
-            className="mb-1 text-xl"
-            style={{ color: "var(--sky-accent-green)" }}
-          >
-            ✓
+          <div className="mb-1 flex justify-center">
+            <CheckCircleIcon className="h-5 w-5" style={{ color: "var(--sky-accent-green)" }} />
           </div>
           <p className="text-xs font-semibold" style={{ color: "var(--sky-accent-green)" }}>
             Todo en regla

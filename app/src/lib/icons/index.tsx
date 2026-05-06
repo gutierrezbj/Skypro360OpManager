@@ -91,6 +91,7 @@ export {
   CircleCheck   as CheckCircleIcon,
   CircleX       as ErrorCircleIcon,
   CircleAlert   as AlertCircleIcon,
+  TriangleAlert as AlertTriangleIcon,
   Clock         as ClockIcon,
   Timer         as TimerIcon,
   Hourglass     as HourglassIcon,
@@ -105,6 +106,8 @@ export {
 
   // Weather
   Sun           as SunIcon,
+  Sunrise       as SunriseIcon,
+  Sunset        as SunsetIcon,
   Cloud         as CloudIcon,
   CloudRain     as CloudRainIcon,
   CloudSun      as CloudSunIcon,

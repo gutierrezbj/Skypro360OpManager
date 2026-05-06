@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { Mission } from "@/lib/db/schema";
 import { saveIncidentForm, type ComplianceActionResult } from "../actions/compliance.actions";
 import SignaturePad from "./SignaturePad";
+import { AlertTriangleIcon } from "@/lib/icons";
 
 const INCIDENT_TYPES = [
   { value: "flyaway", label: "Flyaway (perdida de control)" },
@@ -198,8 +199,9 @@ export default function IncidentForm({
               onChange={setSignature}
             />
             {!signature && (
-              <p className="mt-2 text-[11px]" style={{ color: "var(--sky-accent-yellow)" }}>
-                ⚠ Firma obligatoria para registrar el {noIncident ? "informe sin incidentes" : "incidente"}.
+              <p className="mt-2 flex items-center gap-1.5 text-[11px]" style={{ color: "var(--sky-accent-yellow)" }}>
+                <AlertTriangleIcon className="h-3 w-3 flex-shrink-0" />
+                Firma obligatoria para registrar el {noIncident ? "informe sin incidentes" : "incidente"}.
               </p>
             )}
           </div>

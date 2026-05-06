@@ -223,7 +223,7 @@ async function _sendNotifications(ctx: MissionEmailContext): Promise<void> {
       if (pilotEmail) {
         await sendEmail({
           to: pilotEmail,
-          subject: `✅ [${code}] Misión aprobada — ${name}`,
+          subject: `[${code}] Misión aprobada — ${name}`,
           html: baseTemplate({
             status: "approved",
             headline: "Misión aprobada",
@@ -273,7 +273,7 @@ async function _sendNotifications(ctx: MissionEmailContext): Promise<void> {
       for (const r of recipients) {
         await sendEmail({
           to: r.email,
-          subject: `✅ [${code}] Misión completada — ${name}`,
+          subject: `[${code}] Misión completada — ${name}`,
           html: baseTemplate({
             status: "completed",
             headline: "Misión completada con éxito",
@@ -298,7 +298,7 @@ async function _sendNotifications(ctx: MissionEmailContext): Promise<void> {
       for (const r of recipients) {
         await sendEmail({
           to: r.email,
-          subject: `⚠️ [${code}] Misión abortada — ${name}`,
+          subject: `[URGENTE] [${code}] Misión abortada — ${name}`,
           html: baseTemplate({
             status: "aborted",
             headline: "Misión abortada",

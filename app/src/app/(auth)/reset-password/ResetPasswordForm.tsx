@@ -35,7 +35,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
             color: "#00D97E",
           }}
         >
-          ✓ Contraseña actualizada correctamente.<br />
+          Contraseña actualizada correctamente.<br />
           <span style={{ color: "var(--sky-muted)" }}>Redirigiendo al login...</span>
         </div>
       </div>
