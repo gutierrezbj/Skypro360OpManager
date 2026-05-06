@@ -207,18 +207,25 @@ function GeoButton({
  *   "39.4699, -6.3722"   (coma)
  *   "39.4699; -6.3722"   (punto y coma)
  *   "39.4699 -6.3722"    (espacio)
- * Devuelve null si no matchea o si los valores están fuera de rango terrestre.
+ *
+ * Auto-detecta el orden si está invertido (lng, lat — común en GeoJSON/KMZ):
+ * si el primer valor cabe en rango lat (-90..90) y el segundo en rango
+ * lng (-180..180), asume lat-lng. Si no, prueba el orden inverso.
+ *
+ * Devuelve null si ningún orden encaja en rangos terrestres válidos.
+ * Mismo helper que dronehub (Airspace.jsx parseCoords).
  */
 function parseCoordsInput(text: string): { lat: number; lng: number } | null {
-  const match =
-    text.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/) ||
-    text.match(/^\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*$/);
+  const match = text.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
   if (!match) return null;
-  const lat = parseFloat(match[1]);
-  const lng = parseFloat(match[2]);
-  if (isNaN(lat) || isNaN(lng)) return null;
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
-  return { lat, lng };
+  const a = parseFloat(match[1]);
+  const b = parseFloat(match[2]);
+  if (isNaN(a) || isNaN(b)) return null;
+  // Orden natural: lat, lng
+  if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return { lat: a, lng: b };
+  // Orden invertido (KMZ/GeoJSON): lng, lat
+  if (Math.abs(b) <= 90 && Math.abs(a) <= 180) return { lat: b, lng: a };
+  return null;
 }
 
 function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
