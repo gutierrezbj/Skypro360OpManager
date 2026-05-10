@@ -200,11 +200,13 @@ type PhotonResponse = {
 async function searchPhoton(
   query: string,
   count: number,
-  language: string,
+  // language ignorado: Photon solo soporta default/de/en/fr — pasar 'es' devuelve
+  // error y vacía los resultados. El default ya prioriza el idioma local del país.
+  _language: string,
 ): Promise<GeocodeResult[]> {
   const url =
     `${PHOTON_URL}?q=${encodeURIComponent(query)}` +
-    `&limit=${count}&lang=${language}`;
+    `&limit=${count}`;
 
   try {
     const res = await fetch(url, {

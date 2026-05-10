@@ -215,7 +215,8 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
   // Si el input es un par de coordenadas, no llamamos a /api/geocode
   const coordCandidate = useMemo(() => parseCoordPair(q), [q]);
 
-  // Debounced search
+  // Debounced search con AbortController para evitar race conditions
+  // (si tipeas rápido, fetches viejos no pueden pisar el resultado actual)
   useEffect(() => {
     if (coordCandidate) {
       setResults([]);
@@ -229,21 +230,29 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
       return;
     }
     setLoading(true);
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/geocode?q=${encodeURIComponent(q.trim())}`);
+        const res = await fetch(
+          `/api/geocode?q=${encodeURIComponent(q.trim())}`,
+          { signal: controller.signal },
+        );
         if (res.ok) {
           const data = (await res.json()) as { results: GeocodeResult[] };
           setResults(data.results ?? []);
           setOpen(true);
         }
-      } catch {
-        setResults([]);
+      } catch (err) {
+        // Si fue abortado por nueva tecla del usuario, ignora silenciosamente
+        if ((err as Error)?.name !== "AbortError") setResults([]);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [q, coordCandidate]);
 
   // Cerrar al hacer click fuera
