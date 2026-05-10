@@ -15,14 +15,29 @@ export type MissionActionResult = {
   error?: string;
 };
 
+/**
+ * Genera el siguiente código de misión SKY-{año}-{seq}.
+ *
+ * Estrategia: extrae el sufijo numérico de los códigos existentes para
+ * este tenant + año actual y devuelve max+1. Esto NO se basa en count(*),
+ * por lo que es inmune a borrados de misiones (el bug que duplicaba 002
+ * cuando se borraba alguna previa).
+ *
+ * Hay un unique index (tenantId, code) que actúa como red de seguridad
+ * por si dos transacciones concurrentes resuelven el mismo número.
+ */
 async function generateMissionCode(tenantId: string, tx: typeof db): Promise<string> {
   const year = new Date().getFullYear();
-  const [row] = await tx
-    .select({ count: sql<number>`count(*)::int` })
-    .from(missions)
-    .where(eq(missions.tenantId, tenantId));
-  const seq = (row?.count ?? 0) + 1;
-  return `SKY-${year}-${String(seq).padStart(3, "0")}`;
+  const prefix = `SKY-${year}-`;
+  const [row] = await tx.execute(sql<{ next_seq: number }>`
+    SELECT COALESCE(MAX(CAST(SUBSTRING(code FROM ${prefix.length + 1}) AS INT)), 0) + 1 AS next_seq
+    FROM missions
+    WHERE tenant_id = ${tenantId}::uuid
+      AND code LIKE ${prefix + "%"}
+      AND SUBSTRING(code FROM ${prefix.length + 1}) ~ '^[0-9]+$'
+  `);
+  const seq = Number((row as { next_seq?: number | string } | undefined)?.next_seq ?? 1);
+  return `${prefix}${String(seq).padStart(3, "0")}`;
 }
 
 export async function createMission(

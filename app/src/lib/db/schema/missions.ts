@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum, text, numeric, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, timestamp, pgEnum, text, numeric, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 import { pilots, drones } from "./fleet";
 
@@ -64,7 +64,11 @@ export const missions = pgTable("missions", {
   metadata: jsonb("metadata").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => [
+  // Código único por tenant — un SKY-2026-001 por operador. Sin esto, el
+  // generador (basado en count) podía colisionar tras un delete.
+  uniqueIndex("missions_tenant_code_unique").on(t.tenantId, t.code),
+]);
 
 // Checklists genéricos eliminados — reemplazados por form tables específicas
 // en compliance.ts (formPlanning, formPreflight, formPostflight, formIncidents)
