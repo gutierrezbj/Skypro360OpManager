@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createMission, updateMission, type MissionActionResult } from "../actions/mission.actions";
 import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
+import { parseCoordPair } from "@/lib/geo/coords";
 
 const PRIORITIES = ["low", "normal", "high", "urgent"] as const;
 const PRIORITY_LABELS: Record<string, string> = {
@@ -53,18 +54,23 @@ export default function MissionForm({
   const [coordHint, setCoordHint] = useState<string>("");
 
   /**
-   * Detecta si el clipboard tiene "lat, lng" (con coma o punto y coma)
-   * y rellena ambos campos. Si no, deja el comportamiento normal del input.
+   * Detecta si el clipboard tiene un par de coordenadas (decimal o DMS)
+   * y rellena ambos campos en formato decimal.
+   *
+   * Acepta:
+   *   "36.4929, -4.7715"               (decimal)
+   *   "36°25'04.88"N 5°09'13.11"W"     (DMS — formato AESA / Google Maps)
+   *   "36 25 4.88 N, 5 9 13.11 W"      (DMS sin símbolos)
+   *
+   * Si no matchea ningún par válido, deja el paste normal del input.
    */
   function handleCoordPaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    const text = e.clipboardData.getData("text").trim();
-    // Acepta: "36.4929323, -4.7715616" / "36.4929 -4.7715" / "36.4929; -4.7715"
-    const match = text.match(/^(-?\d+(?:\.\d+)?)\s*[,;]?\s+(-?\d+(?:\.\d+)?)$/) ||
-                  text.match(/^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/);
-    if (match) {
+    const text = e.clipboardData.getData("text");
+    const pair = parseCoordPair(text);
+    if (pair) {
       e.preventDefault();
-      setLatitude(match[1]);
-      setLongitude(match[2]);
+      setLatitude(String(pair.lat));
+      setLongitude(String(pair.lng));
       setCoordHint("Coordenadas detectadas y rellenadas automáticamente");
       setTimeout(() => setCoordHint(""), 3000);
     }
@@ -227,7 +233,8 @@ export default function MissionForm({
                 </p>
               ) : (
                 <p className="mt-1.5 text-[10px] leading-relaxed" style={{ color: "var(--sky-muted)" }}>
-                  Pega <strong style={{ color: "var(--sky-text)" }}>directamente desde Google Maps</strong> (formato &quot;36.4929, -4.7715&quot;) en cualquiera de los dos campos — se rellenan automáticamente.
+                  Pega desde Google Maps o de un documento AESA en cualquiera de los dos campos.
+                  Acepta decimal (<code>36.4929, -4.7715</code>) y DMS (<code>36°25&apos;04&quot;N 5°09&apos;13&quot;W</code>).
                 </p>
               )}
             </div>

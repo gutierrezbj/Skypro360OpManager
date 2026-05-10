@@ -1,9 +1,33 @@
 import { z } from "zod/v4";
+import { coerceCoordinateString } from "@/lib/geo/coords";
 
 const optionalString = z.preprocess(
   (v) => (v === "" ? undefined : v),
   z.string().optional(),
 );
+
+/**
+ * Coerciona coordenadas a string decimal canónico.
+ * Acepta decimal puro ("39.4699") o DMS ("36°25'04.88\"N").
+ * Rechaza formatos inválidos o valores fuera de rango terrestre.
+ */
+function coordCoercer(kind: "lat" | "lng") {
+  return z.preprocess((v) => {
+    try {
+      return coerceCoordinateString(v, kind);
+    } catch (err) {
+      // Devolver el error a Zod via throw es lo correcto en preprocess
+      throw new z.ZodError([
+        {
+          code: "custom",
+          message: err instanceof Error ? err.message : `Coordenada ${kind} inválida`,
+          path: [kind === "lat" ? "latitude" : "longitude"],
+          input: v,
+        },
+      ]);
+    }
+  }, z.string().optional());
+}
 
 const optionalDate = z.preprocess(
   (v) => (v === "" || v === undefined || v === null ? undefined : new Date(v as string)),
@@ -22,14 +46,8 @@ export const missionCreateSchema = z.object({
   pilotId: z.preprocess((v) => (v === "" ? undefined : v), z.string().uuid().optional()),
   droneId: z.preprocess((v) => (v === "" ? undefined : v), z.string().uuid().optional()),
   coordinatorId: z.preprocess((v) => (v === "" ? undefined : v), z.string().uuid().optional()),
-  latitude: z.preprocess(
-    (v) => (v === "" || v === undefined || v === null ? undefined : v),
-    z.string().optional(),
-  ),
-  longitude: z.preprocess(
-    (v) => (v === "" || v === undefined || v === null ? undefined : v),
-    z.string().optional(),
-  ),
+  latitude: coordCoercer("lat"),
+  longitude: coordCoercer("lng"),
   scheduledStart: optionalDate,
   scheduledEnd: optionalDate,
   soraClass: optionalString,

@@ -9,6 +9,7 @@ import {
   type WeatherLoc,
 } from "@/lib/hooks/useRecentWeatherLocations";
 import type { GeocodeResult } from "../services/geocode.service";
+import { parseCoordPair } from "@/lib/geo/coords";
 
 type Props = {
   activeMissions: Mission[];
@@ -202,31 +203,7 @@ function GeoButton({
   );
 }
 
-/**
- * Detecta input tipo "lat, lng" en varios formatos:
- *   "39.4699, -6.3722"   (coma)
- *   "39.4699; -6.3722"   (punto y coma)
- *   "39.4699 -6.3722"    (espacio)
- *
- * Auto-detecta el orden si está invertido (lng, lat — común en GeoJSON/KMZ):
- * si el primer valor cabe en rango lat (-90..90) y el segundo en rango
- * lng (-180..180), asume lat-lng. Si no, prueba el orden inverso.
- *
- * Devuelve null si ningún orden encaja en rangos terrestres válidos.
- * Mismo helper que dronehub (Airspace.jsx parseCoords).
- */
-function parseCoordsInput(text: string): { lat: number; lng: number } | null {
-  const match = text.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
-  if (!match) return null;
-  const a = parseFloat(match[1]);
-  const b = parseFloat(match[2]);
-  if (isNaN(a) || isNaN(b)) return null;
-  // Orden natural: lat, lng
-  if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return { lat: a, lng: b };
-  // Orden invertido (KMZ/GeoJSON): lng, lat
-  if (Math.abs(b) <= 90 && Math.abs(a) <= 180) return { lat: b, lng: a };
-  return null;
-}
+// Reutilizamos el parser compartido en lib/geo/coords (soporta decimal + DMS).
 
 function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
   const [q, setQ] = useState("");
@@ -236,7 +213,7 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Si el input es un par de coordenadas, no llamamos a /api/geocode
-  const coordCandidate = useMemo(() => parseCoordsInput(q), [q]);
+  const coordCandidate = useMemo(() => parseCoordPair(q), [q]);
 
   // Debounced search
   useEffect(() => {
