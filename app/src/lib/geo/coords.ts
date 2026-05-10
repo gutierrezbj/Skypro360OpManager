@@ -100,6 +100,45 @@ export function parseCoordPair(text: string): { lat: number; lng: number } | nul
 }
 
 /**
+ * Convierte coordenada decimal a DMS aeronáutico (estándar ICAO).
+ * Ejemplo: 36.41802 → `36°25'04.88"N` (lat) o `5°09'13.11"W` (lng).
+ *
+ * `kind` determina los hemisferios:
+ *   lat → N (positivo) / S (negativo)
+ *   lng → E (positivo) / W (negativo)  — usamos W (no O) por estándar ICAO
+ */
+export function toDMS(decimal: number, kind: "lat" | "lng"): string {
+  if (isNaN(decimal)) return "—";
+  const abs = Math.abs(decimal);
+  const deg = Math.floor(abs);
+  const minF = (abs - deg) * 60;
+  const min = Math.floor(minF);
+  const sec = (minF - min) * 60;
+  const hem = kind === "lat"
+    ? decimal >= 0 ? "N" : "S"
+    : decimal >= 0 ? "E" : "W";
+  // Padding según convención ICAO: lat 2 dígitos grados, lng 3 dígitos
+  const degStr = kind === "lat"
+    ? String(deg).padStart(2, "0")
+    : String(deg).padStart(3, "0");
+  const minStr = String(min).padStart(2, "0");
+  const secStr = sec.toFixed(2).padStart(5, "0");
+  return `${degStr}°${minStr}'${secStr}"${hem}`;
+}
+
+/**
+ * Formatea un par lat/lng en doble formato: decimal + DMS entre paréntesis.
+ * Pensado para PDFs y documentos formales donde conviene mostrar ambos.
+ *
+ * Ejemplo: `36.41802, -5.15364  (36°25'04.88"N 005°09'13.11"W)`
+ */
+export function formatCoordPair(lat: number, lng: number): string {
+  const decStr = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  const dmsStr = `${toDMS(lat, "lat")} ${toDMS(lng, "lng")}`;
+  return `${decStr}  (${dmsStr})`;
+}
+
+/**
  * Validador para el schema Zod: convierte a string decimal canónico.
  * Devuelve undefined si el input está vacío, null o undefined.
  * Lanza si el formato no es parseable a coordenada terrestre válida.

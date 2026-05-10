@@ -12,6 +12,7 @@ import type {
   FormIncident,
 } from "@/lib/db/schema";
 import { getChecklistLabel } from "@/modules/compliance/checklist-labels";
+import { formatCoordPair } from "@/lib/geo/coords";
 
 type DossierData = {
   mission: Mission;
@@ -360,9 +361,13 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   drawField("Ref. EARO", data.mission.earoReference, { col: 1 });
 
   drawField("Altitud máxima", data.mission.maxAltitude ? `${data.mission.maxAltitude} m AGL` : null, { col: 0 });
-  drawField("Coordenadas", data.mission.latitude && data.mission.longitude
-    ? `${parseFloat(data.mission.latitude).toFixed(5)}, ${parseFloat(data.mission.longitude).toFixed(5)}`
-    : null, { col: 1 });
+  drawField(
+    "Punto de operación",
+    data.mission.latitude && data.mission.longitude
+      ? formatCoordPair(parseFloat(data.mission.latitude), parseFloat(data.mission.longitude))
+      : null,
+    { col: 1 },
+  );
 
   drawField("Inicio programado", fmtDateTime(data.mission.scheduledStart), { col: 0 });
   drawField("Fin programado", fmtDateTime(data.mission.scheduledEnd), { col: 1 });
