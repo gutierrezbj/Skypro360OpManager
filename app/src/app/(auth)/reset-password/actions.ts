@@ -12,10 +12,7 @@ const schema = z.object({
   token: z.string().min(10, "Token inválido"),
   newPassword: z
     .string()
-    .min(10, "Mínimo 10 caracteres")
-    .regex(/[A-Z]/, "Al menos una mayúscula")
-    .regex(/[a-z]/, "Al menos una minúscula")
-    .regex(/[0-9]/, "Al menos un número"),
+    .min(8, "Mínimo 8 caracteres"),
   confirmPassword: z.string(),
 }).refine((d) => d.newPassword === d.confirmPassword, {
   path: ["confirmPassword"],

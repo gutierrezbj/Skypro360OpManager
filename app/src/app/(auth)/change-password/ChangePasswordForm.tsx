@@ -40,18 +40,25 @@ export default function ChangePasswordForm({ allowSkip }: { allowSkip: boolean }
     return undefined;
   };
 
+  // Mostrar banner siempre que haya error (aunque también haya errores por campo)
+  const errorBanner = state && !state.success
+    ? state.fieldErrors
+      ? "Revisa los campos marcados en rojo abajo"
+      : state.error
+    : null;
+
   return (
     <form action={formAction} className="space-y-4">
-      {state && !state.success && state.error && !state.fieldErrors && (
+      {errorBanner && (
         <div
-          className="rounded-lg px-3 py-2.5 text-xs"
+          className="rounded-lg px-3 py-2.5 text-xs font-semibold"
           style={{
-            background: "rgba(229,62,62,0.1)",
-            border: "1px solid rgba(229,62,62,0.3)",
-            color: "#FC8181",
+            background: "rgba(229,62,62,0.12)",
+            border: "1px solid rgba(229,62,62,0.4)",
+            color: "var(--sky-accent-red)",
           }}
         >
-          {state.error}
+          {errorBanner}
         </div>
       )}
 
@@ -59,13 +66,14 @@ export default function ChangePasswordForm({ allowSkip }: { allowSkip: boolean }
         id="currentPassword"
         label="Contraseña actual"
         type="password"
+        hint="La que te dieron (pilot12345 si es tu primer login)"
         error={fieldError("currentPassword")}
       />
       <Field
         id="newPassword"
         label="Contraseña nueva"
         type="password"
-        hint="Mín. 10 caracteres · 1 mayúscula · 1 minúscula · 1 número"
+        hint="Mínimo 8 caracteres. Elige algo que recuerdes."
         error={fieldError("newPassword")}
       />
       <Field

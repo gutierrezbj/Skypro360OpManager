@@ -9,12 +9,12 @@ import { users } from "@/lib/db/schema";
 
 const schema = z.object({
   currentPassword: z.string().min(1, "Contraseña actual requerida"),
+  // Política simple alineada con NIST 800-63B: solo longitud mínima.
+  // Las composition rules (mayús/núm/símbolos) hacen que la gente las eluda
+  // con patrones predecibles tipo "Password1!". Es mejor longitud + sentido común.
   newPassword: z
     .string()
-    .min(10, "Mínimo 10 caracteres")
-    .regex(/[A-Z]/, "Al menos una mayúscula")
-    .regex(/[a-z]/, "Al menos una minúscula")
-    .regex(/[0-9]/, "Al menos un número"),
+    .min(8, "Mínimo 8 caracteres"),
   confirmPassword: z.string(),
 }).refine((d) => d.newPassword === d.confirmPassword, {
   path: ["confirmPassword"],

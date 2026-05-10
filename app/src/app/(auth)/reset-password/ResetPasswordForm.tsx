@@ -63,7 +63,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         id="newPassword"
         label="Contraseña nueva"
         type="password"
-        hint="Mín. 10 caracteres · 1 mayúscula · 1 minúscula · 1 número"
+        hint="Mínimo 8 caracteres. Elige algo que recuerdes."
         error={fieldError("newPassword")}
       />
       <Field
