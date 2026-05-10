@@ -3,7 +3,7 @@ import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { drones, pilots, users } from "@/lib/db/schema";
 import { getMissionsForUser } from "@/lib/db/queries/missions.queries";
-import { canEditMission } from "@/lib/auth/rbac";
+import { canEditMission, canDeleteMission } from "@/lib/auth/rbac";
 import MissionsPageClient from "./MissionsPageClient";
 
 export default async function MissionsPage() {
@@ -51,6 +51,7 @@ export default async function MissionsPage() {
       pilots={pilotList.map((p) => ({ ...p, userName: p.userName ?? undefined }))}
       users={userList}
       canEdit={canEditMission(role)}
+      canDelete={canDeleteMission(role)}
     />
   );
 }

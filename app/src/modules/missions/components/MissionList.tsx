@@ -23,9 +23,11 @@ type Props = {
   users: Pick<User, "id" | "name" | "email">[];
   /** Si false, se ocultan los botones de crear/editar */
   canEdit?: boolean;
+  /** Solo true para admin / org_admin. Muestra botón Borrar en MissionDetail */
+  canDelete?: boolean;
 };
 
-export default function MissionList({ missions, drones, pilots, users, canEdit = true }: Props) {
+export default function MissionList({ missions, drones, pilots, users, canEdit = true, canDelete = false }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Mission | undefined>();
   const [viewing, setViewing] = useState<Mission | undefined>();
@@ -188,6 +190,7 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
           pilots={pilots}
           onClose={() => setViewing(undefined)}
           onEdit={canEdit ? () => openEdit(viewing) : undefined}
+          canDelete={canDelete}
         />
       )}
     </div>

@@ -14,12 +14,14 @@ export default function MissionsPageClient({
   pilots,
   users,
   canEdit = true,
+  canDelete = false,
 }: {
   missions: Mission[];
   drones: Drone[];
   pilots: PilotWithUser[];
   users: Pick<User, "id" | "name" | "email">[];
   canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   const [view, setView] = useState<"list" | "map">("list");
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
@@ -81,6 +83,7 @@ export default function MissionsPageClient({
               pilots={pilots}
               users={users}
               canEdit={canEdit}
+              canDelete={canDelete}
             />
           </div>
         ) : (

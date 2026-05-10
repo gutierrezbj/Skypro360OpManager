@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { Mission, Drone, Pilot } from "@/lib/db/schema";
 import MissionStatusBadge from "./MissionStatusBadge";
 import { getNextStatuses, STATUS_LABELS, PRIORITY_LABELS, isTerminal } from "../state-machine";
-import { transitionMission, type MissionActionResult } from "../actions/mission.actions";
+import { transitionMission, deleteMission, type MissionActionResult } from "../actions/mission.actions";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -14,19 +14,27 @@ export default function MissionDetail({
   pilots,
   onClose,
   onEdit,
+  canDelete = false,
 }: {
   mission: Mission;
   drones: Drone[];
   pilots: PilotWithUser[];
   onClose: () => void;
   onEdit?: () => void;
+  /** Solo true para admin / org_admin */
+  canDelete?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<MissionActionResult | null, FormData>(
     transitionMission,
     null,
   );
+  const [delState, delFormAction, delPending] = useActionState<MissionActionResult | null, FormData>(
+    deleteMission,
+    null,
+  );
+  const [confirming, setConfirming] = useState(false);
 
-  if (state?.success) {
+  if (state?.success || delState?.success) {
     onClose();
   }
 
@@ -150,31 +158,93 @@ export default function MissionDetail({
           </div>
         )}
 
-        <div style={{ borderTop: "1px solid var(--sky-border)" }} className="flex justify-end gap-3 pt-4">
-          <button
-            onClick={onClose}
-            style={{ border: "1px solid var(--sky-border-2)", color: "var(--sky-muted)" }}
-            className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+        {/* Banner de error de borrado */}
+        {delState && !delState.success && delState.error && (
+          <div
+            className="mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
+            style={{
+              background: "rgba(229,62,62,0.12)",
+              border: "1px solid rgba(229,62,62,0.4)",
+              color: "var(--sky-accent-red)",
+            }}
           >
-            Cerrar
-          </button>
-          <a
-            href={`/missions/${mission.id}/compliance`}
-            style={{ background: "rgba(12,159,216,0.1)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.25)" }}
-            className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+            {delState.error}
+          </div>
+        )}
+
+        {/* Confirmación de borrado en lugar de botones normales */}
+        {confirming ? (
+          <div
+            style={{ borderTop: "1px solid var(--sky-border)" }}
+            className="flex flex-col gap-3 pt-4"
           >
-            Compliance
-          </a>
-          {!isTerminal(mission.status) && onEdit && (
+            <p className="text-sm font-semibold" style={{ color: "var(--sky-accent-red)" }}>
+              ¿Borrar la misión {mission.code} de forma permanente?
+            </p>
+            <p className="text-xs" style={{ color: "var(--sky-muted)" }}>
+              Se eliminarán también sus formularios A.4–A.8 e incidentes asociados. Los logs de
+              vuelo quedan huérfanos para auditoría. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirming(false)}
+                disabled={delPending}
+                style={{ border: "1px solid var(--sky-border-2)", color: "var(--sky-muted)" }}
+                className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <form action={delFormAction}>
+                <input type="hidden" name="id" value={mission.id} />
+                <button
+                  type="submit"
+                  disabled={delPending}
+                  style={{ background: "#C53030", color: "#fff" }}
+                  className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80 disabled:opacity-50"
+                >
+                  {delPending ? "Borrando…" : "Sí, borrar definitivamente"}
+                </button>
+              </form>
+            </div>
+          </div>
+        ) : (
+          <div style={{ borderTop: "1px solid var(--sky-border)" }} className="flex justify-end gap-3 pt-4">
+            {canDelete && (
+              <button
+                onClick={() => setConfirming(true)}
+                disabled={isPending}
+                style={{ background: "rgba(197,48,48,0.10)", color: "var(--sky-accent-red)", border: "1px solid rgba(197,48,48,0.35)" }}
+                className="mr-auto rounded-md px-3 py-2 text-sm font-medium hover:opacity-80"
+                title="Borrar misión (solo admin)"
+              >
+                Borrar
+              </button>
+            )}
             <button
-              onClick={onEdit}
-              style={{ background: "#0C9FD8", color: "#fff" }}
+              onClick={onClose}
+              style={{ border: "1px solid var(--sky-border-2)", color: "var(--sky-muted)" }}
               className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
-              Editar
+              Cerrar
             </button>
-          )}
-        </div>
+            <a
+              href={`/missions/${mission.id}/compliance`}
+              style={{ background: "rgba(12,159,216,0.1)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.25)" }}
+              className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+            >
+              Compliance
+            </a>
+            {!isTerminal(mission.status) && onEdit && (
+              <button
+                onClick={onEdit}
+                style={{ background: "#0C9FD8", color: "#fff" }}
+                className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+              >
+                Editar
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

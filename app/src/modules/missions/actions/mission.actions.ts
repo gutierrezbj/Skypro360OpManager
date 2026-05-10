@@ -3,7 +3,7 @@
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, withTenantContext } from "@/lib/db";
-import { missions, pilots, users } from "@/lib/db/schema";
+import { missions, pilots, users, flightLogs } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
 import { AuditService } from "@/modules/audit/service";
 import { missionCreateSchema, missionUpdateSchema, missionTransitionSchema } from "../schemas/mission.schema";
@@ -285,5 +285,66 @@ export async function transitionMission(
     return { success: true };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Error en transicion" };
+  }
+}
+
+// ── Borrar misión ────────────────────────────────────────────────────────────
+// Solo admin / org_admin (canDeleteMission). Cascada manual de flight_logs
+// (que usa SET NULL en mission_id pero requiere desreferenciar uas_id antes
+// si se quisiera borrar el drone — aquí solo borramos la misión, manteniendo
+// los logs de vuelo huérfanos para auditoría histórica).
+//
+// Las tablas form_planning, form_preflight, form_postflight, form_incidents
+// tienen ON DELETE CASCADE en mission_id → se borran automáticamente.
+
+export async function deleteMission(
+  _prev: MissionActionResult | null,
+  formData: FormData,
+): Promise<MissionActionResult> {
+  const session = await requireRole("admin", "org_admin");
+  const tenantId = session.user.tenantId;
+  const userId = session.user.id;
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || id.length === 0) {
+    return { success: false, error: "ID de misión requerido" };
+  }
+
+  try {
+    await withTenantContext(tenantId, async (tx) => {
+      // 1. Verificar que la misión existe y pertenece al tenant
+      const [existing] = await tx
+        .select({ id: missions.id, code: missions.code, name: missions.name })
+        .from(missions)
+        .where(and(eq(missions.id, id), eq(missions.tenantId, tenantId)))
+        .limit(1);
+
+      if (!existing) {
+        throw new Error("Misión no encontrada o sin permisos");
+      }
+
+      // 2. Desreferenciar flight_logs (mission_id es SET NULL, pero por si acaso)
+      await tx.update(flightLogs).set({ missionId: null }).where(eq(flightLogs.missionId, id));
+
+      // 3. Audit log ANTES de borrar (referencia ya inválida después)
+      await AuditService.log({
+        tenantId,
+        userId,
+        entityType: "mission",
+        entityId: id,
+        action: "delete",
+        metadata: { code: existing.code, name: existing.name },
+      }, tx);
+
+      // 4. Borrar misión — cascada borra form_planning/preflight/postflight/incidents
+      await tx.delete(missions).where(and(eq(missions.id, id), eq(missions.tenantId, tenantId)));
+    });
+
+    revalidatePath("/missions");
+    revalidatePath("/");
+    revalidatePath("/espacio-ops");
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Error al borrar la misión" };
   }
 }
