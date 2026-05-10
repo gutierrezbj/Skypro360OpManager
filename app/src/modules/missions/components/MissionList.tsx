@@ -165,6 +165,21 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
                     >
                       Editar
                     </button>
+                    {canDelete && (
+                      <button
+                        onClick={() => setViewing(m)}
+                        title="Borrar misión"
+                        aria-label="Borrar misión"
+                        style={{ background: "rgba(197,48,48,0.08)", color: "var(--sky-accent-red)", border: "1px solid rgba(197,48,48,0.3)" }}
+                        className="flex-shrink-0 rounded-md px-2 py-1.5 text-xs font-medium hover:opacity-80"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/>
+                          <line x1="10" y1="11" x2="10" y2="17"/>
+                          <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
