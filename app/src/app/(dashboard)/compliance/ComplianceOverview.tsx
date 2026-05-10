@@ -34,10 +34,10 @@ export default function ComplianceOverview({
 
       {/* Stats */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Planificacion pendiente" value={needsPlanning.length}  accent="#4A8FD4" />
-        <StatCard label="Pre-vuelo pendiente"      value={needsPreflight.length} accent="#F5C518" />
-        <StatCard label="En vuelo"                 value={inFlight.length}       accent="#00D97E" />
-        <StatCard label="Post-vuelo pendiente"     value={needsPostflight.length} accent="#0C9FD8" />
+        <StatCard label="Planificacion pendiente" value={needsPlanning.length}  accent="var(--sky-accent-blue)"   tint="rgba(12,159,216,0.10)" border="rgba(12,159,216,0.35)" />
+        <StatCard label="Pre-vuelo pendiente"     value={needsPreflight.length} accent="var(--sky-accent-yellow)" tint="rgba(245,197,24,0.10)" border="rgba(245,197,24,0.35)" />
+        <StatCard label="En vuelo"                value={inFlight.length}       accent="var(--sky-accent-green)"  tint="rgba(0,217,126,0.10)"  border="rgba(0,217,126,0.35)" />
+        <StatCard label="Post-vuelo pendiente"    value={needsPostflight.length} accent="var(--sky-accent-blue)"   tint="rgba(12,159,216,0.10)" border="rgba(12,159,216,0.35)" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -47,10 +47,10 @@ export default function ComplianceOverview({
 
           {pendingDrones.length > 0 && (
             <div
-              style={{ background: "rgba(245,197,24,0.06)", border: "1px solid rgba(245,197,24,0.25)" }}
+              style={{ background: "rgba(245,197,24,0.10)", border: "1px solid rgba(245,197,24,0.35)" }}
               className="rounded-lg p-4"
             >
-              <h3 style={{ color: "#F5C518" }} className="text-sm font-semibold">
+              <h3 style={{ color: "var(--sky-accent-yellow)" }} className="text-sm font-semibold">
                 Registro pendiente ({pendingDrones.length})
               </h3>
               <ul className="mt-2 space-y-1">
@@ -65,10 +65,10 @@ export default function ComplianceOverview({
 
           {problematicPilots.length > 0 && (
             <div
-              style={{ background: "rgba(229,62,62,0.06)", border: "1px solid rgba(229,62,62,0.25)" }}
+              style={{ background: "rgba(229,62,62,0.10)", border: "1px solid rgba(229,62,62,0.35)" }}
               className="rounded-lg p-4"
             >
-              <h3 style={{ color: "#FC8181" }} className="text-sm font-semibold">
+              <h3 style={{ color: "var(--sky-accent-red)" }} className="text-sm font-semibold">
                 Pilotos sin certificacion valida ({problematicPilots.length})
               </h3>
               <ul className="mt-2 space-y-1">
@@ -83,10 +83,10 @@ export default function ComplianceOverview({
 
           {pilots.length > 0 && drones.length > 0 && pendingDrones.length === 0 && problematicPilots.length === 0 && (
             <div
-              style={{ background: "rgba(0,217,126,0.06)", border: "1px solid rgba(0,217,126,0.25)" }}
+              style={{ background: "rgba(0,217,126,0.10)", border: "1px solid rgba(0,217,126,0.35)" }}
               className="rounded-lg p-4"
             >
-              <h3 style={{ color: "#00D97E" }} className="text-sm font-semibold">Todo en regla</h3>
+              <h3 style={{ color: "var(--sky-accent-green)" }} className="text-sm font-semibold">Todo en regla</h3>
               <p style={{ color: "var(--sky-muted)" }} className="mt-1 text-xs">
                 Sin alertas de expiracion ni registros pendientes.
               </p>
@@ -121,14 +121,14 @@ export default function ComplianceOverview({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span
-                            style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
-                            className="text-xs"
+                            style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
+                            className="text-xs font-semibold"
                           >
                             {m.code}
                           </span>
                           <MissionStatusBadge status={m.status} />
                         </div>
-                        <p style={{ color: "var(--sky-text)" }} className="mt-0.5 text-sm font-medium">{m.name}</p>
+                        <p style={{ color: "var(--sky-text)" }} className="mt-0.5 text-sm font-semibold">{m.name}</p>
                         <div style={{ color: "var(--sky-muted)" }} className="mt-0.5 flex gap-3 text-xs">
                           {pilot && <span>Piloto: {pilot.userName ?? pilot.licenseNumber}</span>}
                           {drone && <span>Drone: {drone.model}</span>}
@@ -154,10 +154,22 @@ export default function ComplianceOverview({
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: number; accent: string }) {
+function StatCard({
+  label,
+  value,
+  accent,
+  tint,
+  border,
+}: {
+  label: string;
+  value: number;
+  accent: string;
+  tint: string;
+  border: string;
+}) {
   return (
     <div
-      style={{ background: `${accent}0D`, border: `1px solid ${accent}30` }}
+      style={{ background: tint, border: `1px solid ${border}` }}
       className="rounded-xl p-4"
     >
       <p style={{ color: accent }} className="text-2xl font-bold">{value}</p>
@@ -184,12 +196,27 @@ function ComplianceStage({ status }: { status: string }) {
           key={s.key}
           style={
             i < activeIdx
-              ? { background: "rgba(0,217,126,0.12)", color: "#00D97E", border: "1px solid rgba(0,217,126,0.3)" }
+              // Pasado (firmado): verde sólido — usa accent que adapta dark/light.
+              ? {
+                  background: "rgba(0,217,126,0.16)",
+                  color: "var(--sky-accent-green)",
+                  border: "1px solid rgba(0,217,126,0.50)",
+                }
               : i === activeIdx
-                ? { background: "rgba(12,159,216,0.12)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.3)" }
-                : { background: "var(--sky-surface-2)", color: "#3A5570", border: "1px solid var(--sky-border)" }
+                // En curso: azul brand — usa accent que adapta dark/light.
+                ? {
+                    background: "rgba(12,159,216,0.18)",
+                    color: "var(--sky-accent-blue)",
+                    border: "1px solid rgba(12,159,216,0.55)",
+                  }
+                // Futuro (pendiente): texto muted (legible en ambos temas) sobre surface-2.
+                : {
+                    background: "var(--sky-surface-2)",
+                    color: "var(--sky-muted)",
+                    border: "1px solid var(--sky-border-2)",
+                  }
           }
-          className="rounded px-1.5 py-0.5 text-[10px] font-medium"
+          className="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
         >
           {s.label}
         </span>
