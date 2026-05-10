@@ -116,7 +116,7 @@ export default function ComplianceOverview({
                       key={m.id}
                       href={`/missions/${m.id}/compliance`}
                       style={{ borderBottom: "1px solid var(--sky-border)", display: "flex" }}
-                      className="items-center justify-between px-4 py-3 transition-colors hover:bg-[#111D2E]"
+                      className="items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--sky-surface-2)]"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
