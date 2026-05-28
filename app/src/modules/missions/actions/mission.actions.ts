@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, like } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, withTenantContext } from "@/lib/db";
 import { missions, pilots, users, flightLogs } from "@/lib/db/schema";
@@ -18,26 +18,36 @@ export type MissionActionResult = {
 /**
  * Genera el siguiente código de misión SKY-{año}-{seq}.
  *
- * Estrategia: extrae el sufijo numérico de los códigos existentes para
- * este tenant + año actual y devuelve max+1. Esto NO se basa en count(*),
- * por lo que es inmune a borrados de misiones (el bug que duplicaba 002
- * cuando se borraba alguna previa).
+ * Estrategia: trae todos los códigos del tenant para el año actual, extrae
+ * el sufijo numérico, devuelve max+1. NO usa count(*), por lo que es
+ * inmune a borrados de misiones (bug previo que duplicaba 002 tras un
+ * delete).
  *
- * Hay un unique index (tenantId, code) que actúa como red de seguridad
- * por si dos transacciones concurrentes resuelven el mismo número.
+ * Implementación con query builder (no sql crudo) porque tx.execute() con
+ * postgres-js devuelve un objeto que no es destructurable como array — la
+ * primera versión con `[row] = await tx.execute(...)` caía al fallback y
+ * generaba siempre 001.
+ *
+ * Hay un unique index (tenantId, code) como red de seguridad ante races.
  */
 async function generateMissionCode(tenantId: string, tx: typeof db): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `SKY-${year}-`;
-  const [row] = await tx.execute(sql<{ next_seq: number }>`
-    SELECT COALESCE(MAX(CAST(SUBSTRING(code FROM ${prefix.length + 1}) AS INT)), 0) + 1 AS next_seq
-    FROM missions
-    WHERE tenant_id = ${tenantId}::uuid
-      AND code LIKE ${prefix + "%"}
-      AND SUBSTRING(code FROM ${prefix.length + 1}) ~ '^[0-9]+$'
-  `);
-  const seq = Number((row as { next_seq?: number | string } | undefined)?.next_seq ?? 1);
-  return `${prefix}${String(seq).padStart(3, "0")}`;
+
+  const rows = await tx
+    .select({ code: missions.code })
+    .from(missions)
+    .where(and(eq(missions.tenantId, tenantId), like(missions.code, `${prefix}%`)));
+
+  let max = 0;
+  for (const { code } of rows) {
+    const suffix = code.slice(prefix.length);
+    if (/^\d+$/.test(suffix)) {
+      const n = parseInt(suffix, 10);
+      if (n > max) max = n;
+    }
+  }
+  return `${prefix}${String(max + 1).padStart(3, "0")}`;
 }
 
 export async function createMission(
@@ -56,50 +66,80 @@ export async function createMission(
 
   const input = parsed.data;
 
-  try {
-    await withTenantContext(tenantId, async (tx) => {
-      const code = await generateMissionCode(tenantId, tx);
+  // Hasta 3 intentos: si el unique index (tenantId, code) rechaza por una
+  // colisión (race condition con otra petición simultánea) regeneramos el
+  // código y reintentamos. En la práctica con un solo operador no debería
+  // pasar nunca, pero protege ante creates paralelos.
+  let attempts = 0;
+  while (attempts < 3) {
+    attempts++;
+    try {
+      await withTenantContext(tenantId, async (tx) => {
+        const code = await generateMissionCode(tenantId, tx);
 
-      const [mission] = await tx
-        .insert(missions)
-        .values({
-          tenantId,
-          code,
-          name: input.name,
-          description: input.description,
-          priority: input.priority,
-          status: "draft",
-          pilotId: input.pilotId,
-          droneId: input.droneId,
-          coordinatorId: input.coordinatorId,
-          latitude: input.latitude,
-          longitude: input.longitude,
-          scheduledStart: input.scheduledStart,
-          scheduledEnd: input.scheduledEnd,
-          soraClass: input.soraClass,
-          earoReference: input.earoReference,
-          maxAltitude: input.maxAltitude?.toString(),
-        })
-        .returning();
+        const [mission] = await tx
+          .insert(missions)
+          .values({
+            tenantId,
+            code,
+            name: input.name,
+            description: input.description,
+            priority: input.priority,
+            status: "draft",
+            pilotId: input.pilotId,
+            droneId: input.droneId,
+            coordinatorId: input.coordinatorId,
+            latitude: input.latitude,
+            longitude: input.longitude,
+            scheduledStart: input.scheduledStart,
+            scheduledEnd: input.scheduledEnd,
+            soraClass: input.soraClass,
+            earoReference: input.earoReference,
+            maxAltitude: input.maxAltitude?.toString(),
+          })
+          .returning();
 
-      await AuditService.log(
-        {
-          tenantId,
-          userId: session.user.id,
-          action: "create",
-          entityType: "mission",
-          entityId: mission.id,
-          metadata: { code, name: input.name },
-        },
-        tx,
-      );
-    });
+        await AuditService.log(
+          {
+            tenantId,
+            userId: session.user.id,
+            action: "create",
+            entityType: "mission",
+            entityId: mission.id,
+            metadata: { code, name: input.name },
+          },
+          tx,
+        );
+      });
 
-    revalidatePath("/missions");
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al crear mision" };
+      revalidatePath("/missions");
+      return { success: true };
+    } catch (err) {
+      // Detectar violación de unique index (Postgres SQLSTATE 23505).
+      const msg = err instanceof Error ? err.message : String(err);
+      const isUniqueViolation =
+        msg.includes("missions_tenant_code_unique") ||
+        msg.includes("duplicate key") ||
+        (typeof (err as { code?: string }).code === "string" &&
+          (err as { code: string }).code === "23505");
+
+      if (isUniqueViolation && attempts < 3) {
+        // Reintentar — el siguiente generateMissionCode verá el nuevo MAX.
+        continue;
+      }
+
+      console.error("createMission failed:", err);
+      // No filtrar el SQL crudo al usuario. Mensaje genérico, traza en logs.
+      return {
+        success: false,
+        error: isUniqueViolation
+          ? "Colisión de código de misión. Intenta de nuevo."
+          : "No se pudo crear la misión. Intenta de nuevo o contacta soporte.",
+      };
+    }
   }
+
+  return { success: false, error: "No se pudo crear la misión tras varios intentos." };
 }
 
 export async function updateMission(
