@@ -7,6 +7,7 @@ import MissionStatusBadge from "./MissionStatusBadge";
 import MissionForm from "./MissionForm";
 import MissionDetail from "./MissionDetail";
 import { PRIORITY_LABELS, STATUS_HEX } from "../state-machine";
+import { GLOBAL_META, type GlobalLevel } from "@/modules/coordinations/logic";
 
 const PRIORITY_HEX: Record<string, string> = {
   low:    "#4A8FD4",
@@ -25,9 +26,11 @@ type Props = {
   canEdit?: boolean;
   /** Solo true para admin / org_admin. Muestra botón Borrar en MissionDetail */
   canDelete?: boolean;
+  /** Semáforo de coordinaciones por misión (solo misiones con organismos) */
+  coordinationLevels?: Record<string, GlobalLevel>;
 };
 
-export default function MissionList({ missions, drones, pilots, users, canEdit = true, canDelete = false }: Props) {
+export default function MissionList({ missions, drones, pilots, users, canEdit = true, canDelete = false, coordinationLevels = {} }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Mission | undefined>();
   const [viewing, setViewing] = useState<Mission | undefined>();
@@ -98,6 +101,8 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
             const pilot = pilots.find((p) => p.id === m.pilotId);
             const drone = drones.find((d) => d.id === m.droneId);
             const statusColor = STATUS_HEX[m.status as keyof typeof STATUS_HEX] ?? "#3A5570";
+            const coordLevel = coordinationLevels[m.id];
+            const coordMeta = coordLevel ? GLOBAL_META[coordLevel] : null;
             return (
               <div
                 key={m.id}
@@ -141,6 +146,15 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
                         <span style={{ color: "var(--sky-muted)" }}>Fecha</span>
                         <span style={{ color: "var(--sky-text)" }} className="font-medium">
                           {new Date(m.scheduledStart).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
+                        </span>
+                      </div>
+                    )}
+                    {coordMeta && (
+                      <div className="flex items-center justify-between">
+                        <span style={{ color: "var(--sky-muted)" }}>Coordinación</span>
+                        <span className="flex items-center gap-1.5 font-semibold" style={{ color: coordMeta.color }}>
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: coordMeta.color, boxShadow: `0 0 5px ${coordMeta.color}` }} />
+                          {coordMeta.label}
                         </span>
                       </div>
                     )}

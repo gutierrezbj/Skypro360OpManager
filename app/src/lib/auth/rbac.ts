@@ -68,6 +68,13 @@ export function canGenerateDossier(role: string): boolean {
   return ["admin", "org_admin", "coordinator", "pilot"].includes(role);
 }
 
+// ── Coordinaciones aeronáuticas ──────────────────────────────────────────────
+
+/** Gestiona organismos, estados y contactos de coordinación. Pilot solo lee. */
+export function canManageCoordinations(role: string): boolean {
+  return ["admin", "org_admin", "coordinator"].includes(role);
+}
+
 // ── Usuarios ─────────────────────────────────────────────────────────────────
 
 export function canManageUsers(role: string): boolean {

@@ -17,6 +17,7 @@ const serverSchema = z.object({
 
   AEMET_API_KEY: z.string().optional(),
   TELEMETRY_API_KEY: z.string().optional(),
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 const clientSchema = z.object({

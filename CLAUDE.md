@@ -27,6 +27,8 @@ Luis entrego V2.6 "Certified Final" con compliance AESA funcional. Estrategia: O
 | 4K — Sprint 1 Cierre | COMPLETADA | 2026-05-02 | RBAC roles+UI por perfil, cambio password obligatorio en primer login, reset password por email con token, backup automatico Postgres diario (cron 03:15 UTC), datos AESA del operador en tenant, drones reales en flota |
 | 4L — Sprint 2 Pulido | COMPLETADA | 2026-05-02 | Mapa cambia tile style segun tema (positron/dark-matter), header PDF dossier con datos completos del operador AESA, email notifications cambios estado mision (ya cableadas) |
 | 4M — Sprint 3 Cierre | EN CURSO | 2026-05-02 | Tests Vitest fix, CLAUDE.md actualizado, manuales v1.1, acta cierre fase 4. Notion SDDs diferido manual. |
+| 4N — Sprint A/B (seguridad + CI) | COMPLETADA | 2026-09-26 | canUserAccessMission en transiciones y firmas, FKs validadas por tenant, ActionError sin fuga de SQL, env validado en arranque, CI verde (Node 24, npm ci), migraciones 0005/0006 |
+| 4O — Coordinaciones aeronauticas | COMPLETADA | 2026-09-26 | Tabla mission_coordinations (MI 5d, helipuerto 10d, aeropuerto 20d, Defensa 10-15d habiles), seccion en ficha compliance, semaforo en listado, widget cockpit "Pendientes de coordinar", gate a preflight con override auditado, recordatorios email 10/5/3 dias via cron |
 | 4E — Advanced (5+) | DIFERIDA | — | AESA API real (no existe), telemetria real-time Socket.IO (necesita SDK fabricante), PWA offline-first (sprint v1.1 segun feedback) |
 
 ## Decision arquitectonica: Merge Strategy
@@ -179,6 +181,8 @@ cd app && npm install && npm run docker:up && npm run db:push && npm run db:seed
 - **Deploy**: `ssh root@skp360mgr.systemrapid.io "cd /opt/apps/opsmanager && git pull origin main && cd app && docker compose -f docker-compose.prod.yml up -d --build"`
 - **Backup BD**: cron `15 3 * * *` UTC, ejecuta `/opt/apps/opsmanager/ops/backup-postgres.sh`. Rotacion 14d/4w/6m en `/opt/apps/opsmanager/backups/`
 - **Restore BD**: `/opt/apps/opsmanager/ops/restore-postgres.sh <ruta-backup>` (con safety backup pre-operacion automatico)
+- **Recordatorios coordinaciones**: cron `0 7 * * *` UTC ejecuta `/opt/apps/opsmanager/ops/coordination-reminders.sh` → `POST /api/cron/coordination-reminders` con `Authorization: Bearer $CRON_SECRET` (var en `.env.production`). Idempotente por `coordination_reminders(coordination_id, dias)`.
+- **Migraciones**: SQL a mano en `app/drizzle/migrations/` (no hay snapshots desde 0001). Aplicar en prod con `docker exec -i opsmanager-db psql -U opsmanager -d opsmanager < app/drizzle/migrations/NNNN_x.sql` tras backup.
 - **Health check**: `curl -sf http://localhost:3100/api/health`
 
 ## ADRs vigentes

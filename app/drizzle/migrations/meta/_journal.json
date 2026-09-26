@@ -43,6 +43,13 @@
       "when": 1809800000000,
       "tag": "0005_missions_tenant_code_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1809900000000,
+      "tag": "0006_mission_coordinations",
+      "breakpoints": true
     }
   ]
 }

@@ -62,7 +62,11 @@ export const missionUpdateSchema = missionCreateSchema.partial().extend({
 export const missionTransitionSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(["draft", "planned", "approved", "preflight", "in_flight", "completed", "aborted", "cancelled"]),
+  forceCoordinations: z.preprocess((v) => v === "1" || v === "on" || v === true, z.boolean()).default(false),
+  forceReason: optionalString,
 });
+
+export const missionOrganismosSchema = z.array(z.enum(["mi", "helipuerto", "aeropuerto", "defensa"]));
 
 export type MissionCreateInput = z.infer<typeof missionCreateSchema>;
 export type MissionUpdateInput = z.infer<typeof missionUpdateSchema>;

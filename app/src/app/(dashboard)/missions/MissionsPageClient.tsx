@@ -5,6 +5,7 @@ import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 import MissionList from "@/modules/missions/components/MissionList";
 import MissionsMap from "@/modules/missions/components/MissionsMap";
 import { useTelemetry } from "@/modules/telemetry/hooks/useTelemetry";
+import type { GlobalLevel } from "@/modules/coordinations/logic";
 
 type PilotWithUser = Pilot & { userName?: string };
 
@@ -15,6 +16,7 @@ export default function MissionsPageClient({
   users,
   canEdit = true,
   canDelete = false,
+  coordinationLevels = {},
 }: {
   missions: Mission[];
   drones: Drone[];
@@ -22,6 +24,7 @@ export default function MissionsPageClient({
   users: Pick<User, "id" | "name" | "email">[];
   canEdit?: boolean;
   canDelete?: boolean;
+  coordinationLevels?: Record<string, GlobalLevel>;
 }) {
   const [view, setView] = useState<"list" | "map">("list");
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
@@ -84,6 +87,7 @@ export default function MissionsPageClient({
               users={users}
               canEdit={canEdit}
               canDelete={canDelete}
+              coordinationLevels={coordinationLevels}
             />
           </div>
         ) : (

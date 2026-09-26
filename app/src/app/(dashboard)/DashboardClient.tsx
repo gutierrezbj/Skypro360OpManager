@@ -9,6 +9,7 @@ import WeatherWidget from "@/modules/integrations/components/WeatherWidget";
 import WeatherLocationPicker from "@/modules/integrations/components/WeatherLocationPicker";
 import WeatherEmptyState from "@/modules/integrations/components/WeatherEmptyState";
 import BoeAlertsWidget from "@/modules/integrations/components/BoeAlertsWidget";
+import PendingCoordinationsWidget, { type CoordinationAlert } from "@/modules/coordinations/components/PendingCoordinationsWidget";
 import type { WeatherLoc } from "@/lib/hooks/useRecentWeatherLocations";
 import { PRIORITY_LABELS, STATUS_HEX } from "@/modules/missions/state-machine";
 import { DroneIcon, PilotIcon, MissionIcon, ClockIcon } from "@/lib/icons";
@@ -47,11 +48,13 @@ export default function DashboardClient({
   stats,
   pilots,
   drones,
+  coordinationAlerts = [],
 }: {
   missions: Mission[];
   stats: Stats;
   pilots: PilotWithUser[];
   drones: Drone[];
+  coordinationAlerts?: CoordinationAlert[];
 }) {
   const [now, setNow] = useState(() => new Date());
   const [weatherLoc, setWeatherLoc] = useState<WeatherLoc | null>(null);
@@ -230,6 +233,8 @@ export default function DashboardClient({
           className="w-full lg:w-72 xl:w-80 flex-shrink-0 p-4 space-y-4 overflow-y-auto"
           style={{ borderLeft: "1px solid var(--sky-border)" }}
         >
+          <PendingCoordinationsWidget alerts={coordinationAlerts} />
+
           <BoeAlertsWidget />
 
           <ExpiryAlerts pilots={pilots} drones={drones} />

@@ -3,6 +3,8 @@ import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { drones, pilots, users } from "@/lib/db/schema";
 import { getMissionsForUser } from "@/lib/db/queries/missions.queries";
+import { getCoordinationsForMissions } from "@/lib/db/queries/coordinations.queries";
+import { estadoGlobal, type GlobalLevel } from "@/modules/coordinations/logic";
 import { canEditMission, canDeleteMission } from "@/lib/auth/rbac";
 import MissionsPageClient from "./MissionsPageClient";
 
@@ -12,7 +14,7 @@ export default async function MissionsPage() {
   const userId = session.user.id;
   const role = (session.user as { role: string }).role;
 
-  const [missionList, droneList, pilotList, userList] = await withTenantContext(tenantId, async (tx) => {
+  const [missionList, droneList, pilotList, userList, coordList] = await withTenantContext(tenantId, async (tx) => {
     const m = await getMissionsForUser({ tenantId, userId, role }, tx);
 
     const d = await tx.select().from(drones).where(eq(drones.tenantId, tenantId));
@@ -41,8 +43,16 @@ export default async function MissionsPage() {
       .from(users)
       .where(eq(users.tenantId, tenantId));
 
-    return [m, d, p, u] as const;
+    const c = await getCoordinationsForMissions(tenantId, m.map((x) => x.id), tx);
+
+    return [m, d, p, u, c] as const;
   });
+
+  const coordinationLevels: Record<string, GlobalLevel> = {};
+  for (const m of missionList) {
+    const coords = coordList.filter((c) => c.missionId === m.id);
+    if (coords.length > 0) coordinationLevels[m.id] = estadoGlobal(coords, m.scheduledStart);
+  }
 
   return (
     <MissionsPageClient
@@ -52,6 +62,7 @@ export default async function MissionsPage() {
       users={userList}
       canEdit={canEditMission(role)}
       canDelete={canDeleteMission(role)}
+      coordinationLevels={coordinationLevels}
     />
   );
 }

@@ -10,8 +10,11 @@ import type {
   FormPreflight,
   FormPostflight,
   FormIncident,
+  MissionCoordination,
 } from "@/lib/db/schema";
 import MissionStatusBadge from "@/modules/missions/components/MissionStatusBadge";
+import CoordinationsSection from "@/modules/coordinations/components/CoordinationsSection";
+import { BODY_LABELS } from "@/modules/coordinations/logic";
 import PlanningForm from "@/modules/compliance/components/PlanningForm";
 import PreFlightForm from "@/modules/compliance/components/PreFlightForm";
 import PostFlightForm from "@/modules/compliance/components/PostFlightForm";
@@ -29,6 +32,8 @@ export default function MissionCompliancePanel({
   preflights,
   postflights,
   incidents,
+  coordinations,
+  canManageCoordinations,
 }: {
   mission: Mission;
   drones: Drone[];
@@ -38,6 +43,8 @@ export default function MissionCompliancePanel({
   preflights: FormPreflight[];
   postflights: FormPostflight[];
   incidents: FormIncident[];
+  coordinations: MissionCoordination[];
+  canManageCoordinations: boolean;
 }) {
   const [showForm, setShowForm] = useState<
     "planning" | "preflight" | "postflight" | "incident" | null
@@ -108,6 +115,13 @@ export default function MissionCompliancePanel({
         preflightCount={preflights.length}
         postflightCount={postflights.length}
         incidentCount={incidents.length}
+        coordinationsPending={coordinations.filter((c) => c.estado !== "aprobada").map((c) => BODY_LABELS[c.organismo])}
+      />
+
+      <CoordinationsSection
+        mission={mission}
+        coordinations={coordinations}
+        canEdit={canManageCoordinations}
       />
 
       {/* Mission info + completion */}

@@ -10,3 +10,4 @@ export * from "./audit";
 export * from "./compliance";
 export * from "./flight-ops";
 export * from "./geo";
+export * from "./coordinations";

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { createMission, updateMission, type MissionActionResult } from "../actions/mission.actions";
 import type { Mission, Drone, Pilot, User } from "@/lib/db/schema";
 import { parseCoordPair } from "@/lib/geo/coords";
+import { BODY_ORDER, BODY_LABELS, BODY_DEFAULT_DAYS, DEFENSA_RANGE } from "@/modules/coordinations/logic";
 
 const PRIORITIES = ["low", "normal", "high", "urgent"] as const;
 const PRIORITY_LABELS: Record<string, string> = {
@@ -238,6 +239,32 @@ export default function MissionForm({
                 </p>
               )}
             </div>
+
+            {!mission && (
+              <div className="col-span-2">
+                <label style={labelStyle} className="mb-1 block text-xs font-medium uppercase tracking-wider">
+                  Coordinaciones aeronáuticas
+                  <span style={{ color: "var(--sky-muted)", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}>
+                    {" "}(organismos a avisar antes de volar; se pueden ajustar después en la ficha)
+                  </span>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {BODY_ORDER.map((b) => (
+                    <label
+                      key={b}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-xs"
+                      style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)", color: "var(--sky-text)" }}
+                    >
+                      <input type="checkbox" name="organismos" value={b} className="accent-[var(--sky-accent-blue)]" />
+                      <span className="font-medium">{BODY_LABELS[b]}</span>
+                      <span style={{ color: "var(--sky-muted)" }}>
+                        {b === "defensa" ? `${DEFENSA_RANGE.min}–${DEFENSA_RANGE.max}` : BODY_DEFAULT_DAYS[b]} d hábiles
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ borderTop: "1px solid var(--sky-border)" }} className="flex justify-end gap-3 pt-4">

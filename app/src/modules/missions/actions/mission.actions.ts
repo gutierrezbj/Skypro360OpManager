@@ -8,8 +8,11 @@ import { requireRole } from "@/server/middleware/auth";
 import { ActionError, toActionError } from "@/server/actions/errors";
 import { canUserAccessMission } from "@/lib/db/queries/missions.queries";
 import { getDroneById, getPilotById } from "@/lib/db/queries/fleet.queries";
+import { getCoordinationsForMission } from "@/lib/db/queries/coordinations.queries";
+import { missionCoordinations } from "@/lib/db/schema";
+import { BODY_DEFAULT_DAYS, BODY_LABELS } from "@/modules/coordinations/logic";
 import { AuditService } from "@/modules/audit/service";
-import { missionCreateSchema, missionUpdateSchema, missionTransitionSchema } from "../schemas/mission.schema";
+import { missionCreateSchema, missionUpdateSchema, missionTransitionSchema, missionOrganismosSchema } from "../schemas/mission.schema";
 import { canTransition } from "../state-machine";
 import { notifyMissionTransition } from "@/modules/notifications/mission.emails";
 
@@ -89,6 +92,8 @@ export async function createMission(
   }
 
   const input = parsed.data;
+  const organismosParsed = missionOrganismosSchema.safeParse(formData.getAll("organismos"));
+  const organismos = organismosParsed.success ? [...new Set(organismosParsed.data)] : [];
 
   // Hasta 3 intentos: si el unique index (tenantId, code) rechaza por una
   // colisión (race condition con otra petición simultánea) regeneramos el
@@ -131,13 +136,25 @@ export async function createMission(
             action: "create",
             entityType: "mission",
             entityId: mission.id,
-            metadata: { code, name: input.name },
+            metadata: { code, name: input.name, organismos },
           },
           tx,
         );
+
+        if (organismos.length > 0) {
+          await tx.insert(missionCoordinations).values(
+            organismos.map((organismo) => ({
+              tenantId,
+              missionId: mission.id,
+              organismo,
+              diasHabiles: BODY_DEFAULT_DAYS[organismo],
+            })),
+          );
+        }
       });
 
       revalidatePath("/missions");
+      revalidatePath("/");
       return { success: true };
     } catch (err) {
       if (err instanceof ActionError) return { success: false, error: err.message };
@@ -249,13 +266,16 @@ export async function transitionMission(
   const parsed = missionTransitionSchema.safeParse({
     id: formData.get("id"),
     status: formData.get("status"),
+    forceCoordinations: formData.get("forceCoordinations") ?? undefined,
+    forceReason: formData.get("forceReason") ?? undefined,
   });
 
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Datos invalidos" };
   }
 
-  const { id, status: newStatus } = parsed.data;
+  const { id, status: newStatus, forceCoordinations, forceReason } = parsed.data;
+  let coordinationOverride: { pendientes: string[]; motivo: string } | null = null;
 
   // Collect notification context after successful transition
   let notificationCtx: Parameters<typeof notifyMissionTransition>[0] | null = null;
@@ -287,6 +307,22 @@ export async function transitionMission(
         if (!current.droneId) throw new ActionError("Debe asignar un drone antes de iniciar vuelo");
       }
 
+      // Gate: preflight requiere todas las coordinaciones aprobadas
+      // (override manual con motivo, queda en audit log).
+      if (newStatus === "preflight") {
+        const coords = await getCoordinationsForMission(tenantId, id, tx);
+        const pendientes = coords.filter((c) => c.estado !== "aprobada").map((c) => BODY_LABELS[c.organismo]);
+        if (pendientes.length > 0) {
+          if (!forceCoordinations) {
+            throw new ActionError(`Coordinaciones sin aprobar: ${pendientes.join(", ")}. Apruébalas o fuerza el paso indicando el motivo.`);
+          }
+          if (!forceReason || forceReason.trim().length < 10) {
+            throw new ActionError("Indica un motivo (mínimo 10 caracteres) para forzar el pre-vuelo sin coordinaciones aprobadas.");
+          }
+          coordinationOverride = { pendientes, motivo: forceReason.trim() };
+        }
+      }
+
       const values: Record<string, unknown> = {
         status: newStatus,
         updatedAt: new Date(),
@@ -313,6 +349,9 @@ export async function transitionMission(
           entityType: "mission",
           entityId: id,
           changes: { status: { old: current.status, new: newStatus } },
+          metadata: coordinationOverride
+            ? { coordinacionesForzadas: coordinationOverride.pendientes, motivo: coordinationOverride.motivo }
+            : undefined,
         },
         tx,
       );

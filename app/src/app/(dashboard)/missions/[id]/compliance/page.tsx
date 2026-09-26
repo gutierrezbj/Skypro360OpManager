@@ -4,6 +4,8 @@ import { requireAuth } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { missions, drones, pilots, users } from "@/lib/db/schema";
 import { canUserAccessMission } from "@/lib/db/queries/missions.queries";
+import { getCoordinationsForMission } from "@/lib/db/queries/coordinations.queries";
+import { canManageCoordinations } from "@/lib/auth/rbac";
 import {
   getPlanningForMission,
   getPreflightsForMission,
@@ -33,7 +35,7 @@ export default async function MissionCompliancePage({
     const allowed = await canUserAccessMission({ missionId: id, tenantId, userId, role }, tx);
     if (!allowed) return { forbidden: true as const };
 
-    const [droneList, pilotList, userList, planning, preflights, postflights, incidents] =
+    const [droneList, pilotList, userList, planning, preflights, postflights, incidents, coordinations] =
       await Promise.all([
         tx.select().from(drones).where(eq(drones.tenantId, tenantId)),
         tx.select().from(pilots).where(eq(pilots.tenantId, tenantId)),
@@ -42,8 +44,9 @@ export default async function MissionCompliancePage({
         getPreflightsForMission(tenantId, id, tx),
         getPostflightsForMission(tenantId, id, tx),
         getIncidentsForMission(tenantId, id, tx),
+        getCoordinationsForMission(tenantId, id, tx),
       ]);
-    return { forbidden: false as const, mission, droneList, pilotList, userList, planning, preflights, postflights, incidents };
+    return { forbidden: false as const, mission, droneList, pilotList, userList, planning, preflights, postflights, incidents, coordinations };
   });
 
   if (!data) notFound();
@@ -53,7 +56,7 @@ export default async function MissionCompliancePage({
     notFound();
   }
 
-  const { mission, droneList, pilotList, userList, planning, preflights, postflights, incidents } = data;
+  const { mission, droneList, pilotList, userList, planning, preflights, postflights, incidents, coordinations } = data;
 
   return (
     <MissionCompliancePanel
@@ -65,6 +68,8 @@ export default async function MissionCompliancePage({
       preflights={preflights}
       postflights={postflights}
       incidents={incidents}
+      coordinations={coordinations}
+      canManageCoordinations={canManageCoordinations(role)}
     />
   );
 }
