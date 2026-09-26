@@ -18,6 +18,7 @@ import {
   type CoordinationStatus,
 } from "../logic";
 import { addCoordination, updateCoordination, removeCoordination } from "../actions/coordination.actions";
+import { BODY_ICONS } from "./bodyIcons";
 
 type Props = {
   mission: Mission;
@@ -134,11 +135,13 @@ export default function CoordinationsSection({ mission, coordinations, canEdit }
         <div className="divide-y" style={{ borderColor: "var(--sky-border)" }}>
           {rows.map((r) => {
             const um = r.urgencia ? URGENCY_META[r.urgencia] : null;
+            const Icon = BODY_ICONS[r.organismo];
             return (
               <div key={r.id} className="py-3 first:pt-0 last:pb-0" style={{ borderColor: "var(--sky-border)" }}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
+                      <Icon className="h-4 w-4 flex-shrink-0" style={{ color: um ? um.color : "var(--sky-muted)" }} />
                       <span className="text-sm font-semibold" style={{ color: "var(--sky-text)" }}>
                         {BODY_LABELS[r.organismo]}
                       </span>

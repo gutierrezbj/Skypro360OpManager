@@ -11,6 +11,7 @@ import {
   DroneIcon,
   ComplianceIcon,
   AnalyticsIcon,
+  TimerIcon,
   LogOutIcon,
   MenuIcon,
   CloseIcon,
@@ -31,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/",             label: "Operaciones",  icon: MapIcon },
   { href: "/espacio-ops",  label: "Espacio OPS",  icon: RadarIcon },
   { href: "/missions",     label: "Misiones",     icon: MissionIcon },
+  { href: "/coordinaciones", label: "Coordinaciones", icon: TimerIcon },
   { href: "/fleet",        label: "Flota",        icon: DroneIcon },
   { href: "/compliance",   label: "Compliance",   icon: ComplianceIcon },
   // Analytics: no visible para piloto ni viewer

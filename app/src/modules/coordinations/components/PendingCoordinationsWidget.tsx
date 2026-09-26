@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BODY_SHORT, URGENCY_META, fmtLimite, type CoordinationBody, type UrgencyLevel } from "../logic";
+import { BODY_ICONS } from "./bodyIcons";
 
 export type CoordinationAlert = {
   missionId: string;
@@ -44,7 +45,8 @@ export default function PendingCoordinationsWidget({ alerts }: { alerts: Coordin
                   </span>
                 </div>
                 <p className="mt-0.5 truncate text-xs font-semibold" style={{ color: "var(--sky-text)" }}>{a.name}</p>
-                <p className="text-[11px]" style={{ color: "var(--sky-muted)" }}>
+                <p className="flex items-center gap-1 text-[11px]" style={{ color: "var(--sky-muted)" }}>
+                  {(() => { const Icon = BODY_ICONS[a.organismo]; return <Icon className="h-3 w-3" style={{ color: um.color }} />; })()}
                   {BODY_SHORT[a.organismo]} · límite {fmtLimite(new Date(a.limite))}
                 </p>
               </Link>
@@ -52,6 +54,13 @@ export default function PendingCoordinationsWidget({ alerts }: { alerts: Coordin
           );
         })}
       </ul>
+      <Link
+        href="/coordinaciones"
+        className="block px-3 py-2 text-center text-[11px] font-semibold hover:opacity-80"
+        style={{ color: "var(--sky-accent-blue)", borderTop: "1px solid var(--sky-border)" }}
+      >
+        Abrir centro de coordinación →
+      </Link>
     </div>
   );
 }
