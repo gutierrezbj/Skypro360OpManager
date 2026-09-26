@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: app/package-lock.json
 
@@ -29,7 +29,7 @@ jobs:
         run: npm run lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Unit tests
         run: npm test
@@ -42,40 +42,4 @@ jobs:
           AUTH_SECRET: ci-test-secret-minimum-32-characters-long
           AUTH_URL: http://localhost:3100
 
-  deploy-staging:
-    name: Deploy to Staging
-    needs: check
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /opt/apps/opsmanager/app
-            git pull origin develop
-            docker compose -f docker-compose.prod.yml up -d --build
-            sleep 10
-            curl -sf http://localhost:3100/api/health || exit 1
-
-  deploy-production:
-    name: Deploy to Production
-    needs: check
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /opt/apps/opsmanager/app
-            git pull origin main
-            docker compose -f docker-compose.prod.yml up -d --build
-            sleep 10
-            curl -sf http://localhost:3100/api/health || exit 1
+# Deploy a producción es manual (backup previo + SSH), ver CLAUDE.md "Operaciones".

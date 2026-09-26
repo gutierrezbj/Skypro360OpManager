@@ -1,7 +1,8 @@
 /**
  * Tests del proxy /api/geocode (Nominatim / OpenStreetMap).
  */
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
+import type { Session } from "next-auth";
 
 // Mock auth() ANTES de importar la route
 vi.mock("@/lib/auth", () => ({
@@ -12,7 +13,7 @@ import { GET } from "@/app/api/geocode/route";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 
-const mockAuth = vi.mocked(auth);
+const mockAuth = auth as unknown as Mock<() => Promise<Session | null>>;
 
 function makeReq(query: string): NextRequest {
   const url = `http://localhost/api/geocode${query}`;

@@ -34,20 +34,30 @@ vi.mock("next/server", () => ({
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+type MockRes = {
+  _body: unknown;
+  _status: number;
+  _headers: Record<string, string>;
+};
+
+type FakeRes = {
+  statusCode: number;
+  resume: () => void;
+  on: (event: string, cb: (...args: unknown[]) => void) => void;
+  _emit: (event: string, ...args: unknown[]) => void;
+};
+
 /** Builds a fake EventEmitter-style res object httpsGet expects */
-function makeRes(
-  statusCode: number,
-  chunks: string[],
-): Record<string, unknown> {
+function makeRes(statusCode: number): FakeRes {
   const handlers: Record<string, ((...args: unknown[]) => void)[]> = {};
   return {
     statusCode,
     resume: vi.fn(),
-    on: (event: string, cb: (...args: unknown[]) => void) => {
+    on: (event, cb) => {
       handlers[event] = handlers[event] ?? [];
       handlers[event].push(cb);
     },
-    _emit: (event: string, ...args: unknown[]) => {
+    _emit: (event, ...args) => {
       (handlers[event] ?? []).forEach((h) => h(...args));
     },
   };
@@ -57,14 +67,19 @@ function makeRes(
 function mockEnaire(geojson: unknown) {
   mockHttpsGet.mockImplementation(
     (_url: string, _opts: unknown, callback: (res: unknown) => void) => {
-      const res = makeRes(200, []);
+      const res = makeRes(200);
       callback(res);
-      const r = res as ReturnType<typeof makeRes>;
-      r._emit("data", JSON.stringify(geojson));
-      r._emit("end");
+      res._emit("data", JSON.stringify(geojson));
+      res._emit("end");
       return { setTimeout: vi.fn(), on: vi.fn() };
     },
   );
+}
+
+/** Imports the route fresh (after vi.resetModules) and calls GET */
+async function callRoute(): Promise<MockRes> {
+  const { GET } = await import("@/app/api/airspace/notams/route");
+  return (await GET()) as unknown as MockRes;
 }
 
 /** A minimal GeoJSON FeatureCollection from ENAIRE */
@@ -107,10 +122,8 @@ describe("GET /api/airspace/notams", () => {
 
   it("normalizes ENAIRE fields to internal schema", async () => {
     mockEnaire(SAMPLE_ENAIRE_RESPONSE);
-    const { GET } = await import("@/app/api/airspace/notams/route");
-    const res = await GET();
-    const body = res._body as ReturnType<typeof import("@/app/api/airspace/notams/route").GET> extends Promise<infer R> ? R : never;
-    const data = body as { features: { properties: Record<string, unknown> }[]; count: number };
+    const res = await callRoute();
+    const data = res._body as { features: { properties: Record<string, unknown> }[]; count: number };
 
     // Only the feature with geometry passes through
     expect(data.count).toBe(1);
@@ -152,8 +165,7 @@ describe("GET /api/airspace/notams", () => {
       ],
     });
 
-    const { GET } = await import("@/app/api/airspace/notams/route");
-    const res = await GET();
+    const res = await callRoute();
     const data = res._body as { features: { properties: Record<string, unknown> }[] };
 
     expect(data.features[0].properties.id).toBe("FALLBACK-ID");
@@ -164,8 +176,7 @@ describe("GET /api/airspace/notams", () => {
 
   it("returns X-Cache: MISS on first fetch", async () => {
     mockEnaire(SAMPLE_ENAIRE_RESPONSE);
-    const { GET } = await import("@/app/api/airspace/notams/route");
-    const res = await GET();
+    const res = await callRoute();
     expect(res._headers["X-Cache"]).toBe("MISS");
   });
 
@@ -183,8 +194,7 @@ describe("GET /api/airspace/notams", () => {
       },
     );
 
-    const { GET } = await import("@/app/api/airspace/notams/route");
-    const res = await GET();
+    const res = await callRoute();
     expect(res._status).toBe(503);
     const body = res._body as { error: string };
     expect(body.error).toContain("ENAIRE");
@@ -192,8 +202,7 @@ describe("GET /api/airspace/notams", () => {
 
   it("includes fetchedAt ISO timestamp in response", async () => {
     mockEnaire(SAMPLE_ENAIRE_RESPONSE);
-    const { GET } = await import("@/app/api/airspace/notams/route");
-    const res = await GET();
+    const res = await callRoute();
     const data = res._body as { fetchedAt: string };
     expect(data.fetchedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
@@ -207,8 +216,7 @@ describe("GET /api/airspace/notams", () => {
       ],
     });
 
-    const { GET } = await import("@/app/api/airspace/notams/route");
-    const res = await GET();
+    const res = await callRoute();
     const data = res._body as { count: number };
     expect(data.count).toBe(0);
   });

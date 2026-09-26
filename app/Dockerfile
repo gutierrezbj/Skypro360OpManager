@@ -1,25 +1,19 @@
 # OpsManager — Multi-stage production Dockerfile
-# Node 20 + Next.js standalone output
+# Node 24 + Next.js standalone output
 
-# ── Stage 1: Dependencies ──
-FROM node:20-alpine AS deps
+# ── Stage 1: Build ──
+FROM node:24-alpine AS builder
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install --omit=dev --legacy-peer-deps
-
-# ── Stage 2: Build ──
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install --legacy-peer-deps
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
 
 # Next.js standalone output
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# ── Stage 3: Production ──
-FROM node:20-alpine AS runner
+# ── Stage 2: Production ──
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
