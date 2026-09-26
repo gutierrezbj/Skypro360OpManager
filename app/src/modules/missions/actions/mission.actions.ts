@@ -1,10 +1,13 @@
 "use server";
 
-import { eq, and, sql, like } from "drizzle-orm";
+import { eq, and, like } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, withTenantContext } from "@/lib/db";
 import { missions, pilots, users, flightLogs } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
+import { ActionError, toActionError } from "@/server/actions/errors";
+import { canUserAccessMission } from "@/lib/db/queries/missions.queries";
+import { getDroneById, getPilotById } from "@/lib/db/queries/fleet.queries";
 import { AuditService } from "@/modules/audit/service";
 import { missionCreateSchema, missionUpdateSchema, missionTransitionSchema } from "../schemas/mission.schema";
 import { canTransition } from "../state-machine";
@@ -50,6 +53,27 @@ async function generateMissionCode(tenantId: string, tx: typeof db): Promise<str
   return `${prefix}${String(max + 1).padStart(3, "0")}`;
 }
 
+async function assertAssignmentsInTenant(
+  tx: typeof db,
+  tenantId: string,
+  ids: { pilotId?: string | null; droneId?: string | null; coordinatorId?: string | null },
+) {
+  if (ids.pilotId && !(await getPilotById(ids.pilotId, tenantId, tx))) {
+    throw new ActionError("Piloto no válido");
+  }
+  if (ids.droneId && !(await getDroneById(ids.droneId, tenantId, tx))) {
+    throw new ActionError("Drone no válido");
+  }
+  if (ids.coordinatorId) {
+    const [u] = await tx
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.id, ids.coordinatorId), eq(users.tenantId, tenantId)))
+      .limit(1);
+    if (!u) throw new ActionError("Coordinador no válido");
+  }
+}
+
 export async function createMission(
   _prev: MissionActionResult | null,
   formData: FormData,
@@ -75,6 +99,7 @@ export async function createMission(
     attempts++;
     try {
       await withTenantContext(tenantId, async (tx) => {
+        await assertAssignmentsInTenant(tx, tenantId, input);
         const code = await generateMissionCode(tenantId, tx);
 
         const [mission] = await tx
@@ -115,6 +140,7 @@ export async function createMission(
       revalidatePath("/missions");
       return { success: true };
     } catch (err) {
+      if (err instanceof ActionError) return { success: false, error: err.message };
       // Detectar violación de unique index (Postgres SQLSTATE 23505).
       const msg = err instanceof Error ? err.message : String(err);
       const isUniqueViolation =
@@ -165,7 +191,8 @@ export async function updateMission(
         .from(missions)
         .where(and(eq(missions.id, id), eq(missions.tenantId, tenantId)));
 
-      if (!current) throw new Error("Mision no encontrada");
+      if (!current) throw new ActionError("Misión no encontrada");
+      await assertAssignmentsInTenant(tx, tenantId, updates);
 
       const values: Record<string, unknown> = { updatedAt: new Date() };
       if (updates.name !== undefined) values.name = updates.name;
@@ -208,7 +235,7 @@ export async function updateMission(
     revalidatePath("/missions");
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al actualizar mision" };
+    return toActionError(err, "No se pudo actualizar la misión");
   }
 }
 
@@ -240,18 +267,24 @@ export async function transitionMission(
         .from(missions)
         .where(and(eq(missions.id, id), eq(missions.tenantId, tenantId)));
 
-      if (!current) throw new Error("Mision no encontrada");
+      if (!current) throw new ActionError("Misión no encontrada");
+
+      const allowed = await canUserAccessMission(
+        { missionId: id, tenantId, userId: session.user.id, role: session.user.role },
+        tx,
+      );
+      if (!allowed) throw new ActionError("Sin permisos sobre esta misión");
 
       if (!canTransition(current.status, newStatus)) {
-        throw new Error(
-          `Transicion no permitida: ${current.status} → ${newStatus}`,
+        throw new ActionError(
+          `Transición no permitida: ${current.status} → ${newStatus}`,
         );
       }
 
       // Gate: in_flight requiere piloto y drone asignados
       if (newStatus === "in_flight") {
-        if (!current.pilotId) throw new Error("Debe asignar un piloto antes de iniciar vuelo");
-        if (!current.droneId) throw new Error("Debe asignar un drone antes de iniciar vuelo");
+        if (!current.pilotId) throw new ActionError("Debe asignar un piloto antes de iniciar vuelo");
+        if (!current.droneId) throw new ActionError("Debe asignar un drone antes de iniciar vuelo");
       }
 
       const values: Record<string, unknown> = {
@@ -339,7 +372,7 @@ export async function transitionMission(
     revalidatePath("/missions");
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error en transicion" };
+    return toActionError(err, "No se pudo cambiar el estado de la misión");
   }
 }
 
@@ -375,7 +408,7 @@ export async function deleteMission(
         .limit(1);
 
       if (!existing) {
-        throw new Error("Misión no encontrada o sin permisos");
+        throw new ActionError("Misión no encontrada o sin permisos");
       }
 
       // 2. Desreferenciar flight_logs (mission_id es SET NULL, pero por si acaso)
@@ -400,6 +433,6 @@ export async function deleteMission(
     revalidatePath("/espacio-ops");
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al borrar la misión" };
+    return toActionError(err, "No se pudo borrar la misión");
   }
 }

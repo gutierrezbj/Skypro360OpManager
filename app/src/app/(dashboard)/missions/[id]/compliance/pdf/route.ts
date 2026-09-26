@@ -1,8 +1,9 @@
 import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/server/middleware/auth";
+import { requireRole } from "@/server/middleware/auth";
 import { withTenantContext } from "@/lib/db";
 import { missions, drones, pilots, users, tenants } from "@/lib/db/schema";
+import { canUserAccessMission } from "@/lib/db/queries/missions.queries";
 import {
   getPlanningForMission,
   getPreflightsForMission,
@@ -16,31 +17,41 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const session = await requireAuth();
+  const session = await requireRole("admin", "org_admin", "coordinator", "pilot");
   const tenantId = session.user.tenantId;
 
-  // Fetch mission
-  const [mission] = await withTenantContext(tenantId, (tx) =>
-    tx.select().from(missions).where(and(eq(missions.id, id), eq(missions.tenantId, tenantId))),
-  );
+  const data = await withTenantContext(tenantId, async (tx) => {
+    const [mission] = await tx
+      .select()
+      .from(missions)
+      .where(and(eq(missions.id, id), eq(missions.tenantId, tenantId)));
+    if (!mission) return null;
 
-  if (!mission) {
+    const allowed = await canUserAccessMission(
+      { missionId: id, tenantId, userId: session.user.id, role: session.user.role },
+      tx,
+    );
+    if (!allowed) return null;
+
+    const [droneList, pilotList, userList, tenantList, planning, preflights, postflights, incidents] =
+      await Promise.all([
+        tx.select().from(drones).where(eq(drones.tenantId, tenantId)),
+        tx.select().from(pilots).where(eq(pilots.tenantId, tenantId)),
+        tx.select().from(users).where(eq(users.tenantId, tenantId)),
+        tx.select().from(tenants).where(eq(tenants.id, tenantId)),
+        getPlanningForMission(tenantId, id, tx),
+        getPreflightsForMission(tenantId, id, tx),
+        getPostflightsForMission(tenantId, id, tx),
+        getIncidentsForMission(tenantId, id, tx),
+      ]);
+    return { mission, droneList, pilotList, userList, tenantList, planning, preflights, postflights, incidents };
+  });
+
+  if (!data) {
     return NextResponse.json({ error: "Mision no encontrada" }, { status: 404 });
   }
 
-  // Fetch related data
-  const [droneList, pilotList, userList, tenantList, planning, preflights, postflights, incidents] =
-    await Promise.all([
-      withTenantContext(tenantId, (tx) => tx.select().from(drones).where(eq(drones.tenantId, tenantId))),
-      withTenantContext(tenantId, (tx) => tx.select().from(pilots).where(eq(pilots.tenantId, tenantId))),
-      withTenantContext(tenantId, (tx) => tx.select().from(users).where(eq(users.tenantId, tenantId))),
-      withTenantContext(tenantId, (tx) => tx.select().from(tenants).where(eq(tenants.id, tenantId))),
-      getPlanningForMission(tenantId, id),
-      getPreflightsForMission(tenantId, id),
-      getPostflightsForMission(tenantId, id),
-      getIncidentsForMission(tenantId, id),
-    ]);
-
+  const { mission, droneList, pilotList, userList, tenantList, planning, preflights, postflights, incidents } = data;
   const drone = droneList.find((d) => d.id === mission.droneId) ?? null;
   const pilot = pilotList.find((p) => p.id === mission.pilotId);
   const pilotUser = pilot ? userList.find((u) => u.id === pilot.userId) : null;

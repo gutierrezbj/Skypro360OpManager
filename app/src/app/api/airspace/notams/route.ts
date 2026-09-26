@@ -6,6 +6,7 @@
  */
 import { NextResponse } from "next/server";
 import https from "node:https";
+import { auth } from "@/lib/auth";
 
 // ENAIRE ArcGIS REST requires raw '=' in where — do NOT use URLSearchParams or fetch (encodes =)
 const NOTAM_URL =
@@ -77,6 +78,11 @@ function normalize(raw: any) {
 }
 
 export async function GET() {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   if (_cache && Date.now() - _cache.ts < CACHE_TTL) {
     return NextResponse.json(_cache.data, {
       headers: { "X-Cache": "HIT", "X-Cache-Age": String(Math.round((Date.now() - _cache.ts) / 1000)) },
@@ -102,7 +108,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { error: "ENAIRE temporalmente no disponible", detail: msg },
+      { error: "ENAIRE temporalmente no disponible" },
       { status: 503 }
     );
   }

@@ -76,10 +76,16 @@ describe("parseCoordPair", () => {
     expect(r!.lat).toBeCloseTo(36.418, 3);
   });
 
-  it("decimal en orden invertido (KMZ)", () => {
-    const r = parseCoordPair("-5.1536, 36.418");
+  it("decimal en orden invertido (KMZ) solo se detecta si el primer valor excede ±90", () => {
+    const r = parseCoordPair("-100.5, 36.418");
     expect(r!.lat).toBeCloseTo(36.418, 3);
-    expect(r!.lng).toBeCloseTo(-5.1536, 3);
+    expect(r!.lng).toBeCloseTo(-100.5, 3);
+  });
+
+  it("decimal ambiguo (ambos dentro de ±90) respeta el orden lat, lng de Google", () => {
+    const r = parseCoordPair("-5.1536, 36.418");
+    expect(r!.lat).toBeCloseTo(-5.1536, 3);
+    expect(r!.lng).toBeCloseTo(36.418, 3);
   });
 
   it("DMS pair con espacio", () => {

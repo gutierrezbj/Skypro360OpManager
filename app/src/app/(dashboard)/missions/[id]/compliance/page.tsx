@@ -23,41 +23,37 @@ export default async function MissionCompliancePage({
   const userId = session.user.id;
   const role = (session.user as { role: string }).role;
 
-  const [mission] = await withTenantContext(tenantId, async (tx) => {
-    return tx
+  const data = await withTenantContext(tenantId, async (tx) => {
+    const [mission] = await tx
       .select()
       .from(missions)
       .where(and(eq(missions.id, id), eq(missions.tenantId, tenantId)));
+    if (!mission) return null;
+
+    const allowed = await canUserAccessMission({ missionId: id, tenantId, userId, role }, tx);
+    if (!allowed) return { forbidden: true as const };
+
+    const [droneList, pilotList, userList, planning, preflights, postflights, incidents] =
+      await Promise.all([
+        tx.select().from(drones).where(eq(drones.tenantId, tenantId)),
+        tx.select().from(pilots).where(eq(pilots.tenantId, tenantId)),
+        tx.select().from(users).where(eq(users.tenantId, tenantId)),
+        getPlanningForMission(tenantId, id, tx),
+        getPreflightsForMission(tenantId, id, tx),
+        getPostflightsForMission(tenantId, id, tx),
+        getIncidentsForMission(tenantId, id, tx),
+      ]);
+    return { forbidden: false as const, mission, droneList, pilotList, userList, planning, preflights, postflights, incidents };
   });
 
-  if (!mission) notFound();
-
-  // RBAC: pilot solo accede a sus misiones
-  const allowed = await withTenantContext(tenantId, (tx) =>
-    canUserAccessMission({ missionId: id, tenantId, userId, role }, tx),
-  );
-  if (!allowed) {
+  if (!data) notFound();
+  if (data.forbidden) {
     // Next.js 16: forbidden() renders forbidden.tsx (403) instead of notFound (404)
     if (typeof forbidden === "function") forbidden();
     notFound();
   }
 
-  const [droneList, pilotList, userList, planning, preflights, postflights, incidents] =
-    await Promise.all([
-      withTenantContext(tenantId, (tx) =>
-        tx.select().from(drones).where(eq(drones.tenantId, tenantId)),
-      ),
-      withTenantContext(tenantId, (tx) =>
-        tx.select().from(pilots).where(eq(pilots.tenantId, tenantId)),
-      ),
-      withTenantContext(tenantId, (tx) =>
-        tx.select().from(users).where(eq(users.tenantId, tenantId)),
-      ),
-      getPlanningForMission(tenantId, id),
-      getPreflightsForMission(tenantId, id),
-      getPostflightsForMission(tenantId, id),
-      getIncidentsForMission(tenantId, id),
-    ]);
+  const { mission, droneList, pilotList, userList, planning, preflights, postflights, incidents } = data;
 
   return (
     <MissionCompliancePanel

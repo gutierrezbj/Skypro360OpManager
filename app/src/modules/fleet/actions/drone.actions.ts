@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { withTenantContext } from "@/lib/db";
 import { drones } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
+import { ActionError, toActionError } from "@/server/actions/errors";
 import { AuditService } from "@/modules/audit/service";
 import { droneCreateSchema, droneUpdateSchema, droneStatusChangeSchema } from "../schemas/drone.schema";
 
@@ -85,7 +86,7 @@ export async function createDrone(_prev: DroneActionResult | null, formData: For
     revalidatePath("/fleet");
     return { success: true, data: result };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al crear drone" };
+    return toActionError(err, "No se pudo crear el drone");
   }
 }
 
@@ -110,7 +111,7 @@ export async function updateDrone(_prev: DroneActionResult | null, formData: For
         .from(drones)
         .where(and(eq(drones.id, id), eq(drones.tenantId, tenantId)));
 
-      if (!current) throw new Error("Drone no encontrado");
+      if (!current) throw new ActionError("Drone no encontrado");
 
       const values: Record<string, unknown> = { updatedAt: new Date() };
       if (updates.serialNumber !== undefined) values.serialNumber = updates.serialNumber;
@@ -148,7 +149,7 @@ export async function updateDrone(_prev: DroneActionResult | null, formData: For
     revalidatePath("/fleet");
     return { success: true, data: result };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al actualizar drone" };
+    return toActionError(err, "No se pudo actualizar el drone");
   }
 }
 
@@ -172,7 +173,7 @@ export async function changeDroneStatus(_prev: DroneActionResult | null, formDat
         .from(drones)
         .where(and(eq(drones.id, parsed.data.id), eq(drones.tenantId, tenantId)));
 
-      if (!current) throw new Error("Drone no encontrado");
+      if (!current) throw new ActionError("Drone no encontrado");
 
       const [updated] = await tx
         .update(drones)
@@ -195,6 +196,6 @@ export async function changeDroneStatus(_prev: DroneActionResult | null, formDat
     revalidatePath("/fleet");
     return { success: true, data: result };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al cambiar estado" };
+    return toActionError(err, "No se pudo cambiar el estado del drone");
   }
 }

@@ -2,7 +2,7 @@
 
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { withTenantContext } from "@/lib/db";
+import { withTenantContext, type db } from "@/lib/db";
 import {
   formPlanning,
   formPreflight,
@@ -10,6 +10,8 @@ import {
   formIncidents,
 } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
+import { ActionError, toActionError } from "@/server/actions/errors";
+import { canUserAccessMission } from "@/lib/db/queries/missions.queries";
 import { AuditService } from "@/modules/audit/service";
 import {
   planningFormSchema,
@@ -23,13 +25,23 @@ export type ComplianceActionResult = {
   error?: string;
 };
 
+const SIGN_ROLES = ["admin", "org_admin", "pilot"] as const;
+
+async function assertMissionAccess(
+  tx: typeof db,
+  args: { missionId: string; tenantId: string; userId: string; role: string },
+) {
+  const ok = await canUserAccessMission(args, tx);
+  if (!ok) throw new ActionError("Misión no encontrada o sin permisos");
+}
+
 // --- Planning Form (Apéndice A.4) ---
 
 export async function savePlanningForm(
   _prev: ComplianceActionResult | null,
   formData: FormData,
 ): Promise<ComplianceActionResult> {
-  const session = await requireRole("admin", "org_admin", "coordinator");
+  const session = await requireRole(...SIGN_ROLES);
   const tenantId = session.user.tenantId;
 
   const raw = Object.fromEntries(formData.entries());
@@ -47,6 +59,7 @@ export async function savePlanningForm(
 
   try {
     await withTenantContext(tenantId, async (tx) => {
+      await assertMissionAccess(tx, { missionId: input.missionId, tenantId, userId: session.user.id, role: session.user.role });
       // Upsert — one planning form per mission
       const [existing] = await tx
         .select({ id: formPlanning.id })
@@ -109,7 +122,7 @@ export async function savePlanningForm(
     revalidatePath(`/missions`);
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al guardar planificacion" };
+    return toActionError(err, "No se pudo guardar la planificación");
   }
 }
 
@@ -119,7 +132,7 @@ export async function savePreflightForm(
   _prev: ComplianceActionResult | null,
   formData: FormData,
 ): Promise<ComplianceActionResult> {
-  const session = await requireRole("admin", "org_admin", "coordinator", "pilot");
+  const session = await requireRole(...SIGN_ROLES);
   const tenantId = session.user.tenantId;
 
   const raw = Object.fromEntries(formData.entries());
@@ -136,6 +149,7 @@ export async function savePreflightForm(
 
   try {
     await withTenantContext(tenantId, async (tx) => {
+      await assertMissionAccess(tx, { missionId: input.missionId, tenantId, userId: session.user.id, role: session.user.role });
       const weatherConditions = {
         windSpeed: input.windSpeed,
         temperature: input.temperature,
@@ -170,7 +184,7 @@ export async function savePreflightForm(
     revalidatePath(`/missions`);
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al guardar preflight" };
+    return toActionError(err, "No se pudo guardar el pre-vuelo");
   }
 }
 
@@ -180,7 +194,7 @@ export async function savePostflightForm(
   _prev: ComplianceActionResult | null,
   formData: FormData,
 ): Promise<ComplianceActionResult> {
-  const session = await requireRole("admin", "org_admin", "coordinator", "pilot");
+  const session = await requireRole(...SIGN_ROLES);
   const tenantId = session.user.tenantId;
 
   const raw = Object.fromEntries(formData.entries());
@@ -197,6 +211,7 @@ export async function savePostflightForm(
 
   try {
     await withTenantContext(tenantId, async (tx) => {
+      await assertMissionAccess(tx, { missionId: input.missionId, tenantId, userId: session.user.id, role: session.user.role });
       const [record] = await tx
         .insert(formPostflight)
         .values({
@@ -223,7 +238,7 @@ export async function savePostflightForm(
     revalidatePath(`/missions`);
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al guardar postflight" };
+    return toActionError(err, "No se pudo guardar el post-vuelo");
   }
 }
 
@@ -233,7 +248,7 @@ export async function saveIncidentForm(
   _prev: ComplianceActionResult | null,
   formData: FormData,
 ): Promise<ComplianceActionResult> {
-  const session = await requireRole("admin", "org_admin", "coordinator", "pilot");
+  const session = await requireRole(...SIGN_ROLES);
   const tenantId = session.user.tenantId;
 
   const raw = Object.fromEntries(formData.entries());
@@ -250,6 +265,7 @@ export async function saveIncidentForm(
 
   try {
     await withTenantContext(tenantId, async (tx) => {
+      await assertMissionAccess(tx, { missionId: input.missionId, tenantId, userId: session.user.id, role: session.user.role });
       const [record] = await tx
         .insert(formIncidents)
         .values({
@@ -278,6 +294,6 @@ export async function saveIncidentForm(
     revalidatePath(`/missions`);
     return { success: true };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al guardar incidente" };
+    return toActionError(err, "No se pudo guardar el incidente");
   }
 }

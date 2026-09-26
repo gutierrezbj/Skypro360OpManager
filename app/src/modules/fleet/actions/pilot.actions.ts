@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { withTenantContext } from "@/lib/db";
 import { pilots } from "@/lib/db/schema";
 import { requireRole } from "@/server/middleware/auth";
+import { ActionError, toActionError } from "@/server/actions/errors";
 import { AuditService } from "@/modules/audit/service";
 import { pilotCreateSchema, pilotUpdateSchema } from "../schemas/pilot.schema";
 
@@ -80,7 +81,7 @@ export async function createPilot(_prev: PilotActionResult | null, formData: For
     revalidatePath("/fleet");
     return { success: true, data: result };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al crear piloto" };
+    return toActionError(err, "No se pudo crear el piloto");
   }
 }
 
@@ -104,7 +105,7 @@ export async function updatePilot(_prev: PilotActionResult | null, formData: For
         .from(pilots)
         .where(and(eq(pilots.id, id), eq(pilots.tenantId, tenantId)));
 
-      if (!current) throw new Error("Piloto no encontrado");
+      if (!current) throw new ActionError("Piloto no encontrado");
 
       const values: Record<string, unknown> = { updatedAt: new Date() };
       if (updates.userId !== undefined) values.userId = updates.userId;
@@ -138,6 +139,6 @@ export async function updatePilot(_prev: PilotActionResult | null, formData: For
     revalidatePath("/fleet");
     return { success: true, data: result };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Error al actualizar piloto" };
+    return toActionError(err, "No se pudo actualizar el piloto");
   }
 }

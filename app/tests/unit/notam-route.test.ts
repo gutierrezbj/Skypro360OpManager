@@ -10,6 +10,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockHttpsGet = vi.fn();
 vi.mock("node:https", () => ({ default: { get: mockHttpsGet } }));
 
+// ── Mock auth (la ruta exige sesión) ─────────────────────────────────────────
+
+vi.mock("@/lib/auth", () => ({
+  auth: vi.fn().mockResolvedValue({
+    user: { id: "u1", email: "x@x.es", role: "admin", tenantId: "t1" },
+    expires: new Date(Date.now() + 86400000).toISOString(),
+  }),
+}));
+
 // ── Mock next/server (NextResponse.json) ─────────────────────────────────────
 
 vi.mock("next/server", () => ({

@@ -232,6 +232,7 @@ export async function getWeatherForLocation(
         `${AEMET_BASE}/prediccion/especifica/municipio/diaria/${municipio.code}`,
         {
           headers: { api_key: apiKey },
+          signal: AbortSignal.timeout(6000),
           next: { revalidate: 3600 },
         },
       );
@@ -244,7 +245,10 @@ export async function getWeatherForLocation(
         if (index.estado !== 200 || !index.datos) {
           baseForecast = await fetchOpenMeteoPrimary(lat, lng, locationLabel, targetDate);
         } else {
-          const dataRes = await fetch(index.datos, { next: { revalidate: 3600 } });
+          const dataRes = await fetch(index.datos, {
+            signal: AbortSignal.timeout(6000),
+            next: { revalidate: 3600 },
+          });
           if (!dataRes.ok) {
             baseForecast = await fetchOpenMeteoPrimary(lat, lng, locationLabel, targetDate);
           } else {
