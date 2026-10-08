@@ -72,7 +72,7 @@ export async function sendCoordinationReminder(e: CoordinationReminderEmail): Pr
   </td></tr>
   <tr><td style="padding:8px 40px 32px;text-align:center;">
     <a href="${cta}" style="display:inline-block;background:#0C9FD8;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;">Abrir la operación</a>
-    <p style="margin:16px 0 0;color:#94a3b8;font-size:11px;">Aviso automático a ${e.umbral} días del límite. Marca la coordinación como aprobada para dejar de recibirlos.</p>
+    <p style="margin:16px 0 0;color:#94a3b8;font-size:11px;">${e.umbral === 0 ? "Aviso automático el día del límite." : `Aviso automático a ${e.umbral} ${e.umbral === 1 ? "día" : "días"} del límite.`} Marca la coordinación como aprobada para dejar de recibirlos.</p>
   </td></tr>
 </table>
 </td></tr></table>

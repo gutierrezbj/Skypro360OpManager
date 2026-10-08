@@ -43,7 +43,7 @@ export const STATUS_LABELS: Record<CoordinationStatus, string> = {
   aprobada: "Aprobada",
 };
 
-export const REMINDER_DAYS = [10, 5, 3] as const;
+export const REMINDER_DAYS = [10, 5, 3, 1, 0] as const;
 
 const DAY_MS = 86_400_000;
 

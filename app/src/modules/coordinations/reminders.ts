@@ -15,7 +15,7 @@ export type ReminderRunSummary = {
 
 /**
  * Recorre todas las coordinaciones abiertas y envía el recordatorio del
- * umbral (10/5/3 días) más alto que ya se haya alcanzado y no se haya
+ * umbral (10/5/3/1/0 días) más alto que ya se haya alcanzado y no se haya
  * enviado. Un email por coordinación y umbral; idempotente por
  * coordination_reminders(coordination_id, dias).
  */

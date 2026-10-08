@@ -38,7 +38,12 @@ export default function CoordinationsSection({ mission, coordinations, canEdit }
   const fechaVuelo = mission.scheduledStart ? new Date(mission.scheduledStart) : null;
   const rows = coordinations
     .map((c) => evaluarCoordinacion(c, fechaVuelo))
-    .sort((a, b) => BODY_ORDER.indexOf(a.organismo) - BODY_ORDER.indexOf(b.organismo));
+    .sort((a, b) => {
+      if (a.limite && b.limite && a.limite.getTime() !== b.limite.getTime()) {
+        return a.limite.getTime() - b.limite.getTime();
+      }
+      return BODY_ORDER.indexOf(a.organismo) - BODY_ORDER.indexOf(b.organismo);
+    });
   const global = estadoGlobal(coordinations, fechaVuelo);
   const gm = GLOBAL_META[global];
   const remaining = BODY_ORDER.filter((b) => !coordinations.some((c) => c.organismo === b));
@@ -152,7 +157,11 @@ export default function CoordinationsSection({ mission, coordinations, canEdit }
                         >
                           {um.label}
                           {r.urgencia !== "aprobada" && r.diasRestantes !== null && (
-                            r.diasRestantes >= 0 ? ` · ${r.diasRestantes} d` : ` · hace ${-r.diasRestantes} d`
+                            r.diasRestantes < 0
+                              ? ` · hace ${-r.diasRestantes} d`
+                              : r.diasRestantes === 0
+                                ? " · vence hoy"
+                                : ` · vence en ${r.diasRestantes} d`
                           )}
                         </span>
                       ) : (

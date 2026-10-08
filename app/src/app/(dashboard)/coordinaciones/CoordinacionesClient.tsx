@@ -122,7 +122,7 @@ export default function CoordinacionesClient({ missions, coordinations, canEdit 
                         {BODY_SHORT[a.organismo]}
                       </span>
                       <span className="text-[11px] font-bold" style={{ color: um.color, fontFamily: "var(--font-jetbrains-mono, monospace)" }}>
-                        {a.diasRestantes! < 0 ? `hace ${-a.diasRestantes!} d` : a.diasRestantes === 0 ? "hoy" : `en ${a.diasRestantes} días`}
+                        {a.diasRestantes! < 0 ? `Superado · hace ${-a.diasRestantes!} d` : a.diasRestantes === 0 ? "Vence hoy" : `Vence en ${a.diasRestantes} d`}
                       </span>
                     </div>
                     <p className="mt-1 truncate text-sm font-semibold" style={{ color: "var(--sky-text)" }}>{a.mission.name}</p>

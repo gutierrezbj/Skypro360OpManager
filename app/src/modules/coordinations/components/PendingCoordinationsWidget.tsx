@@ -41,7 +41,7 @@ export default function PendingCoordinationsWidget({ alerts }: { alerts: Coordin
                     {a.code}
                   </span>
                   <span className="rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: um.bg, color: um.color, border: `1px solid ${um.border}` }}>
-                    {a.diasRestantes < 0 ? `hace ${-a.diasRestantes} d` : a.diasRestantes === 0 ? "hoy" : `${a.diasRestantes} d`}
+                    {a.diasRestantes < 0 ? `Superado · hace ${-a.diasRestantes} d` : a.diasRestantes === 0 ? "Vence hoy" : `Vence en ${a.diasRestantes} d`}
                   </span>
                 </div>
                 <p className="mt-0.5 truncate text-xs font-semibold" style={{ color: "var(--sky-text)" }}>{a.name}</p>
