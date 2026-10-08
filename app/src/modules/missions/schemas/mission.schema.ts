@@ -12,21 +12,18 @@ const optionalString = z.preprocess(
  * Rechaza formatos inválidos o valores fuera de rango terrestre.
  */
 function coordCoercer(kind: "lat" | "lng") {
-  return z.preprocess((v) => {
+  return z.unknown().optional().transform((v, ctx) => {
     try {
       return coerceCoordinateString(v, kind);
     } catch (err) {
-      // Devolver el error a Zod via throw es lo correcto en preprocess
-      throw new z.ZodError([
-        {
-          code: "custom",
-          message: err instanceof Error ? err.message : `Coordenada ${kind} inválida`,
-          path: [kind === "lat" ? "latitude" : "longitude"],
-          input: v,
-        },
-      ]);
+      ctx.addIssue({
+        code: "custom",
+        message: err instanceof Error ? err.message : `Coordenada ${kind} inválida`,
+        input: v,
+      });
+      return z.NEVER;
     }
-  }, z.string().optional());
+  });
 }
 
 const optionalDate = z.preprocess(
