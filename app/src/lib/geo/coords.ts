@@ -36,9 +36,29 @@ export function parseDecimal(text: string): number | null {
   return isNaN(v) ? null : v;
 }
 
-/** Intenta parsear una coordenada individual: primero DMS, luego decimal. */
+/**
+ * DMS compacto sin símbolos (AESA/NOTAM): "370850.315279" = 37°08'50.32",
+ * "-33619.401328" = -3°36'19.40", "0044617.4W" = 4°46'17.4" W.
+ * Parte entera de 5 a 7 dígitos: los 2 últimos segundos, los 2 anteriores
+ * minutos, el resto grados; los decimales son de los segundos.
+ */
+export function parseCompactDMS(text: string): number | null {
+  const m = text.trim().match(/^([+-]?)(\d{5,7})(?:\.(\d+))?\s*([NSEWOnsewo])?$/);
+  if (!m) return null;
+  const digits = m[2];
+  const sec = parseFloat(`${digits.slice(-2)}.${m[3] ?? "0"}`);
+  const min = parseInt(digits.slice(-4, -2), 10);
+  const deg = parseInt(digits.slice(0, -4), 10);
+  if (min >= 60 || sec >= 60) return null;
+  let val = deg + min / 60 + sec / 3600;
+  const hem = m[4]?.toUpperCase();
+  if (m[1] === "-" || hem === "S" || hem === "W" || hem === "O") val = -val;
+  return val;
+}
+
+/** Intenta parsear una coordenada individual: DMS, DMS compacto, decimal. */
 export function parseCoordinate(text: string): number | null {
-  return parseDMS(text) ?? parseDecimal(text);
+  return parseDMS(text) ?? parseCompactDMS(text) ?? parseDecimal(text);
 }
 
 /**
@@ -84,11 +104,11 @@ export function parseCoordPair(text: string): { lat: number; lng: number } | nul
     }
   }
 
-  // 2. Decimal pair (con coma, punto y coma o espacio)
-  const decPair = t.match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+  // 2. Par numérico (decimal o DMS compacto) con coma, punto y coma o espacio
+  const decPair = t.match(/^([+-]?\d+(?:\.\d+)?)\s*[,;\s]\s*([+-]?\d+(?:\.\d+)?)$/);
   if (decPair) {
-    const a = parseFloat(decPair[1]);
-    const b = parseFloat(decPair[2]);
+    const a = parseCompactDMS(decPair[1]) ?? parseFloat(decPair[1]);
+    const b = parseCompactDMS(decPair[2]) ?? parseFloat(decPair[2]);
     if (!isNaN(a) && !isNaN(b)) {
       // Auto-detect order
       if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return { lat: a, lng: b };
