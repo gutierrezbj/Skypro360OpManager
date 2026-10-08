@@ -10,10 +10,10 @@ import { PRIORITY_LABELS, STATUS_HEX } from "../state-machine";
 import { GLOBAL_META, type GlobalLevel } from "@/modules/coordinations/logic";
 
 const PRIORITY_HEX: Record<string, string> = {
-  low:    "#4A8FD4",
+  low:    "var(--sky-accent-blue)",
   normal: "var(--sky-text)",
-  high:   "#F5C518",
-  urgent: "#F04E1C",
+  high:   "var(--sky-accent-yellow)",
+  urgent: "var(--sky-accent-orange)",
 };
 
 type PilotWithUser = Pilot & { userName?: string };
@@ -88,7 +88,7 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
           {filter === "all" && canEdit && (
             <button
               onClick={openCreate}
-              style={{ color: "#0C9FD8" }}
+              style={{ color: "var(--sky-accent-blue)" }}
               className="mt-2 text-sm font-medium hover:opacity-80"
             >
               Crear la primera
@@ -106,16 +106,24 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
             return (
               <div
                 key={m.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => setViewing(m)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setViewing(m);
+                  }
+                }}
                 style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
-                className="group relative cursor-pointer overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
+                className="group relative cursor-pointer overflow-hidden rounded-xl transition-all hover:border-[var(--sky-border-2)]"
               >
                 {/* Status bar */}
                 <div className="h-1" style={{ background: statusColor }} />
 
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <span style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }} className="text-xs">
+                    <span style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains-mono, monospace)" }} className="text-xs">
                       {m.code}
                     </span>
                     <MissionStatusBadge status={m.status} />
@@ -167,7 +175,7 @@ export default function MissionList({ missions, drones, pilots, users, canEdit =
                   >
                     <Link
                       href={`/missions/${m.id}/compliance`}
-                      style={{ background: "rgba(12,159,216,0.08)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.2)" }}
+                      style={{ background: "rgba(12,159,216,0.08)", color: "var(--sky-accent-blue)", border: "1px solid rgba(12,159,216,0.2)" }}
                       className="flex-1 rounded-md px-2 py-1.5 text-center text-xs font-medium hover:opacity-80"
                     >
                       Compliance

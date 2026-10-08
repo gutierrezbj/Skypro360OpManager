@@ -15,22 +15,28 @@ export default function BoeAlertsWidget() {
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
 
-  async function load() {
-    setLoading(true);
-    try {
-      const r = await fetch("/api/aesa/boe-search?type=news&rows=6");
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d: BoeSearchResult = await r.json();
-      setData(d);
-      setLastFetch(new Date());
-    } catch {
-      // keep previous data if any
-    } finally {
-      setLoading(false);
-    }
+  function fetchAlerts() {
+    return fetch("/api/aesa/boe-search?type=news&rows=6")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json() as Promise<BoeSearchResult>;
+      })
+      .then((d) => {
+        setData(d);
+        setLastFetch(new Date());
+      })
+      .catch(() => {
+        // keep previous data if any
+      })
+      .finally(() => setLoading(false));
   }
 
-  useEffect(() => { load(); }, []);
+  function load() {
+    setLoading(true);
+    fetchAlerts();
+  }
+
+  useEffect(() => { fetchAlerts(); }, []);
 
   const hasItems = (data?.documents?.length ?? 0) > 0;
 

@@ -46,6 +46,10 @@ const CONTENT_W = PAGE_W - MARGIN * 2;
 // El servidor corre en UTC. Forzamos zona horaria Madrid para todo formateo.
 const TZ_MADRID = "Europe/Madrid";
 
+function sanitizeText(s: string): string {
+  return s.replace(/[^\x20-\x7E\xA0-\xFF–—‘’“”•…€™]/gu, "?");
+}
+
 function fmtDateTime(d: Date | null | undefined): string {
   if (!d) return "—";
   return new Date(d).toLocaleString("es-ES", {
@@ -109,7 +113,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   } = {}) {
     const { x = MARGIN, size = 9, font: f = font, color = TEXT, lineGap = 12 } = opts;
     checkSpace(lineGap);
-    page.drawText(text, { x, y, size, font: f, color });
+    page.drawText(sanitizeText(text), { x, y, size, font: f, color });
     y -= lineGap;
   }
 
@@ -138,8 +142,8 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   // ── Field key-value en linea ──────────────────────────────────────────────
   function drawField(label: string, value: string | null | undefined, opts: { col?: 0 | 1 } = {}) {
     const { col = -1 } = opts as { col?: -1 | 0 | 1 };
-    const labelText = label.toUpperCase();
-    const valueText = value ?? "—";
+    const labelText = sanitizeText(label.toUpperCase());
+    const valueText = sanitizeText(value ?? "—");
 
     if (col === -1) {
       // single-column layout, ancho completo
@@ -197,7 +201,7 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
         page.drawLine({ start: { x: cx - 2, y: cy }, end: { x: cx - 0.5, y: cy - 1.5 }, thickness: 1, color: rgb(1, 1, 1) });
         page.drawLine({ start: { x: cx - 0.5, y: cy - 1.5 }, end: { x: cx + 2, y: cy + 2 }, thickness: 1, color: rgb(1, 1, 1) });
       }
-      page.drawText(getChecklistLabel(key), {
+      page.drawText(sanitizeText(getChecklistLabel(key)), {
         x: x + 14, y: itemY - 6,
         size: 8, font, color: checked ? TEXT : MUTED,
       });
@@ -282,12 +286,12 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
     // Operator info a la derecha del logo
     const infoX = MARGIN + logoW + 20;
     const infoY = y - 4;
-    page.drawText(data.tenant.name, {
+    page.drawText(sanitizeText(data.tenant.name), {
       x: infoX, y: infoY, size: 14, font: fontBold, color: BRAND_DARK,
     });
     let lineYOffset = 18;
     if (data.tenant.legalName && data.tenant.legalName !== data.tenant.name) {
-      page.drawText(data.tenant.legalName, {
+      page.drawText(sanitizeText(data.tenant.legalName), {
         x: infoX, y: infoY - lineYOffset, size: 8, font, color: MUTED,
       });
       lineYOffset += 12;
@@ -296,23 +300,23 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
     if (data.tenant.nif) metaParts.push(`NIF: ${data.tenant.nif}`);
     if (data.tenant.operatorRegistrationNumber) metaParts.push(`Reg. AESA: ${data.tenant.operatorRegistrationNumber}`);
     if (metaParts.length > 0) {
-      page.drawText(metaParts.join("  ·  "), {
+      page.drawText(sanitizeText(metaParts.join("  ·  ")), {
         x: infoX, y: infoY - lineYOffset, size: 8, font: fontMono, color: MUTED,
       });
       lineYOffset += 12;
     }
     if (data.tenant.aesaCsv) {
-      page.drawText(`CSV: ${data.tenant.aesaCsv}`, {
+      page.drawText(sanitizeText(`CSV: ${data.tenant.aesaCsv}`), {
         x: infoX, y: infoY - lineYOffset, size: 7, font: fontMono, color: MUTED,
       });
     }
     y -= logoH + 16;
   } else {
     // Fallback sin logo: solo texto
-    page.drawText(data.tenant.name, { x: MARGIN, y, size: 18, font: fontBold, color: BRAND_DARK });
+    page.drawText(sanitizeText(data.tenant.name), { x: MARGIN, y, size: 18, font: fontBold, color: BRAND_DARK });
     y -= 22;
     if (data.tenant.legalName && data.tenant.legalName !== data.tenant.name) {
-      page.drawText(data.tenant.legalName, { x: MARGIN, y, size: 9, font, color: MUTED });
+      page.drawText(sanitizeText(data.tenant.legalName), { x: MARGIN, y, size: 9, font, color: MUTED });
       y -= 14;
     }
     y -= 4;
@@ -340,11 +344,11 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
   page.drawRectangle({
     x: MARGIN, y: y - 50, width: 4, height: 56, color: BRAND_BLUE,
   });
-  page.drawText(data.mission.code, {
+  page.drawText(sanitizeText(data.mission.code), {
     x: MARGIN + 16, y: y - 14,
     size: 11, font: fontMonoBold, color: BRAND_BLUE,
   });
-  page.drawText(data.mission.name, {
+  page.drawText(sanitizeText(data.mission.name), {
     x: MARGIN + 16, y: y - 32,
     size: 14, font: fontBold, color: BRAND_DARK,
   });
@@ -532,15 +536,15 @@ export async function generateMissionDossierPdf(data: DossierData): Promise<Uint
     });
 
     // Left: tenant + reg AESA
-    const leftText = data.tenant.operatorRegistrationNumber
+    const leftText = sanitizeText(data.tenant.operatorRegistrationNumber
       ? `${data.tenant.name}  ·  Reg. AESA ${data.tenant.operatorRegistrationNumber}`
-      : data.tenant.name;
+      : data.tenant.name);
     p.drawText(leftText, {
       x: MARGIN, y: 18, size: 7, font, color: MUTED,
     });
 
     // Center: mission code (mono)
-    const codeText = data.mission.code;
+    const codeText = sanitizeText(data.mission.code);
     const codeW = fontMono.widthOfTextAtSize(codeText, 7);
     p.drawText(codeText, {
       x: (PAGE_W - codeW) / 2, y: 18, size: 7, font: fontMono, color: BRAND_BLUE,

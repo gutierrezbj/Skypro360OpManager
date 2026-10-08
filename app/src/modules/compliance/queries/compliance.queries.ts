@@ -5,7 +5,6 @@ import {
   formPreflight,
   formPostflight,
   formIncidents,
-  complianceTemplates,
 } from "@/lib/db/schema";
 
 export async function getPlanningForMission(tenantId: string, missionId: string, txDb: typeof db = db) {
@@ -35,23 +34,4 @@ export async function getIncidentsForMission(tenantId: string, missionId: string
     .select()
     .from(formIncidents)
     .where(and(eq(formIncidents.missionId, missionId), eq(formIncidents.tenantId, tenantId)));
-}
-
-export async function getActiveTemplates(tenantId: string, type?: string, txDb: typeof db = db) {
-  if (type) {
-    return txDb
-      .select()
-      .from(complianceTemplates)
-      .where(
-        and(
-          eq(complianceTemplates.tenantId, tenantId),
-          eq(complianceTemplates.isActive, true),
-          eq(complianceTemplates.type, type),
-        ),
-      );
-  }
-  return txDb
-    .select()
-    .from(complianceTemplates)
-    .where(and(eq(complianceTemplates.tenantId, tenantId), eq(complianceTemplates.isActive, true)));
 }

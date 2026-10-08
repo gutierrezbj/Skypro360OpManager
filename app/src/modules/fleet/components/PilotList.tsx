@@ -61,7 +61,7 @@ export default function PilotList({
         <div style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }} className="rounded-lg py-12 text-center">
           <p className="text-sm">No hay pilotos registrados.</p>
           {canEdit && (
-            <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
+            <button onClick={openCreate} style={{ color: "var(--sky-accent-blue)" }} className="mt-2 text-sm font-medium hover:opacity-80">
               Registrar el primero
             </button>
           )}
@@ -74,12 +74,12 @@ export default function PilotList({
               <div
                 key={pilot.id}
                 style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
-                className="overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
+                className="overflow-hidden rounded-xl transition-all hover:border-[var(--sky-border-2)]"
               >
                 <div className="h-1" style={{ background: certColor }} />
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <PilotIcon style={{ color: "#0C9FD8" }} className="h-6 w-6" />
+                    <PilotIcon style={{ color: "var(--sky-accent-blue)" }} className="h-6 w-6" />
                     <span
                       style={{
                         background: `${certColor}18`,
@@ -99,7 +99,7 @@ export default function PilotList({
                     <div className="flex justify-between">
                       <span style={{ color: "var(--sky-muted)" }}>Licencia</span>
                       <span
-                        style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
+                        style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
                         className="font-medium"
                       >
                         {pilot.licenseNumber || "—"}

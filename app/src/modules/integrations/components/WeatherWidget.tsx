@@ -35,14 +35,14 @@ function kpLabel(status: string | null | undefined): { label: string; color: str
 }
 
 export default function WeatherWidget({ lat, lng, date }: Props) {
-  const [weather, setWeather] = useState<WeatherForecast | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const requestKey = `${lat}|${lng}|${date ?? ""}`;
+  const [result, setResult] = useState<{ key: string; weather: WeatherForecast | null; error: string | null } | null>(null);
+  const current = result?.key === requestKey ? result : null;
+  const loading = current === null;
+  const weather = current?.weather ?? null;
+  const error = current?.error ?? null;
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    setWeather(null);
     const params = new URLSearchParams({ lat: String(lat), lng: String(lng) });
     if (date) params.set("date", date);
 
@@ -52,14 +52,12 @@ export default function WeatherWidget({ lat, lng, date }: Props) {
         return r.json();
       })
       .then((data: WeatherForecast) => {
-        setWeather(data);
-        setLoading(false);
+        setResult({ key: requestKey, weather: data, error: null });
       })
       .catch((err) => {
-        setError(err.message);
-        setLoading(false);
+        setResult({ key: requestKey, weather: null, error: err.message });
       });
-  }, [lat, lng, date]);
+  }, [lat, lng, date, requestKey]);
 
   if (loading) {
     return (

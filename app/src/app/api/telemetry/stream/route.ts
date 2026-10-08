@@ -44,17 +44,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "No tenant" }, { status: 400 });
   }
 
-  const inFlightMissions = await db
-    .select({
-      id: missions.id,
-      latitude: missions.latitude,
-      longitude: missions.longitude,
-      maxAltitude: missions.maxAltitude,
-    })
-    .from(missions)
-    .where(eq(missions.tenantId, tenantId))
-    .then((rows) => rows.filter((r) => r.latitude && r.longitude && parseFloat(r.latitude) !== 0));
-
   // Filter to in_flight only — we also include preflight for demo richness
   const activeMissions = await db
     .select({ id: missions.id, status: missions.status, latitude: missions.latitude, longitude: missions.longitude, maxAltitude: missions.maxAltitude })

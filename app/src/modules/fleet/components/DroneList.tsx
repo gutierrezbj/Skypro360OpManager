@@ -48,7 +48,7 @@ export default function DroneList({ drones, canEdit = true }: { drones: Drone[];
         <div style={{ border: "1px dashed var(--sky-border-2)", color: "var(--sky-muted)" }} className="rounded-lg py-12 text-center">
           <p className="text-sm">No hay drones registrados.</p>
           {canEdit && (
-            <button onClick={openCreate} style={{ color: "#0C9FD8" }} className="mt-2 text-sm font-medium hover:opacity-80">
+            <button onClick={openCreate} style={{ color: "var(--sky-accent-blue)" }} className="mt-2 text-sm font-medium hover:opacity-80">
               Registrar el primero
             </button>
           )}
@@ -59,12 +59,12 @@ export default function DroneList({ drones, canEdit = true }: { drones: Drone[];
             <div
               key={drone.id}
               style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}
-              className="overflow-hidden rounded-xl transition-all hover:border-[#1E3A5F]"
+              className="overflow-hidden rounded-xl transition-all hover:border-[var(--sky-border-2)]"
             >
               <div className="h-1" style={{ background: DRONE_STATUS_HEX[drone.status] ?? "#3A5570" }} />
               <div className="p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <DroneIcon style={{ color: "#0C9FD8" }} className="h-6 w-6" />
+                  <DroneIcon style={{ color: "var(--sky-accent-blue)" }} className="h-6 w-6" />
                   <DroneStatusBadge status={drone.status} />
                 </div>
                 <h3 style={{ color: "var(--sky-text)" }} className="text-sm font-semibold">{drone.model}</h3>
@@ -73,7 +73,7 @@ export default function DroneList({ drones, canEdit = true }: { drones: Drone[];
                   <div className="flex justify-between">
                     <span style={{ color: "var(--sky-muted)" }}>S/N</span>
                     <span
-                      style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
+                      style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains-mono, monospace)" }}
                       className="font-medium"
                     >
                       {drone.serialNumber}

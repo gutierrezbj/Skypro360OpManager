@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
   // Add cache headers — BOE data is stable (24h)
   return NextResponse.json(result, {
     headers: {
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "private, s-maxage=3600, stale-while-revalidate=86400",
       "X-Source": result.source,
     },
   });

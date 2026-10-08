@@ -35,7 +35,7 @@ export const BODY_DEFAULT_DAYS: Record<CoordinationBody, number> = {
   defensa: 15,
 };
 
-export const DEFENSA_RANGE = { min: 10, max: 15 } as const;
+export const DEFENSA_RANGE = { min: 11, max: 15 } as const;
 
 export const STATUS_LABELS: Record<CoordinationStatus, string> = {
   pendiente: "Pendiente",

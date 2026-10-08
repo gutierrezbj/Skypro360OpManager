@@ -1,4 +1,3 @@
-import { eq, and, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auditLogs, type NewAuditLog } from "@/lib/db/schema/audit";
 
@@ -51,34 +50,5 @@ export const AuditService = {
         `AESA compliance requires all mutations to be audited.`
       );
     }
-  },
-
-  /**
-   * Historial de auditoría de una entidad específica.
-   */
-  async getEntityHistory(tenantId: string, entityType: string, entityId: string) {
-    return db
-      .select()
-      .from(auditLogs)
-      .where(
-        and(
-          eq(auditLogs.tenantId, tenantId),
-          eq(auditLogs.entityType, entityType),
-          eq(auditLogs.entityId, entityId),
-        )
-      )
-      .orderBy(desc(auditLogs.createdAt));
-  },
-
-  /**
-   * Log de actividad reciente de un tenant (para dashboard admin).
-   */
-  async getRecentActivity(tenantId: string, limit = 50) {
-    return db
-      .select()
-      .from(auditLogs)
-      .where(eq(auditLogs.tenantId, tenantId))
-      .orderBy(desc(auditLogs.createdAt))
-      .limit(limit);
   },
 };

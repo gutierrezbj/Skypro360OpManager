@@ -54,7 +54,7 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
   // NOTAM state
   const [notamData, setNotamData] = useState<{ type: string; features: unknown[] } | null>(null);
   const [showNotams, setShowNotams] = useState(true);
-  const [notamLoading, setNotamLoading] = useState(false);
+  const [notamLoading, setNotamLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   // Refs para acceder al estado más reciente desde callbacks de MapLibre
   // (evita closures viejos al re-aplicar layers tras setStyle)
@@ -77,7 +77,6 @@ export default function MissionsMap({ missions, drones, pilots, onSelectMission,
 
   // Fetch NOTAMs once on mount
   useEffect(() => {
-    setNotamLoading(true);
     fetch("/api/airspace/notams")
       .then((r) => r.json())
       .then((d) => setNotamData(d))

@@ -1,19 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export type WeatherLoc = { lat: number; lng: number; label: string };
 
 const KEY = "sky-weather-recents";
 const MAX = 5;
+const EMPTY: WeatherLoc[] = [];
+const listeners = new Set<() => void>();
+let cachedRaw: string | null = null;
+let cachedList: WeatherLoc[] = EMPTY;
 
-function readStorage(): WeatherLoc[] {
-  if (typeof window === "undefined") return [];
+function parseStorage(raw: string | null): WeatherLoc[] {
+  if (!raw) return EMPTY;
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return EMPTY;
     return parsed
       .filter(
         (x): x is WeatherLoc =>
@@ -25,17 +27,44 @@ function readStorage(): WeatherLoc[] {
       )
       .slice(0, MAX);
   } catch {
-    return [];
+    return EMPTY;
   }
 }
 
+function readStorage(): WeatherLoc[] {
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(KEY);
+  } catch {
+    raw = null;
+  }
+  if (raw !== cachedRaw) {
+    cachedRaw = raw;
+    cachedList = parseStorage(raw);
+  }
+  return cachedList;
+}
+
+function getServerSnapshot(): WeatherLoc[] {
+  return EMPTY;
+}
+
 function writeStorage(list: WeatherLoc[]): void {
-  if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(list));
   } catch {
     // ignore (private browsing, full quota, etc.)
   }
+  listeners.forEach((l) => l());
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
 }
 
 /**
@@ -45,26 +74,16 @@ function writeStorage(list: WeatherLoc[]): void {
  * No guarda "Mi ubicación" — es transitoria.
  */
 export function useRecentWeatherLocations() {
-  const [recents, setRecents] = useState<WeatherLoc[]>([]);
-
-  // Hidratar desde localStorage en cliente
-  useEffect(() => {
-    setRecents(readStorage());
-  }, []);
+  const recents = useSyncExternalStore(subscribe, readStorage, getServerSnapshot);
 
   const add = useCallback((loc: WeatherLoc) => {
     if (!loc.label || loc.label === "Mi ubicación") return;
-    setRecents((prev) => {
-      const lower = loc.label.toLowerCase();
-      const filtered = prev.filter((r) => r.label.toLowerCase() !== lower);
-      const next = [loc, ...filtered].slice(0, MAX);
-      writeStorage(next);
-      return next;
-    });
+    const lower = loc.label.toLowerCase();
+    const filtered = readStorage().filter((r) => r.label.toLowerCase() !== lower);
+    writeStorage([loc, ...filtered].slice(0, MAX));
   }, []);
 
   const clear = useCallback(() => {
-    setRecents([]);
     writeStorage([]);
   }, []);
 

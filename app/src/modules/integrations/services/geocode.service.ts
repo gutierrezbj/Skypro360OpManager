@@ -20,7 +20,7 @@
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 const PHOTON_URL = "https://photon.komoot.io/api/";
-const USER_AGENT = "OpsManager-Skypro360/1.0 (gutierrezbj@gmail.com)";
+const USER_AGENT = `OpsManager-Skypro360/1.0 (${process.env.NOMINATIM_CONTACT ?? "ops@systemrapid.io"})`;
 
 export type GeocodeResult = {
   name: string;          // primer fragmento legible (ej "Calle Mayor 12" o "Madrid")

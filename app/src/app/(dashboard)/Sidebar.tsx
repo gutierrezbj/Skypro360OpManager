@@ -97,8 +97,8 @@ export default function Sidebar({
               className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all"
               style={{
                 background:  active ? "rgba(12,159,216,0.1)"  : "transparent",
-                color:       active ? "#0C9FD8"               : "var(--sky-muted)",
-                borderLeft:  active ? "2px solid #0C9FD8"     : "2px solid transparent",
+                color:       active ? "var(--sky-accent-blue)" : "var(--sky-muted)",
+                borderLeft:  active ? "2px solid var(--sky-accent-blue)" : "2px solid transparent",
                 paddingLeft: "10px",
               }}
               onMouseEnter={(e) => {
@@ -116,7 +116,7 @@ export default function Sidebar({
             >
               <Icon
                 className="h-4 w-4 flex-shrink-0"
-                style={{ color: active ? "#0C9FD8" : "var(--sky-muted)" }}
+                style={{ color: active ? "var(--sky-accent-blue)" : "var(--sky-muted)" }}
               />
               <span style={{ fontFamily: "var(--font-barlow), sans-serif", fontWeight: 500 }}>
                 {label}
@@ -154,9 +154,10 @@ export default function Sidebar({
           <Link
             href="/change-password"
             title="Cambiar contraseña"
+            aria-label="Cambiar contraseña"
             className="flex-shrink-0 rounded-md p-1.5 transition-colors"
             style={{ color: "var(--sky-muted)" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#0C9FD8")}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-accent-blue)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-muted)")}
           >
             <SettingsIcon className="h-4 w-4" />
@@ -165,9 +166,10 @@ export default function Sidebar({
           <button
             onClick={toggleTheme}
             title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
+            aria-label={theme === "dark" ? "Modo claro" : "Modo oscuro"}
             className="flex-shrink-0 rounded-md p-1.5 transition-colors"
             style={{ color: "var(--sky-muted)" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#0C9FD8")}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-accent-blue)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-muted)")}
           >
             {theme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
@@ -175,9 +177,10 @@ export default function Sidebar({
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Cerrar sesion"
+            aria-label="Cerrar sesion"
             className="flex-shrink-0 rounded-md p-1.5 transition-colors"
             style={{ color: "var(--sky-muted)" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#F04E1C")}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-accent-orange)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--sky-muted)")}
           >
             <LogOutIcon className="h-4 w-4" />
@@ -218,6 +221,7 @@ export default function Sidebar({
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
+            role="presentation"
             className="absolute inset-0"
             style={{ background: "rgba(8,13,20,0.8)" }}
             onClick={() => setMobileOpen(false)}
@@ -226,7 +230,7 @@ export default function Sidebar({
             <button
               onClick={() => setMobileOpen(false)}
               className="absolute right-3 top-4 rounded-md p-1"
-              style={{ color: "#6BA3C0" }}
+              style={{ color: "var(--sky-muted)" }}
               aria-label="Cerrar menu"
             >
               <CloseIcon className="h-5 w-5" />

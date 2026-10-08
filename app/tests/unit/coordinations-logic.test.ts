@@ -132,10 +132,10 @@ describe("diasHabilesPermitidos", () => {
     expect(diasHabilesPermitidos("mi", 6)).toBe(false);
     expect(diasHabilesPermitidos("aeropuerto", 20)).toBe(true);
   });
-  it("defensa entre 10 y 15", () => {
-    expect(diasHabilesPermitidos("defensa", 10)).toBe(true);
+  it("defensa entre 11 y 15 hábiles (≥ 15 naturales, AIC NTL 01/26)", () => {
+    expect(diasHabilesPermitidos("defensa", 11)).toBe(true);
     expect(diasHabilesPermitidos("defensa", 15)).toBe(true);
-    expect(diasHabilesPermitidos("defensa", 9)).toBe(false);
+    expect(diasHabilesPermitidos("defensa", 10)).toBe(false);
     expect(diasHabilesPermitidos("defensa", 16)).toBe(false);
     expect(diasHabilesPermitidos("defensa", 12.5)).toBe(false);
   });

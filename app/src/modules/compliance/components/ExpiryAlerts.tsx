@@ -1,5 +1,3 @@
-"use client";
-
 import type { Pilot, Drone } from "@/lib/db/schema";
 import { CheckCircleIcon } from "@/lib/icons";
 

@@ -50,7 +50,7 @@ export default function MissionDetail({
       >
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <p style={{ color: "#0C9FD8", fontFamily: "var(--font-jetbrains-mono, monospace)" }} className="text-xs">
+            <p style={{ color: "var(--sky-accent-blue)", fontFamily: "var(--font-jetbrains-mono, monospace)" }} className="text-xs">
               {mission.code}
             </p>
             <h2 style={{ color: "var(--sky-text)" }} className="text-lg font-semibold">{mission.name}</h2>
@@ -60,7 +60,7 @@ export default function MissionDetail({
 
         {state?.error && (
           <div
-            style={{ background: "rgba(229,62,62,0.08)", border: "1px solid rgba(229,62,62,0.3)", color: "#FC8181" }}
+            style={{ background: "rgba(229,62,62,0.08)", border: "1px solid rgba(229,62,62,0.3)", color: "var(--sky-accent-red)" }}
             className="mb-4 rounded-md p-3 text-sm"
           >
             {state.error}
@@ -145,8 +145,8 @@ export default function MissionDetail({
                     disabled={isPending}
                     style={
                       ns === "cancelled" || ns === "aborted"
-                        ? { border: "1px solid rgba(229,62,62,0.4)", color: "#FC8181", background: "rgba(229,62,62,0.06)" }
-                        : { border: "1px solid rgba(12,159,216,0.3)", color: "#0C9FD8", background: "rgba(12,159,216,0.08)" }
+                        ? { border: "1px solid rgba(229,62,62,0.4)", color: "var(--sky-accent-red)", background: "rgba(229,62,62,0.06)" }
+                        : { border: "1px solid rgba(12,159,216,0.3)", color: "var(--sky-accent-blue)", background: "rgba(12,159,216,0.08)" }
                     }
                     className="rounded-md px-3 py-1.5 text-sm font-medium transition-opacity disabled:opacity-50 hover:opacity-80"
                   >
@@ -229,7 +229,7 @@ export default function MissionDetail({
             </button>
             <a
               href={`/missions/${mission.id}/compliance`}
-              style={{ background: "rgba(12,159,216,0.1)", color: "#0C9FD8", border: "1px solid rgba(12,159,216,0.25)" }}
+              style={{ background: "rgba(12,159,216,0.1)", color: "var(--sky-accent-blue)", border: "1px solid rgba(12,159,216,0.25)" }}
               className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
             >
               Compliance

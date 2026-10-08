@@ -5,6 +5,17 @@ import type { FormPlanning, Mission } from "@/lib/db/schema";
 import { savePlanningForm, type ComplianceActionResult } from "../actions/compliance.actions";
 import SignaturePad from "./SignaturePad";
 
+const inputStyle = {
+  background: "var(--sky-bg)",
+  border: "1px solid var(--sky-border-2)",
+  color: "var(--sky-text)",
+  fontFamily: "var(--font-barlow), sans-serif",
+} as const;
+
+const labelStyle = {
+  color: "var(--sky-muted)",
+} as const;
+
 const RISK_LEVELS = [
   { value: "low", label: "Bajo" },
   { value: "medium", label: "Medio" },
@@ -57,17 +68,17 @@ export default function PlanningForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-xl" style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border-2)" }}>
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-xs font-mono text-gray-400">{mission.code}</p>
-            <h2 className="text-lg font-semibold text-gray-900">Planificacion Operacional (A.4)</h2>
+            <p className="text-xs font-mono" style={labelStyle}>{mission.code}</p>
+            <h2 className="text-lg font-semibold" style={{ color: "var(--sky-text)" }}>Planificacion Operacional (A.4)</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">&times;</button>
+          <button onClick={onClose} className="hover:opacity-80" style={labelStyle}>&times;</button>
         </div>
 
         {state?.error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+          <div className="mb-4 rounded-md p-3 text-sm" style={{ background: "rgba(229,62,62,0.1)", border: "1px solid rgba(229,62,62,0.3)", color: "var(--sky-accent-red)" }}>{state.error}</div>
         )}
 
         <form action={formAction} className="space-y-4">
@@ -75,11 +86,11 @@ export default function PlanningForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Nivel de riesgo</label>
+              <label className="mb-1 block text-sm font-medium" style={labelStyle}>Nivel de riesgo</label>
               <select
                 name="riskLevel"
                 defaultValue={existing?.riskLevel ?? ""}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-md px-3 py-2 text-sm" style={inputStyle}
               >
                 <option value="">Seleccionar</option>
                 {RISK_LEVELS.map((r) => (
@@ -88,11 +99,11 @@ export default function PlanningForm({
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Tipo operacion</label>
+              <label className="mb-1 block text-sm font-medium" style={labelStyle}>Tipo operacion</label>
               <select
                 name="operationType"
                 defaultValue={existing?.operationType ?? ""}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-md px-3 py-2 text-sm" style={inputStyle}
               >
                 <option value="">Seleccionar</option>
                 {OPERATION_TYPES.map((o) => (
@@ -103,31 +114,31 @@ export default function PlanningForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Altitud maxima planificada</label>
+            <label className="mb-1 block text-sm font-medium" style={labelStyle}>Altitud maxima planificada</label>
             <input
               name="maxAltitude"
               type="text"
               defaultValue={existing?.maxAltitude ?? mission.maxAltitude ?? ""}
               placeholder="120m"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md px-3 py-2 text-sm" style={inputStyle}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Prevision meteorologica</label>
+            <label className="mb-1 block text-sm font-medium" style={labelStyle}>Prevision meteorologica</label>
             <textarea
               name="weatherForecast"
               rows={2}
               defaultValue={existing?.weatherForecast ?? ""}
               placeholder="Condiciones previstas para la fecha del vuelo..."
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md px-3 py-2 text-sm" style={inputStyle}
             />
           </div>
 
           {/* Checklist A.4 */}
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Checklist planificacion</p>
-            <div className="space-y-1.5 rounded-md border border-gray-200 bg-gray-50 p-3">
+            <p className="mb-2 text-sm font-medium" style={labelStyle}>Checklist planificacion</p>
+            <div className="space-y-1.5 rounded-md p-3" style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}>
               {PLANNING_CHECKLIST.map((item) => (
                 <label key={item.key} className="flex items-center gap-2 text-sm">
                   <input
@@ -136,9 +147,9 @@ export default function PlanningForm({
                     onChange={(e) =>
                       setChecklist((prev) => ({ ...prev, [item.key]: e.target.checked }))
                     }
-                    className="rounded border-gray-300"
+                    className="rounded"
                   />
-                  <span className="text-gray-700">{item.label}</span>
+                  <span style={{ color: "var(--sky-text)" }}>{item.label}</span>
                 </label>
               ))}
             </div>
@@ -155,16 +166,16 @@ export default function PlanningForm({
           />
 
           {/* RP approval */}
-          <div className="rounded-md border border-indigo-200 bg-indigo-50 p-3">
+          <div className="rounded-md p-3" style={{ background: "rgba(12,159,216,0.1)", border: "1px solid rgba(12,159,216,0.35)" }}>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 name="rpApproved"
                 value="true"
                 defaultChecked={existing?.rpApproved ?? false}
-                className="rounded border-gray-300"
+                className="rounded"
               />
-              <span className="font-medium text-indigo-800">
+              <span className="font-medium" style={{ color: "var(--sky-accent-blue)" }}>
                 Aprobado por el Responsable de Operaciones (SORA)
               </span>
             </label>
@@ -178,18 +189,18 @@ export default function PlanningForm({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+          <div className="flex justify-end gap-3 pt-4" style={{ borderTop: "1px solid var(--sky-border)" }}>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80" style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border-2)", color: "var(--sky-text)" }}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending || !signature}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50" style={{ background: "var(--sky-accent-blue)" }}
             >
               {isPending ? "Guardando..." : existing ? "Actualizar" : "Guardar"}
             </button>

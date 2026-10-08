@@ -76,7 +76,7 @@ export default function MissionCompliancePanel({
           color: "var(--sky-muted)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.color = "#0C9FD8";
+          (e.currentTarget as HTMLElement).style.color = "var(--sky-accent-blue)";
           (e.currentTarget as HTMLElement).style.borderColor = "rgba(12,159,216,0.4)";
         }}
         onMouseLeave={(e) => {
@@ -101,7 +101,7 @@ export default function MissionCompliancePanel({
           <Link
             href={`/missions/${mission.id}/compliance/pdf`}
             className="rounded-md px-3 py-2 text-sm font-medium transition-opacity hover:opacity-80"
-            style={{ background: "#0C9FD8", color: "#fff" }}
+            style={{ background: "var(--sky-accent-blue)", color: "#fff" }}
           >
             Generar PDF
           </Link>
@@ -126,39 +126,39 @@ export default function MissionCompliancePanel({
 
       {/* Mission info + completion */}
       <div className="mb-6 grid grid-cols-3 gap-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-xs font-medium uppercase text-gray-400">Piloto</p>
-          <p className="mt-1 text-sm font-semibold text-gray-900">
+        <div className="rounded-lg p-4" style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}>
+          <p className="text-xs font-medium uppercase" style={{ color: "var(--sky-muted)" }}>Piloto</p>
+          <p className="mt-1 text-sm font-semibold" style={{ color: "var(--sky-text)" }}>
             {pilotUser?.name ?? "Sin asignar"}
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-xs font-medium uppercase text-gray-400">Drone</p>
-          <p className="mt-1 text-sm font-semibold text-gray-900">
+        <div className="rounded-lg p-4" style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}>
+          <p className="text-xs font-medium uppercase" style={{ color: "var(--sky-muted)" }}>Drone</p>
+          <p className="mt-1 text-sm font-semibold" style={{ color: "var(--sky-text)" }}>
             {drone?.model ?? "Sin asignar"}
           </p>
           {drone && (
-            <p className="text-xs text-gray-400">{drone.serialNumber}</p>
+            <p className="text-xs" style={{ color: "var(--sky-muted)" }}>{drone.serialNumber}</p>
           )}
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-xs font-medium uppercase text-gray-400">Compliance</p>
+        <div className="rounded-lg p-4" style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border)" }}>
+          <p className="text-xs font-medium uppercase" style={{ color: "var(--sky-muted)" }}>Compliance</p>
           <div className="mt-1 flex items-center gap-2">
-            <div className="h-2 flex-1 rounded-full bg-gray-100">
+            <div className="h-2 flex-1 rounded-full" style={{ background: "var(--sky-surface-2)" }}>
               <div
-                className="h-2 rounded-full bg-emerald-500 transition-all"
-                style={{ width: `${completionPct}%` }}
+                className="h-2 rounded-full transition-all"
+                style={{ width: `${completionPct}%`, background: "var(--sky-accent-green)" }}
               />
             </div>
-            <span className="text-sm font-semibold text-gray-900">{completionPct}%</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--sky-text)" }}>{completionPct}%</span>
           </div>
           <div className="mt-2 space-y-1">
             {completionItems.map((item) => (
               <div key={item.label} className="flex items-center gap-1.5 text-xs">
-                <span className={item.done ? "text-emerald-500" : "text-gray-300"}>
+                <span style={{ color: item.done ? "var(--sky-accent-green)" : "var(--sky-dim)" }}>
                   {item.done ? "\u2713" : "\u25CB"}
                 </span>
-                <span className={item.done ? "text-gray-700" : "text-gray-400"}>
+                <span style={{ color: item.done ? "var(--sky-text)" : "var(--sky-muted)" }}>
                   {item.label}
                 </span>
               </div>
@@ -226,10 +226,10 @@ export default function MissionCompliancePanel({
           buttonLabel="Nuevo checklist"
         >
           {preflights.map((pf, i) => (
-            <div key={pf.id} className="mb-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+            <div key={pf.id} className="mb-3 rounded-md p-3" style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-gray-700">Checklist #{i + 1}</span>
-                <span className="text-gray-400">
+                <span className="font-medium" style={{ color: "var(--sky-text)" }}>Checklist #{i + 1}</span>
+                <span style={{ color: "var(--sky-muted)" }}>
                   {new Date(pf.createdAt).toLocaleString("es-ES", {
                     day: "2-digit",
                     month: "short",
@@ -244,7 +244,7 @@ export default function MissionCompliancePanel({
               </div>
               {pf.signatureData && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={pf.signatureData} alt="Firma" className="mt-2 h-10 rounded border border-gray-200 bg-white p-1" />
+                <img src={pf.signatureData} alt="Firma" className="mt-2 h-10 rounded p-1" style={{ border: "1px solid var(--sky-border)", background: "var(--sky-surface)" }} />
               )}
             </div>
           ))}
@@ -259,10 +259,10 @@ export default function MissionCompliancePanel({
           buttonLabel="Nuevo checklist"
         >
           {postflights.map((pf, i) => (
-            <div key={pf.id} className="mb-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+            <div key={pf.id} className="mb-3 rounded-md p-3" style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-gray-700">Checklist #{i + 1}</span>
-                <span className="text-gray-400">
+                <span className="font-medium" style={{ color: "var(--sky-text)" }}>Checklist #{i + 1}</span>
+                <span style={{ color: "var(--sky-muted)" }}>
                   {new Date(pf.createdAt).toLocaleString("es-ES", {
                     day: "2-digit",
                     month: "short",
@@ -277,7 +277,7 @@ export default function MissionCompliancePanel({
               </div>
               {pf.signatureData && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={pf.signatureData} alt="Firma" className="mt-2 h-10 rounded border border-gray-200 bg-white p-1" />
+                <img src={pf.signatureData} alt="Firma" className="mt-2 h-10 rounded p-1" style={{ border: "1px solid var(--sky-border)", background: "var(--sky-surface)" }} />
               )}
             </div>
           ))}
@@ -389,24 +389,25 @@ function ComplianceSection({
   buttonLabel: string;
   children: React.ReactNode;
 }) {
-  const colorMap: Record<string, { border: string; bg: string; text: string; btn: string }> = {
-    blue: { border: "border-blue-200", bg: "bg-blue-50", text: "text-blue-700", btn: "bg-blue-600 hover:bg-blue-700" },
-    emerald: { border: "border-emerald-200", bg: "bg-emerald-50", text: "text-emerald-700", btn: "bg-emerald-600 hover:bg-emerald-700" },
-    amber: { border: "border-amber-200", bg: "bg-amber-50", text: "text-amber-700", btn: "bg-amber-600 hover:bg-amber-700" },
-    red: { border: "border-red-200", bg: "bg-red-50", text: "text-red-700", btn: "bg-red-600 hover:bg-red-700" },
+  const colorMap: Record<string, { border: string; btn: string }> = {
+    blue: { border: "rgba(12,159,216,0.45)", btn: "var(--sky-accent-blue)" },
+    emerald: { border: "rgba(0,217,126,0.45)", btn: "var(--sky-accent-green)" },
+    amber: { border: "rgba(245,197,24,0.45)", btn: "var(--sky-accent-yellow)" },
+    red: { border: "rgba(229,62,62,0.45)", btn: "var(--sky-accent-red)" },
   };
   const c = colorMap[color] ?? colorMap.blue;
 
   return (
-    <div className={`rounded-lg border ${c.border} bg-white`}>
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+    <div className="rounded-lg" style={{ background: "var(--sky-surface)", border: `1px solid ${c.border}` }}>
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--sky-border)" }}>
         <div className="flex items-center gap-2">
-          <span className={`inline-block h-2 w-2 rounded-full ${hasData ? "bg-emerald-400" : "bg-gray-300"}`} />
-          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+          <span className="inline-block h-2 w-2 rounded-full" style={{ background: hasData ? "var(--sky-accent-green)" : "var(--sky-dim)" }} />
+          <h3 className="text-sm font-semibold" style={{ color: "var(--sky-text)" }}>{title}</h3>
         </div>
         <button
           onClick={onAdd}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium text-white ${c.btn}`}
+          className="rounded-md px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
+          style={{ background: c.btn }}
         >
           {buttonLabel}
         </button>
@@ -415,7 +416,7 @@ function ComplianceSection({
         {hasData ? (
           children
         ) : (
-          <p className="text-center text-sm text-gray-400">Sin datos. Haga clic en &quot;{buttonLabel}&quot; para comenzar.</p>
+          <p className="text-center text-sm" style={{ color: "var(--sky-muted)" }}>Sin datos. Haga clic en &quot;{buttonLabel}&quot; para comenzar.</p>
         )}
       </div>
     </div>
@@ -425,8 +426,8 @@ function ComplianceSection({
 function Field({ label, value, span2 }: { label: string; value: string | null | undefined; span2?: boolean }) {
   return (
     <div className={span2 ? "col-span-2" : ""}>
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className="text-gray-900">{value || "—"}</p>
+      <p className="text-xs" style={{ color: "var(--sky-muted)" }}>{label}</p>
+      <p style={{ color: "var(--sky-text)" }}>{value || "—"}</p>
     </div>
   );
 }

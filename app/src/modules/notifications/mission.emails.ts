@@ -9,7 +9,7 @@
  *   cancelled   → piloto (si asignado)
  */
 
-import { sendEmail } from "./email.service";
+import { sendEmail, escapeHtml } from "./email.service";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "https://skp360mgr.systemrapid.io";
 const LOGO_URL = `${APP_URL}/logo-skypro360.png`;
@@ -124,7 +124,7 @@ function baseTemplate({
             </h1>
 
             <!-- Greeting -->
-            ${recipientName ? `<p style="margin:10px 0 0;color:#94a3b8;font-size:14px;">Para&nbsp;<strong style="color:#e2e8f0;">${recipientName}</strong></p>` : ""}
+            ${recipientName ? `<p style="margin:10px 0 0;color:#94a3b8;font-size:14px;">Para&nbsp;<strong style="color:#e2e8f0;">${escapeHtml(recipientName)}</strong></p>` : ""}
           </td>
         </tr>
 
@@ -137,8 +137,8 @@ function baseTemplate({
               <tr><td style="height:4px;background:linear-gradient(90deg,${meta.color},${meta.color}88);"></td></tr>
               <tr>
                 <td style="padding:20px 24px;">
-                  <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${meta.color};font-family:monospace;">${missionCode}</p>
-                  <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;line-height:1.3;">${missionName}</p>
+                  <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${meta.color};font-family:monospace;">${escapeHtml(missionCode)}</p>
+                  <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;line-height:1.3;">${escapeHtml(missionName)}</p>
                   ${scheduled ? `
                   <p style="margin:10px 0 0;font-size:13px;color:#64748b;">
                     <span style="display:inline-block;background:#e2e8f0;border-radius:6px;padding:3px 10px;font-weight:600;">

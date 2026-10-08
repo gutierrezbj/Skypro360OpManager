@@ -218,18 +218,7 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
   // Debounced search con AbortController para evitar race conditions
   // (si tipeas rápido, fetches viejos no pueden pisar el resultado actual)
   useEffect(() => {
-    if (coordCandidate) {
-      setResults([]);
-      setLoading(false);
-      setOpen(true);
-      return;
-    }
-    if (q.trim().length < 2) {
-      setResults([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (coordCandidate || q.trim().length < 2) return;
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -266,6 +255,15 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  function handleChange(value: string) {
+    setQ(value);
+    const coords = parseCoordPair(value);
+    const short = value.trim().length < 2;
+    if (coords || short) setResults([]);
+    if (coords) setOpen(true);
+    setLoading(!coords && !short);
+  }
+
   function handleSelect(r: GeocodeResult) {
     const label = formatLabel(r);
     onPick({ lat: r.lat, lng: r.lng, label });
@@ -292,7 +290,7 @@ function SearchBox({ onPick }: { onPick: (loc: WeatherLoc) => void }) {
         <input
           type="text"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           placeholder="Ciudad o coordenadas (lat, lng)..."
           className="w-full rounded-md pl-7 pr-7 py-1.5 text-[11px] outline-none"

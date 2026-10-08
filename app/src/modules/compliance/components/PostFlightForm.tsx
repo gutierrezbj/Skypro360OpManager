@@ -5,6 +5,17 @@ import type { Mission, Drone } from "@/lib/db/schema";
 import { savePostflightForm, type ComplianceActionResult } from "../actions/compliance.actions";
 import SignaturePad from "./SignaturePad";
 
+const inputStyle = {
+  background: "var(--sky-bg)",
+  border: "1px solid var(--sky-border-2)",
+  color: "var(--sky-text)",
+  fontFamily: "var(--font-barlow), sans-serif",
+} as const;
+
+const labelStyle = {
+  color: "var(--sky-muted)",
+} as const;
+
 const POSTFLIGHT_CHECKLIST_A7 = [
   { key: "uas_landed_safely", label: "UAS aterrizado de forma segura" },
   { key: "structure_inspection", label: "Estructura del UAS inspeccionada" },
@@ -54,17 +65,17 @@ export default function PostFlightForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-xl" style={{ background: "var(--sky-surface)", border: "1px solid var(--sky-border-2)" }}>
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-xs font-mono text-gray-400">{mission.code}</p>
-            <h2 className="text-lg font-semibold text-gray-900">Checklist Post-Vuelo (A.7/A.8)</h2>
+            <p className="text-xs font-mono" style={labelStyle}>{mission.code}</p>
+            <h2 className="text-lg font-semibold" style={{ color: "var(--sky-text)" }}>Checklist Post-Vuelo (A.7/A.8)</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">&times;</button>
+          <button onClick={onClose} className="hover:opacity-80" style={labelStyle}>&times;</button>
         </div>
 
         {state?.error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+          <div className="mb-4 rounded-md p-3 text-sm" style={{ background: "rgba(229,62,62,0.1)", border: "1px solid rgba(229,62,62,0.3)", color: "var(--sky-accent-red)" }}>{state.error}</div>
         )}
 
         <form action={formAction} className="space-y-4">
@@ -72,11 +83,11 @@ export default function PostFlightForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">UAS</label>
+              <label className="mb-1 block text-sm font-medium" style={labelStyle}>UAS</label>
               <select
                 name="uasId"
                 defaultValue={mission.droneId ?? ""}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-md px-3 py-2 text-sm" style={inputStyle}
               >
                 <option value="">Seleccionar</option>
                 {drones.map((d) => (
@@ -85,29 +96,29 @@ export default function PostFlightForm({
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Bateria restante (%)</label>
+              <label className="mb-1 block text-sm font-medium" style={labelStyle}>Bateria restante (%)</label>
               <input
                 name="batteryRemaining"
                 type="text"
                 placeholder="45%"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-md px-3 py-2 text-sm" style={inputStyle}
               />
             </div>
           </div>
 
           {/* Checklist A.7 — UAS Estado Final */}
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">A.7 — Estado final UAS</p>
-            <div className="space-y-1.5 rounded-md border border-gray-200 bg-gray-50 p-3">
+            <p className="mb-2 text-sm font-medium" style={labelStyle}>A.7 — Estado final UAS</p>
+            <div className="space-y-1.5 rounded-md p-3" style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border)" }}>
               {POSTFLIGHT_CHECKLIST_A7.map((item) => (
                 <label key={item.key} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     checked={checklistA7[item.key] ?? false}
                     onChange={(e) => setChecklistA7((prev) => ({ ...prev, [item.key]: e.target.checked }))}
-                    className="rounded border-gray-300"
+                    className="rounded"
                   />
-                  <span className="text-gray-700">{item.label}</span>
+                  <span style={{ color: "var(--sky-text)" }}>{item.label}</span>
                 </label>
               ))}
             </div>
@@ -115,17 +126,17 @@ export default function PostFlightForm({
 
           {/* Checklist A.8 — Cierre Operaciones */}
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">A.8 — Cierre de operaciones</p>
-            <div className="space-y-1.5 rounded-md border border-gray-200 bg-amber-50 p-3">
+            <p className="mb-2 text-sm font-medium" style={labelStyle}>A.8 — Cierre de operaciones</p>
+            <div className="space-y-1.5 rounded-md p-3" style={{ background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.35)" }}>
               {POSTFLIGHT_CHECKLIST_A8.map((item) => (
                 <label key={item.key} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     checked={checklistA8[item.key] ?? false}
                     onChange={(e) => setChecklistA8((prev) => ({ ...prev, [item.key]: e.target.checked }))}
-                    className="rounded border-gray-300"
+                    className="rounded"
                   />
-                  <span className="text-gray-700">{item.label}</span>
+                  <span style={{ color: "var(--sky-text)" }}>{item.label}</span>
                 </label>
               ))}
             </div>
@@ -140,14 +151,14 @@ export default function PostFlightForm({
             onChange={setSignature}
           />
 
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-            <button type="button" onClick={onClose} className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          <div className="flex justify-end gap-3 pt-4" style={{ borderTop: "1px solid var(--sky-border)" }}>
+            <button type="button" onClick={onClose} className="rounded-md px-4 py-2 text-sm font-medium hover:opacity-80" style={{ background: "var(--sky-surface-2)", border: "1px solid var(--sky-border-2)", color: "var(--sky-text)" }}>
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending || !signature}
-              className="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+              className="rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50" style={{ background: "var(--sky-accent-yellow)" }}
             >
               {isPending ? "Guardando..." : "Guardar Post-Vuelo"}
             </button>

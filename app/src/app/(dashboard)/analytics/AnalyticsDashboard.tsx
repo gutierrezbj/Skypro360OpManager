@@ -58,13 +58,13 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
   const donutTotal = donutData.reduce((s, d) => s + d.total, 0);
   const R = 42;
   const CIRC = 2 * Math.PI * R;
-  let donutOffset = 0;
-  const donutSegments = donutData.map((d) => {
+  const donutSegments = donutData.map((d, i) => {
     const pct = d.total / donutTotal;
     const dash = pct * CIRC;
     const gap = CIRC - dash;
-    const rotation = donutOffset;
-    donutOffset += pct * 360;
+    const rotation = donutData
+      .slice(0, i)
+      .reduce((acc, prev) => acc + (prev.total / donutTotal) * 360, 0);
     return { ...d, dash, gap, rotation };
   });
 

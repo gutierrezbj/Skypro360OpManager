@@ -1,5 +1,3 @@
-"use client";
-
 import { MapPinIcon } from "@/lib/icons";
 
 export default function WeatherEmptyState() {

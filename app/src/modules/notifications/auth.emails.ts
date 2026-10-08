@@ -3,9 +3,9 @@
  * Cockpit-styled HTML — funciona en clientes oscuros y claros.
  */
 
-import { sendEmail } from "./email.service";
+import { sendEmail, escapeHtml } from "./email.service";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://skp360mgr.systemrapid.io";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "https://skp360mgr.systemrapid.io";
 
 function baseTemplate(opts: {
   title: string;
@@ -62,7 +62,7 @@ export async function sendPasswordResetEmail(args: {
     title: "Restablecer contraseña",
     preheader: "Solicitud de cambio de contraseña en OpsManager",
     bodyHtml: `
-      <p style="margin:0 0 12px;">Hola <strong style="color:#0C9FD8;">${args.userName}</strong>,</p>
+      <p style="margin:0 0 12px;">Hola <strong style="color:#0C9FD8;">${escapeHtml(args.userName)}</strong>,</p>
       <p style="margin:0 0 12px;">Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en OpsManager.</p>
       <p style="margin:0;">Pulsa el botón para crear una nueva contraseña. El enlace caduca en <strong>1 hora</strong>.</p>
     `,
@@ -86,7 +86,7 @@ export async function sendPasswordChangedEmail(args: {
     title: "Contraseña actualizada",
     preheader: "Tu contraseña en OpsManager se ha cambiado correctamente",
     bodyHtml: `
-      <p style="margin:0 0 12px;">Hola <strong style="color:#0C9FD8;">${args.userName}</strong>,</p>
+      <p style="margin:0 0 12px;">Hola <strong style="color:#0C9FD8;">${escapeHtml(args.userName)}</strong>,</p>
       <p style="margin:0 0 12px;">Te confirmamos que tu contraseña de OpsManager se ha cambiado correctamente.</p>
       <p style="margin:0;">Si no fuiste tú, contacta inmediatamente con el administrador de tu organización.</p>
     `,

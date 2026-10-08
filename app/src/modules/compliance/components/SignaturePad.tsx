@@ -26,23 +26,23 @@ export default function SignaturePad({ label, name, value, onChange }: Props) {
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">{label}</label>
-      <div className="rounded-md border border-gray-300 bg-white">
+      <label className="mb-1 block text-sm font-medium" style={{ color: "var(--sky-muted)" }}>{label}</label>
+      <div className="rounded-md" style={{ border: "1px solid var(--sky-border-2)", background: "var(--sky-surface)" }}>
         <SignatureCanvas
           ref={sigRef}
           penColor="#1f2937"
           canvasProps={{
             className: "w-full h-28 rounded-t-md",
-            style: { width: "100%", height: "112px" },
+            style: { width: "100%", height: "112px", background: "#FFFFFF" },
           }}
           onEnd={handleEnd}
         />
-        <div className="flex items-center justify-between border-t border-gray-200 px-2 py-1">
-          <span className="text-[10px] text-gray-400">Firme arriba</span>
+        <div className="flex items-center justify-between px-2 py-1" style={{ borderTop: "1px solid var(--sky-border)" }}>
+          <span className="text-[10px]" style={{ color: "var(--sky-muted)" }}>Firme arriba</span>
           <button
             type="button"
             onClick={handleClear}
-            className="text-xs text-red-500 hover:text-red-700"
+            className="text-xs hover:opacity-80" style={{ color: "var(--sky-accent-red)" }}
           >
             Limpiar
           </button>

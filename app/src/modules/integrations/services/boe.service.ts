@@ -53,13 +53,17 @@ function getCached(key: string): BoeSearchResult | null {
 
 function setCached(key: string, result: BoeSearchResult): void {
   cache.set(key, { result, expiresAt: Date.now() + CACHE_TTL_MS });
+  if (cache.size > 200) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
 }
 
 // ─── XML parsing ──────────────────────────────────────────────────────────────
 
 function extractXmlValue(xml: string, tag: string): string {
   const match = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i").exec(xml);
-  return match ? match[1].replace(/<!\\[CDATA\\[|\\]\\]>/g, "").trim() : "";
+  return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "";
 }
 
 function extractAllXmlBlocks(xml: string, tag: string): string[] {

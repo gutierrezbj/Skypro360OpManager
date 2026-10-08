@@ -49,7 +49,7 @@ export default function PilotForm({
 
         {state?.error && (
           <div
-            style={{ background: "rgba(229,62,62,0.08)", border: "1px solid rgba(229,62,62,0.3)", color: "#FC8181" }}
+            style={{ background: "rgba(229,62,62,0.08)", border: "1px solid rgba(229,62,62,0.3)", color: "var(--sky-accent-red)" }}
             className="mb-4 rounded-md p-3 text-sm"
           >
             {state.error}

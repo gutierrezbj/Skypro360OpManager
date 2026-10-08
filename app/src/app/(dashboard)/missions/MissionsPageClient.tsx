@@ -46,7 +46,7 @@ export default function MissionsPageClient({
             letterSpacing: "0.08em",
           }}
         >
-          Misi<span style={{ color: "#0C9FD8" }}>ones</span>
+          Misi<span style={{ color: "var(--sky-accent-blue)" }}>ones</span>
         </h1>
         {/* View toggle */}
         <div

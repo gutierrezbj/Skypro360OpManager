@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     { results },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control": "private, s-maxage=86400, stale-while-revalidate=604800",
       },
     },
   );

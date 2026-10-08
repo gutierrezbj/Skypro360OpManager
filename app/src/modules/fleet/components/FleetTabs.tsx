@@ -28,7 +28,7 @@ export default function FleetTabs({
             onClick={() => setTab("drones")}
             style={
               tab === "drones"
-                ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
+                ? { borderBottom: "2px solid var(--sky-accent-blue)", color: "var(--sky-accent-blue)" }
                 : { borderBottom: "2px solid transparent", color: "var(--sky-muted)" }
             }
             className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
@@ -39,7 +39,7 @@ export default function FleetTabs({
             onClick={() => setTab("pilots")}
             style={
               tab === "pilots"
-                ? { borderBottom: "2px solid #0C9FD8", color: "#0C9FD8" }
+                ? { borderBottom: "2px solid var(--sky-accent-blue)", color: "var(--sky-accent-blue)" }
                 : { borderBottom: "2px solid transparent", color: "var(--sky-muted)" }
             }
             className="pb-3 text-sm font-medium transition-colors hover:opacity-80"
