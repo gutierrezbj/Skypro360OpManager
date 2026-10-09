@@ -21,9 +21,9 @@ export type ReminderRunSummary = {
  */
 export async function runCoordinationReminders(now: Date = new Date()): Promise<ReminderRunSummary> {
   const summary: ReminderRunSummary = { tenants: 0, evaluated: 0, sent: 0, skipped: 0, errors: [] };
-  const tenantRows = await db.select({ id: tenants.id }).from(tenants);
+  const tenantRows = await db.select({ id: tenants.id, contactEmail: tenants.contactEmail }).from(tenants);
 
-  for (const { id: tenantId } of tenantRows) {
+  for (const { id: tenantId, contactEmail } of tenantRows) {
     summary.tenants++;
     try {
       await withTenantContext(tenantId, async (tx) => {
@@ -56,6 +56,7 @@ export async function runCoordinationReminders(now: Date = new Date()): Promise<
           const umbral = Math.min(...pending);
 
           const to = new Set(staff.map((s) => s.email));
+          if (contactEmail) to.add(contactEmail);
           if (r.mission.coordinatorId) {
             const [coord] = await tx.select({ email: users.email }).from(users).where(eq(users.id, r.mission.coordinatorId)).limit(1);
             if (coord?.email) to.add(coord.email);
