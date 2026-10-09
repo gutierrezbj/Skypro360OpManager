@@ -23,7 +23,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        const { email, password } = parsed.data;
+        const { password } = parsed.data;
+        const email = parsed.data.email.trim().toLowerCase();
 
         const [user] = await db
           .select()
